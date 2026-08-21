@@ -7,25 +7,25 @@ import type { ComparisonKind } from '../core/compare'
 import type { Contributor, HistorySnapshot } from '../core/types'
 
 const languageColors: Record<string, string> = {
-  TypeScript: '#4b9fcf',
-  JavaScript: '#ddc85a',
-  Rust: '#df744f',
-  Go: '#56c5d0',
-  Python: '#6f9ec4',
-  Ruby: '#c95050',
-  Java: '#da7857',
-  Kotlin: '#9b76df',
-  Swift: '#ec775d',
-  CSS: '#b36ed1',
-  HTML: '#dd7149',
-  Vue: '#5abf91',
-  Svelte: '#ef6a50',
-  Docs: '#d7c9a5',
-  Data: '#8da38c',
-  SQL: '#759bc2',
-  Shell: '#7fbe77',
-  Docker: '#5597d1',
-  Other: '#8f938d',
+  TypeScript: '#4b93b3',
+  JavaScript: '#c99c2e',
+  Rust: '#c86747',
+  Go: '#3aa9b4',
+  Python: '#5b84a9',
+  Ruby: '#b94f58',
+  Java: '#c96b4d',
+  Kotlin: '#8369bd',
+  Swift: '#d76650',
+  CSS: '#9d67af',
+  HTML: '#cf643f',
+  Vue: '#439b78',
+  Svelte: '#d85d45',
+  Docs: '#a68a62',
+  Data: '#728a72',
+  SQL: '#6286aa',
+  Shell: '#62965e',
+  Docker: '#4e83b0',
+  Other: '#777e79',
 }
 
 interface CitySceneProps {
@@ -50,11 +50,11 @@ function DistrictLabel({ name, width }: { name: string; width: number }) {
     const context = canvas.getContext('2d')
     if (context) {
       context.clearRect(0, 0, canvas.width, canvas.height)
-      context.fillStyle = 'rgba(8, 12, 10, .72)'
+      context.fillStyle = 'rgba(250, 247, 238, .9)'
       context.fillRect(0, 0, canvas.width, canvas.height)
-      context.strokeStyle = 'rgba(116, 153, 134, .55)'
+      context.strokeStyle = 'rgba(58, 103, 83, .5)'
       context.strokeRect(1, 1, canvas.width - 2, canvas.height - 2)
-      context.fillStyle = '#9db2a7'
+      context.fillStyle = '#34463d'
       context.font = '600 24px ui-monospace, SFMono-Regular, monospace'
       context.textAlign = 'center'
       context.textBaseline = 'middle'
@@ -79,21 +79,21 @@ function CityGround({ layout }: { layout: CityLayout }) {
     <group>
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.08, 0]} receiveShadow>
         <planeGeometry args={[layout.span * 2.4, layout.span * 2.4]} />
-        <meshStandardMaterial color="#080b0a" roughness={0.96} metalness={0.08} />
+        <meshStandardMaterial color="#c9c3b6" roughness={0.98} metalness={0} />
       </mesh>
       <gridHelper
-        args={[layout.span * 2, Math.max(20, Math.round(layout.span / 2)), '#25312c', '#151d1a']}
+        args={[layout.span * 2, Math.max(20, Math.round(layout.span / 2)), '#789286', '#adb4aa']}
         position={[0, 0.01, 0]}
       />
       {layout.districts.map((district) => (
         <group key={district.name} position={[district.x, 0, district.z]}>
           <mesh position={[0, 0.06, 0]} receiveShadow>
             <boxGeometry args={[district.width, 0.12, district.depth]} />
-            <meshStandardMaterial color="#101713" roughness={0.9} metalness={0.2} />
+            <meshStandardMaterial color="#e4ded1" roughness={0.92} metalness={0.02} />
           </mesh>
           <mesh position={[0, 0.14, 0]} scale={[1.002, 1.002, 1.002]}>
             <boxGeometry args={[district.width, 0.14, district.depth]} />
-            <meshBasicMaterial color="#34483e" transparent opacity={0.42} wireframe />
+            <meshBasicMaterial color="#6f9181" transparent opacity={0.48} wireframe />
           </mesh>
           <DistrictLabel name={district.name} width={district.width} />
         </group>
@@ -162,7 +162,7 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
         const comparisonKind = comparison?.get(entry.path)
         ruinsRef.current?.setColorAt(
           index,
-          new THREE.Color(comparisonKind ? comparisonColors[comparisonKind] : index % 2 ? '#57382f' : '#493830'),
+          new THREE.Color(comparisonKind ? comparisonColors[comparisonKind] : index % 2 ? '#a66c58' : '#8e6252'),
         )
       })
       ruinsRef.current.instanceMatrix.needsUpdate = true
@@ -192,10 +192,10 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
           <boxGeometry />
           <meshStandardMaterial
             vertexColors
-            roughness={0.58}
-            metalness={0.35}
-            emissive="#07100d"
-            emissiveIntensity={0.2}
+            roughness={0.7}
+            metalness={0.08}
+            emissive="#fff9ec"
+            emissiveIntensity={0.06}
           />
         </instancedMesh>
       )}
@@ -216,7 +216,7 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
           position={[selectedLayout.x, (selected.alive ? selectedHeight : 0.5) + 0.35, selectedLayout.z]}
         >
           <torusGeometry args={[Math.max(selectedLayout.width, selectedLayout.depth) * 0.72, 0.055, 8, 32]} />
-          <meshBasicMaterial color="#ffd28c" toneMapped={false} />
+          <meshBasicMaterial color="#b95720" toneMapped={false} />
         </mesh>
       )}
     </group>
@@ -350,7 +350,7 @@ function ReleaseEvent({
   return (
     <mesh ref={ring} rotation-x={Math.PI / 2} position={[0, 0.38, 0]}>
       <torusGeometry args={[span * 0.42, 0.12, 10, 96]} />
-      <meshBasicMaterial color="#ffdca2" transparent opacity={0.56} toneMapped={false} />
+      <meshBasicMaterial color="#c66725" transparent opacity={0.82} toneMapped={false} />
     </mesh>
   )
 }
@@ -380,13 +380,13 @@ function MergeConfluence({
     <group ref={confluence} position={[0, 0.42, 0]}>
       <mesh rotation={[Math.PI / 2, 0, -0.56]} position={[-radius * 0.58, 0, 0]}>
         <torusGeometry args={[radius, 0.075, 8, 64, Math.PI * 1.42]} />
-        <meshBasicMaterial color="#82aaff" transparent opacity={0.64} toneMapped={false} />
+        <meshBasicMaterial color="#4e70b2" transparent opacity={0.72} toneMapped={false} />
       </mesh>
       <mesh rotation={[Math.PI / 2, 0, Math.PI + 0.56]} position={[radius * 0.58, 0.02, 0]}>
         <torusGeometry args={[radius, 0.075, 8, 64, Math.PI * 1.42]} />
-        <meshBasicMaterial color="#63d8bd" transparent opacity={0.58} toneMapped={false} />
+        <meshBasicMaterial color="#147d69" transparent opacity={0.7} toneMapped={false} />
       </mesh>
-      <pointLight position={[0, 2.3, 0]} color="#9ebdff" intensity={32} distance={radius * 2.5} decay={2} />
+      <pointLight position={[0, 2.3, 0]} color="#9ab6e8" intensity={24} distance={radius * 2.5} decay={2} />
     </group>
   )
 }
@@ -448,18 +448,19 @@ function CameraControls({
 function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
   return (
     <>
-      <fog attach="fog" args={['#080b0a', props.layout.span * 0.72, props.layout.span * 2.1]} />
-      <ambientLight intensity={0.8} color="#9cb4a8" />
-      <hemisphereLight args={['#afc8c2', '#130e0b', 1.2]} />
+      <fog attach="fog" args={['#d8d3c7', props.layout.span * 0.82, props.layout.span * 2.35]} />
+      <ambientLight intensity={1.75} color="#fff8e8" />
+      <hemisphereLight args={['#fff8e8', '#8e806d', 2.2]} />
       <directionalLight
         position={[16, 28, -12]}
-        intensity={3.4}
-        color="#ffd6a0"
+        intensity={4.8}
+        color="#fff0c9"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={120}
       />
-      <pointLight position={[-18, 8, 12]} intensity={120} distance={48} color="#316b66" decay={2} />
+      <directionalLight position={[-22, 18, 20]} intensity={1.5} color="#b8d9cf" />
+      <pointLight position={[-18, 8, 12]} intensity={52} distance={48} color="#75b9aa" decay={2} />
       <CityGround layout={props.layout} />
       <Buildings
         snapshot={props.snapshot}
@@ -512,7 +513,7 @@ export function CityScene({ onCanvas, ...props }: CitySceneProps) {
         far: 500,
       }}
       dpr={renderDpr}
-      shadows={{ type: THREE.PCFShadowMap }}
+      shadows={{ type: THREE.PCFSoftShadowMap }}
       fallback={
         <div className="webgl-fallback" role="alert">
           <strong>WebGL is unavailable.</strong>
@@ -521,9 +522,9 @@ export function CityScene({ onCanvas, ...props }: CitySceneProps) {
       }
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true }}
       onCreated={({ gl }) => {
-        gl.setClearColor('#080a09')
+        gl.setClearColor('#d8d3c7')
         gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.05
+        gl.toneMappingExposure = 1.28
         onCanvas(gl.domElement)
       }}
       onPointerMissed={() => props.onSelect(undefined)}

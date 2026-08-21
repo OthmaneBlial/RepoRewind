@@ -17,6 +17,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 ### Changed
 
+- Reimagined the interface as a warm archival-daylight city with brighter WebGL lighting, legible paper-glass controls, and clearer responsive overlays.
 - Git metadata parsing now uses NUL-delimited records and portable empty-tree diffs so unusual paths and non-Unix systems are handled safely.
 - The development and preview servers bind to localhost by default.
 - The 3D renderer is lazy-loaded and no longer depends on `@react-three/drei`.
