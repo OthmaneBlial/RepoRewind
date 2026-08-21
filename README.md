@@ -5,6 +5,10 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-f1a35f.svg)](./LICENSE)
 [![Node.js 22.13 or 24](https://img.shields.io/badge/node-22.13%20%7C%2024-79d6bc.svg)](./package.json)
 [![No telemetry](https://img.shields.io/badge/telemetry-none-82aaff.svg)](./docs/privacy.md)
+[![CI](https://github.com/OthmaneBlial/RepoRewind/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/OthmaneBlial/RepoRewind/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/OthmaneBlial/RepoRewind?sort=semver)](https://github.com/OthmaneBlial/RepoRewind/releases/latest)
+
+**[Explore the project showcase →](https://othmaneblial.github.io/RepoRewind/)** · **[Read the field notes](https://othmaneblial.github.io/RepoRewind/docs.html)**
 
 RepoRewind is a local-first visual history explorer for software teams, maintainers, educators, and anyone trying to understand how a codebase actually evolved. Files become buildings, folders become districts, contributors become travelers, releases become landmarks, refactors rebuild neighborhoods, and deleted code remains visible as ruins.
 
