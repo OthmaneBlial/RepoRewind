@@ -4,6 +4,8 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-21
+
 ### Added
 
 - Keyboard-first archive search, temporal comparison, file inspection, deterministic fictional demo reset, and browser-native MP4/WebM film export.
@@ -32,3 +34,6 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Analyzer output passes the same closed-world runtime contract as browser imports before it can be written or piped.
 - Contributor grouping uses archive-local sequential identifiers instead of an email-derived hash, preventing cross-archive correlation through contributor IDs.
 - Production-host examples include restrictive security headers and no telemetry.
+
+[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.1.0

@@ -36,7 +36,7 @@ Use `npm run test:watch` while developing. Changes to the archive format must up
 
 ## Interface changes
 
-Preserve the industrial night-observatory identity, practical keyboard behavior, visible focus, reduced motion, and usable narrow layouts. Include real screenshots for visual pull requests, but remove personal repository data and debugging UI first.
+Preserve the editorial archival-city identity, warm daylight contrast, practical keyboard behavior, visible focus, reduced motion, and usable narrow layouts. Include real screenshots for visual pull requests, but remove personal repository data and debugging UI first.
 
 ## Commit and pull request scope
 
