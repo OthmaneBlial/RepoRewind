@@ -12,7 +12,7 @@ This makes frame selection, timing, and duration deterministic. It does **not** 
 
 - Package: `mediabunny`; official npm metadata reported `1.55.1` as `latest` on 2026-08-20. Pin `"mediabunny": "1.55.1"` while implementing because this API is moving quickly.
 - License: Mozilla Public License 2.0 (`MPL-2.0`), a weak file-level copyleft license. Normal use from an open- or closed-source project is allowed. If MediaBunny's own licensed source is modified and the modification is distributed, those modified source files must be published under MPL-2.0. Keep its license/copyright notices.
-- npm: https://www.npmjs.com/package/mediabunny
+- npm registry metadata: https://registry.npmjs.org/mediabunny/latest
 - official repository and license explanation: https://github.com/Vanilagy/mediabunny
 
 ## Exact canvas-to-MP4 API

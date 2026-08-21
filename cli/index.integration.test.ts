@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -55,13 +55,15 @@ describe('RepoRewind CLI', () => {
     const history = JSON.parse(stdout) as {
       repository: { name: string }
       commits: unknown[]
-      contributors: Array<{ email?: string }>
+      contributors: Array<{ id: string; email?: string }>
     }
 
     expect(stderr).toBe('')
     expect(history.repository.name).toBe(basename(repository))
     expect(history.commits).toHaveLength(1)
+    expect(history.contributors[0].id).toBe('author-0001')
     expect(history.contributors[0].email).toBeUndefined()
+    expect(stdout).not.toContain('fixture@example.test')
   })
 
   it('refuses to overwrite an archive unless --force is explicit', async () => {
@@ -79,5 +81,10 @@ describe('RepoRewind CLI', () => {
     expect(JSON.parse(await readFile(output, 'utf8'))).toMatchObject({
       repository: { name: basename(repository) },
     })
+    const archiveMode = (await stat(output)).mode & 0o777
+    expect(archiveMode).toBe(process.platform === 'win32' ? archiveMode : 0o600)
+    expect(
+      (await readdir(repository)).filter((entry) => entry.startsWith('history.json.') && entry.endsWith('.tmp')),
+    ).toEqual([])
   })
 })

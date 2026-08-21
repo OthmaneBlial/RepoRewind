@@ -1026,20 +1026,29 @@ summary:focus-visible {
 .release-marker {
   position: absolute;
   z-index: 3;
-  top: 3px;
-  width: 1px;
-  height: 12px;
+  top: -3px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
-  background: rgba(99, 216, 189, 0.55);
+  background: transparent;
   cursor: pointer;
   transform: translateX(-50%);
+}
+.release-marker::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  height: 12px;
+  background: rgba(99, 216, 189, 0.55);
 }
 .release-marker::after {
   content: '';
   position: absolute;
-  top: -1px;
-  left: -2px;
+  top: 4px;
+  left: calc(50% - 2.5px);
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -1049,22 +1058,32 @@ summary:focus-visible {
 .branch-marker {
   position: absolute;
   z-index: 4;
+  top: -3px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
+  background: transparent;
   cursor: pointer;
   transform: translateX(-50%);
 }
-.merge-marker {
-  top: 4px;
+.merge-marker::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
   width: 8px;
   height: 8px;
   border: 1px solid #a8c2f2;
   background: #314766;
-  transform: translateX(-50%) rotate(45deg);
+  transform: rotate(45deg);
   box-shadow: 0 0 7px rgba(130, 170, 255, 0.4);
 }
-.branch-marker {
-  top: -2px;
+.branch-marker::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 9.5px;
   width: 5px;
   height: 5px;
   border: 1px solid var(--branch-color);

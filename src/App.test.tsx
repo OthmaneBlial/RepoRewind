@@ -14,6 +14,7 @@ describe('RepoRewind application', () => {
     render(<App />)
 
     expect((await screen.findAllByText('Fictional demo'))[0]).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Search archive' })).toHaveAttribute('aria-label', 'Search archive')
     const importButton = screen.getByRole('button', { name: /^Import$/ })
     await user.click(importButton)
 
@@ -104,6 +105,20 @@ describe('RepoRewind application', () => {
     await user.click(screen.getByRole('button', { name: 'Open demo' }))
     expect((await screen.findAllByText('Fictional demo'))[0]).toBeVisible()
     expect(screen.getByRole('status')).toHaveTextContent('fictional ten-year demo archive has been restored')
+  })
+
+  it('keeps the import dialog recoverable when an archive is malformed', async () => {
+    vi.stubGlobal('Worker', undefined)
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /^Import$/ }))
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')
+    await user.upload(input!, new File(['not json'], 'broken-history.json', { type: 'application/json' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('not valid JSON')
+    expect(screen.getByRole('dialog', { name: 'Bring your repository’s past to life.' })).toBeVisible()
+    expect(screen.getByRole('button', { name: /Choose a history file/ })).toBeEnabled()
   })
 })
 

@@ -12,7 +12,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Native modal dialogs with inert backgrounds, cancellation, focus trapping, and focus restoration.
 - Compact mobile actions that keep search, archive import, and film export reachable on narrow screens.
 - Strict CLI parsing, `--stdout`, `--quiet`, `--version`, branch selection, bounded history analysis, and privacy-preserving email defaults.
-- Safe archive writes that refuse to replace an existing file unless `--force` is explicit.
+- Safe archive writes that refuse to replace an existing file unless `--force` is explicit; forced replacement is atomic and keeps private file permissions.
 - Formatting, linting, documentation validation, integration tests, dependency auditing, and pinned multi-platform CI.
 
 ### Changed
@@ -28,5 +28,6 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Imported archives enforce size, count, string, date, relationship, and integer bounds before indexing.
 - Public repository links require HTTPS (with loopback HTTP for development), generated film names are sanitized, and export/import resources are cleaned up on cancellation.
 - Analyzer remotes strip URL credentials, queries, and fragments before serialization; unsupported local remotes are omitted.
-- Contributor grouping uses deterministic 80-bit SHA-256-derived identifiers instead of collision-prone 32-bit hashes.
+- Analyzer output passes the same closed-world runtime contract as browser imports before it can be written or piped.
+- Contributor grouping uses archive-local sequential identifiers instead of an email-derived hash, preventing cross-archive correlation through contributor IDs.
 - Production-host examples include restrictive security headers and no telemetry.

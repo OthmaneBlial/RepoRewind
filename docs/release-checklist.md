@@ -17,6 +17,7 @@ Use this checklist for a public tag or hosted demo. It records evidence; it is n
 - [ ] `node dist-cli/index.js --version`
 - [ ] `npm run preview -- --host 127.0.0.1`
 - [ ] Production HTML and immutable assets return successfully over HTTP.
+- [ ] `dist/LICENSE` and `dist/THIRD_PARTY_NOTICES.md` are present in the deployable artifact.
 
 ## Product validation
 

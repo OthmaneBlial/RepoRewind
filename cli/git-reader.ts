@@ -1,6 +1,5 @@
 import { basename, resolve } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
-import { createHash } from 'node:crypto'
 import type {
   BranchRef,
   ChangeStatus,
@@ -81,10 +80,6 @@ async function streamGitRecords(
       else reject(new Error(stderr.trim() || `git exited with status ${status}`))
     })
   })
-}
-
-function stableId(value: string): string {
-  return `author-${createHash('sha256').update(value).digest('hex').slice(0, 20)}`
 }
 
 interface StatusEntry {
@@ -402,6 +397,7 @@ function assembleHistory(
     )
   }
   const contributors = new Map<string, Contributor>()
+  const contributorIds = new Map<string, string>()
   const branches = readBranches(repositoryPath, selectedBranch)
   const refsByCommit = new Map<string, string[]>()
   branches.forEach((branch) => {
@@ -419,7 +415,12 @@ function assembleHistory(
       authoredAt = '',
       message = 'Untitled commit',
     ] = header
-    const authorId = stableId(authorEmail.toLowerCase() || authorName.toLowerCase())
+    const identityKey = authorEmail.toLocaleLowerCase() || authorName.toLocaleLowerCase()
+    let authorId = contributorIds.get(identityKey)
+    if (!authorId) {
+      authorId = `author-${String(contributorIds.size + 1).padStart(4, '0')}`
+      contributorIds.set(identityKey, authorId)
+    }
     const files = mergeChanges(stats, statuses.get(hash) ?? [])
     const additions = files.reduce((total, file) => total + file.additions, 0)
     const deletions = files.reduce((total, file) => total + file.deletions, 0)

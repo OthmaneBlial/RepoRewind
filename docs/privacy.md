@@ -8,11 +8,13 @@ For the selected local Git repository and ref, the analyzer reads:
 
 - repository name, branch/ref, and a sanitized configured remote string;
 - commit hashes, parent hashes, timestamps, messages, and refs;
-- contributor display names and local Git email metadata used to group identities; email strings are serialized only with `--include-emails`;
+- contributor display names and local Git email metadata used only to group identities within that analysis; archive-local sequential identifiers are serialized, and email strings are included only with `--include-emails`;
 - file paths, change status, rename origins, and numeric addition/deletion totals;
 - tags and branch tips.
 
 It does not read source contents, binary contents, working-tree files, credential stores, Git configuration beyond the sanitized remote, issue data, or hosting-provider data. URL usernames, passwords, queries, and fragments are removed; unsupported local/file remotes are omitted.
+
+Contributor identifiers do not contain a hash or other reusable derivative of an email address. They are assigned in first-seen history order, so an archive without `--include-emails` cannot be correlated through an email-derived identifier.
 
 Commit messages, names, file paths, and remotes can still be sensitive. Treat a generated archive as private unless you have reviewed it.
 

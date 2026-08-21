@@ -295,9 +295,9 @@ function ImportModal({
           <span>Terminal</span>
         </div>
         <code>
-          <b>$</b> npm run analyze -- /path/to/repository
+          <b>$</b> npm run analyze -- /path/to/repository --output ./reporewind-history.json
           <br />
-          <b>$</b> open reporewind-history.json
+          <b>→</b> Select Import and choose the generated JSON
         </code>
       </div>
       <p className="privacy-note">
@@ -994,7 +994,7 @@ export default function App() {
           <ChevronIcon />
         </button>
         <div className="top-actions">
-          <button className="archive-search-trigger" onClick={() => setSearchOpen(true)}>
+          <button className="archive-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search archive">
             <SearchIcon />
             <span>Search archive</span>
             <kbd>⌘K</kbd>

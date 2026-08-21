@@ -3,23 +3,33 @@
 **Turn a local Git history into a living city you can replay, search, compare, and film.**
 
 [![MIT License](https://img.shields.io/badge/license-MIT-f1a35f.svg)](./LICENSE)
-[![Node.js 22.12 or 24](https://img.shields.io/badge/node-22.12%20%7C%2024-79d6bc.svg)](./package.json)
+[![Node.js 22.13 or 24](https://img.shields.io/badge/node-22.13%20%7C%2024-79d6bc.svg)](./package.json)
 [![No telemetry](https://img.shields.io/badge/telemetry-none-82aaff.svg)](./docs/privacy.md)
 
 RepoRewind is a local-first visual history explorer for software teams, maintainers, educators, and anyone trying to understand how a codebase actually evolved. Files become buildings, folders become districts, contributors become travelers, releases become landmarks, refactors rebuild neighborhoods, and deleted code remains visible as ruins.
 
 The experience opens immediately with a clearly labeled fictional ten-year archive. Real repositories are analyzed locally into a portable JSON file—no account, cloud service, source upload, paid API, or hidden credential required.
 
+## Product tour
+
+| Replay the living city                                                                                                 | Find any trace                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| ![RepoRewind city timeline showing a fictional repository at the v2.0.0 release](./docs/screenshots/city-timeline.png) | ![Archive search finding a branch and commit related to film export](./docs/screenshots/search-archive.png) |
+
+| Compare two eras                                                                                       | Export a history film                                                                          |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| ![Temporal diff comparing the v2.0.0 and v3.0.0 repository eras](./docs/screenshots/temporal-diff.png) | ![Film export controls with MP4 and WebM delivery options](./docs/screenshots/film-export.png) |
+
 ## Quick start
 
-Requirements: [Node.js](https://nodejs.org/) 24 (recommended) or Node.js 22.12+, npm 10+, and Git.
+Requirements: [Node.js](https://nodejs.org/) 24 (recommended) or Node.js 22.13+, npm 10+, and Git.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The deterministic demo is already loaded. Select **Import** at any time to see the two-command real-repository workflow.
+Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The deterministic demo is already loaded. Select **Import** at any time to see the local real-repository workflow.
 
 No environment variables, database, service account, or network API are required. To restore the demo after an import, open the repository switcher and choose **Open demo**; reloading also clears the memory-only archive.
 
@@ -119,18 +129,19 @@ Read the complete [architecture guide](./docs/architecture.md), [video export de
 
 ## Development and validation
 
-| Command              | Purpose                                                           |
-| -------------------- | ----------------------------------------------------------------- |
-| `npm run dev`        | Start the localhost-only Vite development server                  |
-| `npm run test:watch` | Run focused Vitest development loops                              |
-| `npm run format`     | Apply the project Prettier configuration                          |
-| `npm run lint`       | Run strict React, accessibility, import, and test lint rules      |
-| `npm run typecheck`  | Validate TypeScript without emitting files                        |
-| `npm run docs:check` | Verify every local Markdown link target                           |
-| `npm run test`       | Run core, Git, CLI, import/export, and frontend interaction tests |
-| `npm run build`      | Build the static browser app and distributable CLI                |
-| `npm run check`      | Run formatting, lint, docs, tests, type checking, and builds      |
-| `npm run verify`     | Run `check` plus the high-severity dependency audit               |
+| Command                  | Purpose                                                           |
+| ------------------------ | ----------------------------------------------------------------- |
+| `npm run dev`            | Start the localhost-only Vite development server                  |
+| `npm run test:watch`     | Run focused Vitest development loops                              |
+| `npm run format`         | Apply the project Prettier configuration                          |
+| `npm run lint`           | Run strict React, accessibility, import, and test lint rules      |
+| `npm run typecheck`      | Validate TypeScript without emitting files                        |
+| `npm run docs:check`     | Verify every local Markdown link target                           |
+| `npm run licenses:check` | Verify locked browser dependencies have third-party notices       |
+| `npm run test`           | Run core, Git, CLI, import/export, and frontend interaction tests |
+| `npm run build`          | Build the static browser app and distributable CLI                |
+| `npm run check`          | Run formatting, lint, docs/licenses, tests, type checking, builds |
+| `npm run verify`         | Run `check` plus the high-severity dependency audit               |
 
 GitHub Actions is configured to run the quality gate on pinned Node.js 24 and exercise supported Node/OS combinations on Linux, macOS, and Windows. Dependency updates are grouped weekly.
 
@@ -143,7 +154,7 @@ npm run build
 npm run preview
 ```
 
-The browser application is emitted to `dist/`; the CLI is emitted to `dist-cli/`. Preview binds to `http://127.0.0.1:4173` by default. Set `SOURCE_MAPS=true` only when a production debugging workflow explicitly requires source maps.
+The browser application, project license, and runtime notices are emitted to `dist/`; the CLI is emitted to `dist-cli/`. Preview binds to `http://127.0.0.1:4173` by default. Set `SOURCE_MAPS=true` only when a production debugging workflow explicitly requires source maps.
 
 Deploy `dist/` to a static HTTPS host. `public/_headers` supplies a restrictive CSP, clickjacking protection, privacy-oriented browser permissions, and immutable asset caching on hosts that support Netlify-style header files. Configure equivalent headers on other hosts.
 
@@ -151,7 +162,7 @@ Docker is intentionally not included: the web output is static, while the analyz
 
 ## Compatibility and limits
 
-- Node.js 24 is pinned for development; Node.js 22.12+ is supported. EOL Node releases are excluded.
+- Node.js 24 is pinned for development; Node.js 22.13+ is supported. EOL Node releases are excluded.
 - The CLI is designed for current Git on Linux, macOS, and Windows; CI is configured to exercise all three.
 - The web app targets ES2022 and requires a current desktop browser with modules, Web Workers, Canvas, and WebGL. Search/import validation can still report useful errors if WebGL initialization fails.
 - MP4 requires HTTPS/localhost and H.264 WebCodecs support. WebM depends on MediaRecorder codec support.

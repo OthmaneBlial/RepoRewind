@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Node.js 24 is recommended; Node.js 22.12 or newer is also supported. RepoRewind binds to `http://127.0.0.1:5173` by default. If that port is occupied, Vite prints the alternative URL it selected.
+Node.js 24 is recommended; Node.js 22.13 or newer is also supported. RepoRewind binds to `http://127.0.0.1:5173` by default. If that port is occupied, Vite prints the alternative URL it selected.
 
 ## The analyzer cannot read a repository
 

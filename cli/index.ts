@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
+import { validateHistory } from '../src/core/history'
 import { analyzeRepositoryStreaming } from './git-reader'
 
 const packageVersion = (
@@ -30,6 +32,23 @@ Examples:
   reporewind analyze . --branch release/3.x --max-commits 5000
   reporewind analyze . --stdout > reporewind-history.json
 `)
+}
+
+function writeArchive(outputPath: string, serialized: string, force: boolean): void {
+  mkdirSync(dirname(outputPath), { recursive: true })
+  if (!force) {
+    writeFileSync(outputPath, serialized, { encoding: 'utf8', mode: 0o600, flag: 'wx' })
+    return
+  }
+
+  const temporaryPath = `${outputPath}.${process.pid}.${randomUUID()}.tmp`
+  try {
+    writeFileSync(temporaryPath, serialized, { encoding: 'utf8', mode: 0o600, flag: 'wx' })
+    renameSync(temporaryPath, outputPath)
+    if (process.platform !== 'win32') chmodSync(outputPath, 0o600)
+  } finally {
+    rmSync(temporaryPath, { force: true })
+  }
 }
 
 async function main(): Promise<void> {
@@ -103,19 +122,20 @@ async function main(): Promise<void> {
   const outputPath = resolve(output ?? 'reporewind-history.json')
   try {
     if (!quiet) process.stdout.write(`Analyzing ${resolve(repositoryPath)}…\n`)
-    const history = await analyzeRepositoryStreaming(repositoryPath, {
-      maxCommits,
-      includeEmails,
-      branch,
-    })
+    const history = validateHistory(
+      await analyzeRepositoryStreaming(repositoryPath, {
+        maxCommits,
+        includeEmails,
+        branch,
+      }),
+    )
     const serialized = `${JSON.stringify(history, null, 2)}\n`
     if (writeToStdout) {
       process.stdout.write(serialized)
       return
     }
 
-    mkdirSync(dirname(outputPath), { recursive: true })
-    writeFileSync(outputPath, serialized, { encoding: 'utf8', mode: 0o600, flag: force ? 'w' : 'wx' })
+    writeArchive(outputPath, serialized, force)
     if (!quiet) {
       const count = (value: number, singular: string) =>
         `${value.toLocaleString()} ${singular}${value === 1 ? '' : 's'}`

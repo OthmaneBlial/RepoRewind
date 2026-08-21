@@ -40,7 +40,8 @@ describe('repository analysis integration', () => {
     const streamedHistory = await analyzeRepositoryStreaming(repository)
     expect(history.commits).toHaveLength(2)
     expect(history.contributors).toMatchObject([{ name: 'Archive Builder', commits: 2 }])
-    expect(history.contributors[0].id).toMatch(/^author-[a-f0-9]{20}$/)
+    expect(history.contributors[0].id).toBe('author-0001')
+    expect(JSON.stringify(history)).not.toContain('archive@example.test')
     expect(history.releases.map((release) => release.tag)).toEqual(['v0.1.0'])
     expect(history.repository.remote).toBe('https://example.test/team/city.git')
     expect(history.commits[1].files).toContainEqual(
@@ -51,6 +52,7 @@ describe('repository analysis integration', () => {
       }),
     )
     expect(streamedHistory.commits).toEqual(history.commits)
+    expect(streamedHistory.contributors).toEqual(history.contributors)
     expect(history.commits[1].files).toContainEqual(
       expect.objectContaining({
         path: 'src/traveler.ts',

@@ -20,10 +20,10 @@ RepoRewind optimizes for smooth interactive exploration on an ordinary modern la
 
 | Artifact                   |      Raw |         Gzip |
 | -------------------------- | -------: | -----------: |
-| Application entry          | 257.3 kB |      80.8 kB |
+| Application entry          | 257.6 kB |      80.9 kB |
 | Shared React/runtime chunk | 173.6 kB |      45.2 kB |
 | Lazy Three.js city chunk   | 896.6 kB |     238.6 kB |
-| Styles                     |  33.1 kB |       8.2 kB |
-| History worker             |  11.0 kB | not reported |
+| Styles                     |  33.3 kB |       8.2 kB |
+| History worker             |  11.1 kB | not reported |
 
 The city chunk remains intentionally large and is the main performance limitation. Lazy loading prevents it from blocking the static shell bundle, but runtime frame rate and memory still require real-device browser measurement before publishing hardware claims.

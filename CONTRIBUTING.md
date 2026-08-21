@@ -21,7 +21,7 @@ Before submitting a pull request:
 npm run verify
 ```
 
-That command checks formatting, lint rules, documentation links, unit and integration tests, TypeScript, both production builds, and high-severity dependency advisories.
+That command checks formatting, lint rules, documentation links, runtime license notices, unit and integration tests, TypeScript, both production builds, and high-severity dependency advisories.
 
 Use `npm run test:watch` while developing. Changes to the archive format must update the TypeScript types, runtime validation, JSON Schema, fixtures, and compatibility documentation together.
 
