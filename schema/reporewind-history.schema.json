@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RepoRewind history archive",
+  "description": "Portable structural Git history consumed by the RepoRewind visual history engine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "repository", "contributors", "commits", "releases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "branch", "generatedAt", "firstCommitAt", "lastCommitAt"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "branch": { "type": "string", "minLength": 1 },
+        "scope": { "enum": ["branch", "all-branches"] },
+        "truncated": { "type": "boolean" },
+        "remote": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "firstCommitAt": { "type": "string", "format": "date-time" },
+        "lastCommitAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "contributors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/contributor" }
+    },
+    "commits": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/commit" }
+    },
+    "releases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/release" }
+    },
+    "branches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/branch" }
+    }
+  },
+  "$defs": {
+    "fileChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "status", "additions", "deletions"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "previousPath": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["added", "modified", "deleted", "renamed"] },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "binary": { "type": "boolean" }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hash", "parents", "authorId", "authoredAt", "message", "additions", "deletions", "files"],
+      "properties": {
+        "hash": { "type": "string", "minLength": 1 },
+        "parents": { "type": "array", "items": { "type": "string" } },
+        "refs": { "type": "array", "items": { "type": "string" } },
+        "isMainline": { "type": "boolean" },
+        "isBaseline": { "type": "boolean" },
+        "authorId": { "type": "string", "minLength": 1 },
+        "authoredAt": { "type": "string", "format": "date-time" },
+        "message": { "type": "string" },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "files": { "type": "array", "items": { "$ref": "#/$defs/fileChange" } }
+      }
+    },
+    "contributor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "color", "commits", "additions", "deletions"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "email": { "type": "string" },
+        "color": { "type": "string" },
+        "commits": { "type": "integer", "minimum": 0 },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "commitHash", "date"],
+      "properties": {
+        "tag": { "type": "string", "minLength": 1 },
+        "commitHash": { "type": "string", "minLength": 1 },
+        "date": { "type": "string", "format": "date-time" },
+        "message": { "type": "string" }
+      }
+    },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "tipHash", "color", "isCurrent", "isRemote"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "tipHash": { "type": "string", "minLength": 1 },
+        "color": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
+        "isRemote": { "type": "boolean" }
+      }
+    }
+  }
+}

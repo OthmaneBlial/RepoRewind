@@ -1,0 +1,47 @@
+{
+  "name": "reporewind",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A cinematic visual history engine for Git repositories.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "bin": {
+    "reporewind": "./dist-cli/index.js"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && tsup cli/index.ts --format esm --out-dir dist-cli --clean",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "tsx cli/index.ts analyze",
+    "check": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "mediabunny": "1.55.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "jsdom": "^27.2.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2"
+  }
+}
