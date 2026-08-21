@@ -15,10 +15,16 @@ describe('archive search', () => {
   })
 
   it('searches commits, contributors, releases, and branch tips with filters', () => {
-    expect(searchArchive(sampleHistory, index, 'author:maya')[0]).toMatchObject({ kind: 'contributor', title: 'Maya Chen' })
+    expect(searchArchive(sampleHistory, index, 'author:maya')[0]).toMatchObject({
+      kind: 'contributor',
+      title: 'Maya Chen',
+    })
     expect(searchArchive(sampleHistory, index, 'release:v2')[0]).toMatchObject({ kind: 'release', title: 'v2.0.0' })
     expect(searchArchive(sampleHistory, index, 'branch:main')[0]).toMatchObject({ kind: 'branch', title: 'main' })
-    expect(searchArchive(sampleHistory, index, 'commit:travelers arrive')[0]).toMatchObject({ kind: 'commit', title: 'Travelers arrive' })
+    expect(searchArchive(sampleHistory, index, 'commit:travelers arrive')[0]).toMatchObject({
+      kind: 'commit',
+      title: 'Travelers arrive',
+    })
   })
 
   it('returns no broad suggestions for an empty query', () => {

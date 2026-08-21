@@ -43,15 +43,15 @@ When a limit omits older commits, RepoRewind reconstructs the earliest retained 
 
 ## City grammar
 
-| Git history | RepoRewind city |
-| --- | --- |
-| File | A building whose height follows its current line count |
-| Top-level folder | A stable district separated by avenues |
-| Contributor | A colored traveler located at their latest work site |
-| Commit | A pulse of construction, demolition, or rebuilding |
-| Tag / release | A city-wide historical ring and timeline marker |
-| Rename / refactor | A neighborhood rebuilding event |
-| Deleted file | A permanent, selectable ruin |
+| Git history       | RepoRewind city                                        |
+| ----------------- | ------------------------------------------------------ |
+| File              | A building whose height follows its current line count |
+| Top-level folder  | A stable district separated by avenues                 |
+| Contributor       | A colored traveler located at their latest work site   |
+| Commit            | A pulse of construction, demolition, or rebuilding     |
+| Tag / release     | A city-wide historical ring and timeline marker        |
+| Rename / refactor | A neighborhood rebuilding event                        |
+| Deleted file      | A permanent, selectable ruin                           |
 
 Layout is derived from stable path hashes across the full history. Scrubbing backward never randomly rearranges the city, and demolished sites remain geographically meaningful.
 

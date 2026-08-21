@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { sampleHistory } from '../data/sample-history'
-import { buildTimelapseFramePlan } from './timelapse'
+import { buildTimelapseFramePlan, historyFilmFilename } from './timelapse'
 
 describe('buildTimelapseFramePlan', () => {
   it('creates an exact fixed-rate activity timeline including both archive endpoints', () => {
@@ -8,7 +8,13 @@ describe('buildTimelapseFramePlan', () => {
 
     expect(plan).toHaveLength(5)
     expect(plan[0]).toMatchObject({ frame: 0, progress: 0, snapshotIndex: 0, timestamp: 0, duration: 0.2 })
-    expect(plan.at(-1)).toMatchObject({ frame: 4, progress: 1, snapshotIndex: sampleHistory.commits.length - 1, timestamp: 0.8, duration: 0.2 })
+    expect(plan.at(-1)).toMatchObject({
+      frame: 4,
+      progress: 1,
+      snapshotIndex: sampleHistory.commits.length - 1,
+      timestamp: 0.8,
+      duration: 0.2,
+    })
     expect(plan.map((frame) => frame.snapshotIndex)).toEqual([0, 6, 12, 18, 24])
   })
 
@@ -23,5 +29,11 @@ describe('buildTimelapseFramePlan', () => {
   it('rejects invalid film settings', () => {
     expect(() => buildTimelapseFramePlan(sampleHistory, 0, 1, 30, 'activity')).toThrow('does not contain any frames')
     expect(() => buildTimelapseFramePlan(sampleHistory, 1, 0, 30, 'activity')).toThrow('must be positive')
+  })
+
+  it('creates safe, bounded download names from imported repository metadata', () => {
+    expect(historyFilmFilename('../../private:repo', 'mp4')).toBe('private-repo-history.mp4')
+    expect(historyFilmFilename('   ', 'webm')).toBe('repository-history.webm')
+    expect(historyFilmFilename('a'.repeat(200), 'mp4')).toBe(`${'a'.repeat(120)}-history.mp4`)
   })
 })

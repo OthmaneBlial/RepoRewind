@@ -12,11 +12,11 @@
       "additionalProperties": false,
       "required": ["name", "branch", "generatedAt", "firstCommitAt", "lastCommitAt"],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "branch": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "branch": { "type": "string", "minLength": 1, "maxLength": 1024 },
         "scope": { "enum": ["branch", "all-branches"] },
         "truncated": { "type": "boolean" },
-        "remote": { "type": "string" },
+        "remote": { "type": "string", "maxLength": 4096 },
         "generatedAt": { "type": "string", "format": "date-time" },
         "firstCommitAt": { "type": "string", "format": "date-time" },
         "lastCommitAt": { "type": "string", "format": "date-time" }
@@ -24,19 +24,23 @@
     },
     "contributors": {
       "type": "array",
+      "maxItems": 100000,
       "items": { "$ref": "#/$defs/contributor" }
     },
     "commits": {
       "type": "array",
       "minItems": 1,
+      "maxItems": 250000,
       "items": { "$ref": "#/$defs/commit" }
     },
     "releases": {
       "type": "array",
+      "maxItems": 100000,
       "items": { "$ref": "#/$defs/release" }
     },
     "branches": {
       "type": "array",
+      "maxItems": 100000,
       "items": { "$ref": "#/$defs/branch" }
     }
   },
@@ -46,27 +50,33 @@
       "additionalProperties": false,
       "required": ["path", "status", "additions", "deletions"],
       "properties": {
-        "path": { "type": "string", "minLength": 1 },
-        "previousPath": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "previousPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
         "status": { "enum": ["added", "modified", "deleted", "renamed"] },
         "additions": { "type": "integer", "minimum": 0 },
         "deletions": { "type": "integer", "minimum": 0 },
         "binary": { "type": "boolean" }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "renamed" } }, "required": ["status"] },
+          "then": { "required": ["previousPath"] }
+        }
+      ]
     },
     "commit": {
       "type": "object",
       "additionalProperties": false,
       "required": ["hash", "parents", "authorId", "authoredAt", "message", "additions", "deletions", "files"],
       "properties": {
-        "hash": { "type": "string", "minLength": 1 },
-        "parents": { "type": "array", "items": { "type": "string" } },
-        "refs": { "type": "array", "items": { "type": "string" } },
+        "hash": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "parents": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 256 } },
+        "refs": { "type": "array", "items": { "type": "string", "maxLength": 1024 } },
         "isMainline": { "type": "boolean" },
         "isBaseline": { "type": "boolean" },
-        "authorId": { "type": "string", "minLength": 1 },
+        "authorId": { "type": "string", "minLength": 1, "maxLength": 512 },
         "authoredAt": { "type": "string", "format": "date-time" },
-        "message": { "type": "string" },
+        "message": { "type": "string", "maxLength": 32768 },
         "additions": { "type": "integer", "minimum": 0 },
         "deletions": { "type": "integer", "minimum": 0 },
         "files": { "type": "array", "items": { "$ref": "#/$defs/fileChange" } }
@@ -77,10 +87,10 @@
       "additionalProperties": false,
       "required": ["id", "name", "color", "commits", "additions", "deletions"],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "name": { "type": "string", "minLength": 1 },
-        "email": { "type": "string" },
-        "color": { "type": "string" },
+        "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "email": { "type": "string", "maxLength": 320 },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "commits": { "type": "integer", "minimum": 0 },
         "additions": { "type": "integer", "minimum": 0 },
         "deletions": { "type": "integer", "minimum": 0 }
@@ -91,10 +101,10 @@
       "additionalProperties": false,
       "required": ["tag", "commitHash", "date"],
       "properties": {
-        "tag": { "type": "string", "minLength": 1 },
-        "commitHash": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "commitHash": { "type": "string", "minLength": 1, "maxLength": 256 },
         "date": { "type": "string", "format": "date-time" },
-        "message": { "type": "string" }
+        "message": { "type": "string", "maxLength": 32768 }
       }
     },
     "branch": {
@@ -102,9 +112,9 @@
       "additionalProperties": false,
       "required": ["name", "tipHash", "color", "isCurrent", "isRemote"],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "tipHash": { "type": "string", "minLength": 1 },
-        "color": { "type": "string" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "tipHash": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
         "isCurrent": { "type": "boolean" },
         "isRemote": { "type": "boolean" }
       }

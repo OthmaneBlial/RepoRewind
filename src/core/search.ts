@@ -14,7 +14,10 @@ export interface ArchiveSearchResult {
 }
 
 function normalize(value: string): string {
-  return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase()
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase()
 }
 
 function scoreText(title: string, searchText: string, queryTokens: string[]): number {
@@ -34,8 +37,14 @@ function scoreText(title: string, searchText: string, queryTokens: string[]): nu
 }
 
 const kindPrefixes: Record<string, ArchiveSearchKind> = {
-  file: 'file', path: 'file', commit: 'commit', author: 'contributor',
-  traveler: 'contributor', release: 'release', tag: 'release', branch: 'branch',
+  file: 'file',
+  path: 'file',
+  commit: 'commit',
+  author: 'contributor',
+  traveler: 'contributor',
+  release: 'release',
+  tag: 'release',
+  branch: 'branch',
 }
 
 export function searchArchive(
@@ -60,30 +69,36 @@ export function searchArchive(
     index.fileActivity.forEach((file) => {
       const name = file.path.split('/').pop() ?? file.path
       const score = scoreText(name, file.path, tokens)
-      if (score > 0) results.push({
-        id: `file:${file.path}`,
-        kind: 'file',
-        title: file.path,
-        subtitle: `${file.touches.toLocaleString()} change${file.touches === 1 ? '' : 's'} · last seen ${new Date(history.commits[file.lastIndex].authoredAt).getUTCFullYear()}`,
-        index: file.lastIndex,
-        path: file.path,
-        score: score + Math.min(25, file.touches),
-      })
+      if (score > 0)
+        results.push({
+          id: `file:${file.path}`,
+          kind: 'file',
+          title: file.path,
+          subtitle: `${file.touches.toLocaleString()} change${file.touches === 1 ? '' : 's'} · last seen ${new Date(history.commits[file.lastIndex].authoredAt).getUTCFullYear()}`,
+          index: file.lastIndex,
+          path: file.path,
+          score: score + Math.min(25, file.touches),
+        })
     })
   }
 
   if (include('commit')) {
     history.commits.forEach((commit, commitIndex) => {
-      const score = scoreText(commit.message, index.commitSearch[commitIndex] ?? `${commit.hash} ${commit.message}`, tokens)
-      if (score > 0) results.push({
-        id: `commit:${commit.hash}`,
-        kind: 'commit',
-        title: commit.message || 'Untitled commit',
-        subtitle: `${commit.hash.slice(0, 7)} · ${new Date(commit.authoredAt).toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })}`,
-        index: commitIndex,
-        path: commit.files.find((file) => file.status !== 'deleted')?.path ?? commit.files[0]?.path,
-        score: score + (commitIndex / history.commits.length) * 8,
-      })
+      const score = scoreText(
+        commit.message,
+        index.commitSearch[commitIndex] ?? `${commit.hash} ${commit.message}`,
+        tokens,
+      )
+      if (score > 0)
+        results.push({
+          id: `commit:${commit.hash}`,
+          kind: 'commit',
+          title: commit.message || 'Untitled commit',
+          subtitle: `${commit.hash.slice(0, 7)} · ${new Date(commit.authoredAt).toLocaleDateString('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })}`,
+          index: commitIndex,
+          path: commit.files.find((file) => file.status !== 'deleted')?.path ?? commit.files[0]?.path,
+          score: score + (commitIndex / history.commits.length) * 8,
+        })
     })
   }
 
@@ -93,15 +108,16 @@ export function searchArchive(
       const activity = activityByAuthor.get(contributor.id)
       if (!activity) return
       const score = scoreText(contributor.name, `${contributor.name} ${contributor.email ?? ''}`, tokens)
-      if (score > 0) results.push({
-        id: `contributor:${contributor.id}`,
-        kind: 'contributor',
-        title: contributor.name,
-        subtitle: `${activity.commits.toLocaleString()} commit${activity.commits === 1 ? '' : 's'} · traveler`,
-        index: activity.lastIndex,
-        authorId: contributor.id,
-        score: score + Math.min(30, activity.commits / 3),
-      })
+      if (score > 0)
+        results.push({
+          id: `contributor:${contributor.id}`,
+          kind: 'contributor',
+          title: contributor.name,
+          subtitle: `${activity.commits.toLocaleString()} commit${activity.commits === 1 ? '' : 's'} · traveler`,
+          index: activity.lastIndex,
+          authorId: contributor.id,
+          score: score + Math.min(30, activity.commits / 3),
+        })
     })
   }
 
@@ -110,14 +126,15 @@ export function searchArchive(
       const commitIndex = history.commits.findIndex((commit) => commit.hash === release.commitHash)
       if (commitIndex < 0) return
       const score = scoreText(release.tag, `${release.tag} ${release.message ?? ''}`, tokens)
-      if (score > 0) results.push({
-        id: `release:${release.tag}`,
-        kind: 'release',
-        title: release.tag,
-        subtitle: `${release.message ?? 'Historical release'} · ${new Date(release.date).getUTCFullYear()}`,
-        index: commitIndex,
-        score: score + 25,
-      })
+      if (score > 0)
+        results.push({
+          id: `release:${release.tag}`,
+          kind: 'release',
+          title: release.tag,
+          subtitle: `${release.message ?? 'Historical release'} · ${new Date(release.date).getUTCFullYear()}`,
+          index: commitIndex,
+          score: score + 25,
+        })
     })
   }
 
@@ -126,14 +143,15 @@ export function searchArchive(
       const commitIndex = history.commits.findIndex((commit) => commit.hash === branch.tipHash)
       if (commitIndex < 0) return
       const score = scoreText(branch.name, branch.name, tokens)
-      if (score > 0) results.push({
-        id: `branch:${branch.name}`,
-        kind: 'branch',
-        title: branch.name,
-        subtitle: `${branch.isRemote ? 'Remote' : 'Local'} branch tip`,
-        index: commitIndex,
-        score: score + 20,
-      })
+      if (score > 0)
+        results.push({
+          id: `branch:${branch.name}`,
+          kind: 'branch',
+          title: branch.name,
+          subtitle: `${branch.isRemote ? 'Remote' : 'Local'} branch tip`,
+          index: commitIndex,
+          score: score + 20,
+        })
     })
   }
 

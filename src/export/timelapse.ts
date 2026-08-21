@@ -7,6 +7,7 @@ export interface ExportOptions {
   width: number
   height: number
   pacing: 'activity' | 'chronological'
+  signal?: AbortSignal
   onProgress: (progress: number) => void
   setFrame: (index: number) => void
   getSourceCanvas: () => HTMLCanvasElement | null
@@ -30,7 +31,19 @@ export interface TimelapseFrame {
   duration: number
 }
 
-const waitForFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+function abortError(): DOMException {
+  return new DOMException('Export canceled.', 'AbortError')
+}
+
+function ensureNotAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) throw abortError()
+}
+
+const waitForFrame = async (signal?: AbortSignal) => {
+  ensureNotAborted(signal)
+  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  ensureNotAborted(signal)
+}
 
 function fitCover(sourceWidth: number, sourceHeight: number, targetWidth: number, targetHeight: number) {
   const sourceRatio = sourceWidth / sourceHeight
@@ -45,7 +58,14 @@ function fitCover(sourceWidth: number, sourceHeight: number, targetWidth: number
   return { x: 0, y: (targetHeight - height) / 2, width, height }
 }
 
-function drawTitle(ctx: CanvasRenderingContext2D, width: number, height: number, history: RepositoryHistory, snapshot: HistorySnapshot, progress: number) {
+function drawTitle(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  history: RepositoryHistory,
+  snapshot: HistorySnapshot,
+  progress: number,
+) {
   const fade = Math.min(1, progress * 10, (1 - progress) * 10)
   const bottomGradient = ctx.createLinearGradient(0, height * 0.58, 0, height)
   bottomGradient.addColorStop(0, 'rgba(5, 8, 7, 0)')
@@ -53,7 +73,14 @@ function drawTitle(ctx: CanvasRenderingContext2D, width: number, height: number,
   ctx.fillStyle = bottomGradient
   ctx.fillRect(0, 0, width, height)
 
-  const vignette = ctx.createRadialGradient(width * 0.5, height * 0.46, height * 0.18, width * 0.5, height * 0.48, width * 0.72)
+  const vignette = ctx.createRadialGradient(
+    width * 0.5,
+    height * 0.46,
+    height * 0.18,
+    width * 0.5,
+    height * 0.48,
+    width * 0.72,
+  )
   vignette.addColorStop(0, 'rgba(0,0,0,0)')
   vignette.addColorStop(1, 'rgba(0,0,0,.42)')
   ctx.fillStyle = vignette
@@ -67,17 +94,24 @@ function drawTitle(ctx: CanvasRenderingContext2D, width: number, height: number,
   ctx.fillStyle = '#ffbe6f'
   ctx.font = `600 ${Math.round(width * 0.011)}px ui-monospace, monospace`
   ctx.letterSpacing = `${Math.round(width * 0.002)}px`
-  const date = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(snapshot.date)).toUpperCase()
+  const date = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(snapshot.date))
+    .toUpperCase()
   ctx.fillText(date, margin, height - height * 0.2)
 
   ctx.textAlign = 'right'
   ctx.fillStyle = '#d6d0c3'
   ctx.font = `400 ${Math.round(width * 0.013)}px ui-monospace, monospace`
-  const shortMessage = snapshot.commit.message.length > 68 ? `${snapshot.commit.message.slice(0, 66)}…` : snapshot.commit.message
+  const shortMessage =
+    snapshot.commit.message.length > 68 ? `${snapshot.commit.message.slice(0, 66)}…` : snapshot.commit.message
   ctx.fillText(shortMessage, width - margin, height - height * 0.14)
   ctx.fillStyle = '#8fa198'
   ctx.font = `500 ${Math.round(width * 0.009)}px ui-monospace, monospace`
-  ctx.fillText(`${snapshot.activeFiles.toLocaleString()} FILES   ${snapshot.totalLines.toLocaleString()} LINES   ${history.contributors.length} TRAVELERS`, width - margin, height - height * 0.095)
+  ctx.fillText(
+    `${snapshot.activeFiles.toLocaleString()} FILES   ${snapshot.totalLines.toLocaleString()} LINES   ${history.contributors.length} TRAVELERS`,
+    width - margin,
+    height - height * 0.095,
+  )
 
   const lineY = height - height * 0.052
   ctx.fillStyle = 'rgba(255,255,255,.16)'
@@ -114,7 +148,11 @@ function drawTitle(ctx: CanvasRenderingContext2D, width: number, height: number,
     ctx.font = `500 ${Math.round(width * 0.01)}px ui-monospace, monospace`
     const firstYear = new Date(history.repository.firstCommitAt).getUTCFullYear()
     const lastYear = new Date(history.repository.lastCommitAt).getUTCFullYear()
-    ctx.fillText(`${firstYear} — ${lastYear}   ·   ${history.commits.length.toLocaleString()} COMMITS`, width / 2, height * 0.59)
+    ctx.fillText(
+      `${firstYear} — ${lastYear}   ·   ${history.commits.length.toLocaleString()} COMMITS`,
+      width / 2,
+      height * 0.59,
+    )
   }
 
   if (progress > 0.965) {
@@ -144,7 +182,9 @@ export function buildTimelapseFramePlan(
   const commitTimes: number[] = []
   history.commits.forEach((commit, index) => {
     const parsed = new Date(commit.authoredAt).getTime()
-    commitTimes.push(Math.max(index > 0 ? commitTimes[index - 1] : Number.NEGATIVE_INFINITY, Number.isFinite(parsed) ? parsed : 0))
+    commitTimes.push(
+      Math.max(index > 0 ? commitTimes[index - 1] : Number.NEGATIVE_INFINITY, Number.isFinite(parsed) ? parsed : 0),
+    )
   })
   const firstTime = commitTimes[0] ?? 0
   const lastTime = commitTimes.at(-1) ?? firstTime
@@ -182,21 +222,24 @@ function createComposite(options: ExportOptions) {
   return { canvas, context }
 }
 
-async function renderCompositeFrame(
-  options: ExportOptions,
-  context: CanvasRenderingContext2D,
-  frame: TimelapseFrame,
-) {
+async function renderCompositeFrame(options: ExportOptions, context: CanvasRenderingContext2D, frame: TimelapseFrame) {
   options.onProgress(frame.progress)
   options.setFrame(frame.snapshotIndex)
-  await waitForFrame()
+  await waitForFrame(options.signal)
   const source = options.getSourceCanvas()
   if (!source) throw new Error('The city renderer is not ready.')
   context.fillStyle = '#080a09'
   context.fillRect(0, 0, options.width, options.height)
   const fitted = fitCover(source.width, source.height, options.width, options.height)
   context.drawImage(source, fitted.x, fitted.y, fitted.width, fitted.height)
-  drawTitle(context, options.width, options.height, options.history, options.getSnapshot(frame.snapshotIndex), frame.progress)
+  drawTitle(
+    context,
+    options.width,
+    options.height,
+    options.history,
+    options.getSnapshot(frame.snapshotIndex),
+    frame.progress,
+  )
 }
 
 function exportBitrate(width: number) {
@@ -204,7 +247,8 @@ function exportBitrate(width: number) {
 }
 
 export async function probeMp4Export(width: number, height: number): Promise<Mp4ExportSupport> {
-  if (!globalThis.isSecureContext) return { supported: false, reason: 'MP4 needs a secure browser context (HTTPS or localhost).' }
+  if (!globalThis.isSecureContext)
+    return { supported: false, reason: 'MP4 needs a secure browser context (HTTPS or localhost).' }
   if (typeof VideoEncoder === 'undefined' || typeof VideoFrame === 'undefined') {
     return { supported: false, reason: 'This browser does not expose WebCodecs video encoding.' }
   }
@@ -224,6 +268,7 @@ export async function probeMp4Export(width: number, height: number): Promise<Mp4
 }
 
 async function exportWebmTimelapse(options: ExportOptions, plan: TimelapseFrame[]): Promise<Blob> {
+  ensureNotAborted(options.signal)
   if (typeof MediaRecorder === 'undefined') throw new Error('This browser does not support video recording.')
   const { canvas, context } = createComposite(options)
 
@@ -235,7 +280,9 @@ async function exportWebmTimelapse(options: ExportOptions, plan: TimelapseFrame[
     videoBitsPerSecond: exportBitrate(options.width),
   })
   const chunks: BlobPart[] = []
-  recorder.ondataavailable = (event) => { if (event.data.size > 0) chunks.push(event.data) }
+  recorder.ondataavailable = (event) => {
+    if (event.data.size > 0) chunks.push(event.data)
+  }
   const stopped = new Promise<void>((resolve, reject) => {
     recorder.onstop = () => resolve()
     recorder.onerror = () => reject(new Error('The browser video encoder failed.'))
@@ -243,19 +290,29 @@ async function exportWebmTimelapse(options: ExportOptions, plan: TimelapseFrame[
   recorder.start(500)
 
   const frameDuration = 1000 / options.fps
-  for (const frame of plan) {
-    const frameStartedAt = performance.now()
-    await renderCompositeFrame(options, context, frame)
-    const remainingFrameTime = Math.max(0, frameDuration - (performance.now() - frameStartedAt))
-    if (remainingFrameTime > 0) await new Promise((resolve) => setTimeout(resolve, remainingFrameTime))
+  try {
+    for (const frame of plan) {
+      ensureNotAborted(options.signal)
+      const frameStartedAt = performance.now()
+      await renderCompositeFrame(options, context, frame)
+      const remainingFrameTime = Math.max(0, frameDuration - (performance.now() - frameStartedAt))
+      if (remainingFrameTime > 0) await new Promise((resolve) => setTimeout(resolve, remainingFrameTime))
+    }
+    recorder.stop()
+    await stopped
+  } catch (error) {
+    if (recorder.state !== 'inactive') recorder.stop()
+    await stopped.catch(() => undefined)
+    throw error
+  } finally {
+    stream.getTracks().forEach((track) => track.stop())
   }
-  recorder.stop()
-  await stopped
   options.onProgress(1)
   return new Blob(chunks, { type: recorder.mimeType || 'video/webm' })
 }
 
 async function exportMp4Timelapse(options: ExportOptions, plan: TimelapseFrame[]): Promise<Blob> {
+  ensureNotAborted(options.signal)
   const support = await probeMp4Export(options.width, options.height)
   if (!support.supported) throw new Error(`${support.reason ?? 'MP4 export is unavailable.'} Choose WebM and retry.`)
   const { BufferTarget, CanvasSource, Mp4OutputFormat, Output, Quality } = await import('mediabunny')
@@ -276,6 +333,7 @@ async function exportMp4Timelapse(options: ExportOptions, plan: TimelapseFrame[]
   await output.start()
   try {
     for (const frame of plan) {
+      ensureNotAborted(options.signal)
       await renderCompositeFrame(options, context, frame)
       await source.add(frame.timestamp, frame.duration, { keyFrame: frame.frame % (2 * options.fps) === 0 })
     }
@@ -290,10 +348,28 @@ async function exportMp4Timelapse(options: ExportOptions, plan: TimelapseFrame[]
 }
 
 export async function exportTimelapse(options: ExportOptions): Promise<Blob> {
-  const plan = buildTimelapseFramePlan(options.history, options.snapshotCount, options.duration, options.fps, options.pacing)
-  return options.format === 'mp4'
-    ? exportMp4Timelapse(options, plan)
-    : exportWebmTimelapse(options, plan)
+  ensureNotAborted(options.signal)
+  const plan = buildTimelapseFramePlan(
+    options.history,
+    options.snapshotCount,
+    options.duration,
+    options.fps,
+    options.pacing,
+  )
+  return options.format === 'mp4' ? exportMp4Timelapse(options, plan) : exportWebmTimelapse(options, plan)
+}
+
+export function historyFilmFilename(repositoryName: string, format: TimelapseFormat): string {
+  const normalizedName = Array.from(repositoryName.normalize('NFKC'), (character) => {
+    const code = character.codePointAt(0) ?? 0
+    return code < 32 || code === 127 || '<>:"/\\|?*'.includes(character) ? '-' : character
+  }).join('')
+  const safeName = normalizedName
+    .replace(/-+/g, '-')
+    .replace(/[.\s-]+$/g, '')
+    .replace(/^[.\s-]+/g, '')
+    .slice(0, 120)
+  return `${safeName || 'repository'}-history.${format}`
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {

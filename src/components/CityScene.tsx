@@ -1,16 +1,31 @@
 import { Canvas, type ThreeEvent, useFrame, useThree } from '@react-three/fiber'
-import { Float, OrbitControls } from '@react-three/drei'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { OrbitControls as ThreeOrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { CityLayout } from '../core/layout'
 import type { ComparisonKind } from '../core/compare'
 import type { Contributor, HistorySnapshot } from '../core/types'
 
 const languageColors: Record<string, string> = {
-  TypeScript: '#4b9fcf', JavaScript: '#ddc85a', Rust: '#df744f', Go: '#56c5d0', Python: '#6f9ec4',
-  Ruby: '#c95050', Java: '#da7857', Kotlin: '#9b76df', Swift: '#ec775d', CSS: '#b36ed1',
-  HTML: '#dd7149', Vue: '#5abf91', Svelte: '#ef6a50', Docs: '#d7c9a5', Data: '#8da38c',
-  SQL: '#759bc2', Shell: '#7fbe77', Docker: '#5597d1', Other: '#8f938d',
+  TypeScript: '#4b9fcf',
+  JavaScript: '#ddc85a',
+  Rust: '#df744f',
+  Go: '#56c5d0',
+  Python: '#6f9ec4',
+  Ruby: '#c95050',
+  Java: '#da7857',
+  Kotlin: '#9b76df',
+  Swift: '#ec775d',
+  CSS: '#b36ed1',
+  HTML: '#dd7149',
+  Vue: '#5abf91',
+  Svelte: '#ef6a50',
+  Docs: '#d7c9a5',
+  Data: '#8da38c',
+  SQL: '#759bc2',
+  Shell: '#7fbe77',
+  Docker: '#5597d1',
+  Other: '#8f938d',
 }
 
 interface CitySceneProps {
@@ -20,6 +35,7 @@ interface CitySceneProps {
   selectedPath?: string
   onSelect: (path?: string) => void
   playing: boolean
+  reducedMotion: boolean
   cinematicProgress?: number
   renderWidth?: number
   comparison?: Map<string, ComparisonKind>
@@ -65,17 +81,20 @@ function CityGround({ layout }: { layout: CityLayout }) {
         <planeGeometry args={[layout.span * 2.4, layout.span * 2.4]} />
         <meshStandardMaterial color="#080b0a" roughness={0.96} metalness={0.08} />
       </mesh>
-      <gridHelper args={[layout.span * 2, Math.max(20, Math.round(layout.span / 2)), '#25312c', '#151d1a']} position={[0, 0.01, 0]} />
+      <gridHelper
+        args={[layout.span * 2, Math.max(20, Math.round(layout.span / 2)), '#25312c', '#151d1a']}
+        position={[0, 0.01, 0]}
+      />
       {layout.districts.map((district) => (
         <group key={district.name} position={[district.x, 0, district.z]}>
           <mesh position={[0, 0.06, 0]} receiveShadow>
             <boxGeometry args={[district.width, 0.12, district.depth]} />
             <meshStandardMaterial color="#101713" roughness={0.9} metalness={0.2} />
           </mesh>
-          <lineSegments position={[0, 0.14, 0]}>
-            <edgesGeometry args={[new THREE.BoxGeometry(district.width, 0.14, district.depth)]} />
-            <lineBasicMaterial color="#34483e" transparent opacity={0.6} />
-          </lineSegments>
+          <mesh position={[0, 0.14, 0]} scale={[1.002, 1.002, 1.002]}>
+            <boxGeometry args={[district.width, 0.14, district.depth]} />
+            <meshBasicMaterial color="#34483e" transparent opacity={0.42} wireframe />
+          </mesh>
           <DistrictLabel name={district.name} width={district.width} />
         </group>
       ))}
@@ -141,7 +160,10 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
         scratch.updateMatrix()
         ruinsRef.current?.setMatrixAt(index, scratch.matrix)
         const comparisonKind = comparison?.get(entry.path)
-        ruinsRef.current?.setColorAt(index, new THREE.Color(comparisonKind ? comparisonColors[comparisonKind] : index % 2 ? '#57382f' : '#493830'))
+        ruinsRef.current?.setColorAt(
+          index,
+          new THREE.Color(comparisonKind ? comparisonColors[comparisonKind] : index % 2 ? '#57382f' : '#493830'),
+        )
       })
       ruinsRef.current.instanceMatrix.needsUpdate = true
       if (ruinsRef.current.instanceColor) ruinsRef.current.instanceColor.needsUpdate = true
@@ -160,19 +182,39 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
   return (
     <group>
       {living.length > 0 && (
-        <instancedMesh ref={livingRef} args={[undefined, undefined, living.length]} castShadow receiveShadow onClick={(event) => selectInstance(event, livingPaths)}>
+        <instancedMesh
+          ref={livingRef}
+          args={[undefined, undefined, living.length]}
+          castShadow
+          receiveShadow
+          onClick={(event) => selectInstance(event, livingPaths)}
+        >
           <boxGeometry />
-          <meshStandardMaterial vertexColors roughness={0.58} metalness={0.35} emissive="#07100d" emissiveIntensity={0.2} />
+          <meshStandardMaterial
+            vertexColors
+            roughness={0.58}
+            metalness={0.35}
+            emissive="#07100d"
+            emissiveIntensity={0.2}
+          />
         </instancedMesh>
       )}
       {ruins.length > 0 && (
-        <instancedMesh ref={ruinsRef} args={[undefined, undefined, ruins.length]} receiveShadow onClick={(event) => selectInstance(event, ruinPaths)}>
+        <instancedMesh
+          ref={ruinsRef}
+          args={[undefined, undefined, ruins.length]}
+          receiveShadow
+          onClick={(event) => selectInstance(event, ruinPaths)}
+        >
           <boxGeometry />
           <meshStandardMaterial vertexColors roughness={1} metalness={0.05} />
         </instancedMesh>
       )}
       {selected && selectedLayout && (
-        <mesh rotation-x={Math.PI / 2} position={[selectedLayout.x, (selected.alive ? selectedHeight : 0.5) + 0.35, selectedLayout.z]}>
+        <mesh
+          rotation-x={Math.PI / 2}
+          position={[selectedLayout.x, (selected.alive ? selectedHeight : 0.5) + 0.35, selectedLayout.z]}
+        >
           <torusGeometry args={[Math.max(selectedLayout.width, selectedLayout.depth) * 0.72, 0.055, 8, 32]} />
           <meshBasicMaterial color="#ffd28c" toneMapped={false} />
         </mesh>
@@ -183,7 +225,10 @@ function Buildings({ snapshot, layout, selectedPath, onSelect, comparison }: Bui
 
 function ChangeSignals({ snapshot, layout }: Pick<CitySceneProps, 'snapshot' | 'layout'>) {
   const signalsRef = useRef<THREE.InstancedMesh>(null)
-  const changes = useMemo(() => snapshot.commit.files.filter((change) => layout.buildings.has(change.path)), [layout, snapshot.commit])
+  const changes = useMemo(
+    () => snapshot.commit.files.filter((change) => layout.buildings.has(change.path)),
+    [layout, snapshot.commit],
+  )
   const scratch = useMemo(() => new THREE.Object3D(), [])
   useEffect(() => {
     if (!signalsRef.current) return
@@ -210,10 +255,20 @@ function ChangeSignals({ snapshot, layout }: Pick<CitySceneProps, 'snapshot' | '
   )
 }
 
-function Travelers({ snapshot, layout, contributors, cinematicProgress }: Pick<CitySceneProps, 'snapshot' | 'layout' | 'contributors' | 'cinematicProgress'>) {
+function Travelers({
+  snapshot,
+  layout,
+  contributors,
+  cinematicProgress,
+  reducedMotion,
+}: Pick<CitySceneProps, 'snapshot' | 'layout' | 'contributors' | 'cinematicProgress' | 'reducedMotion'>) {
   const travelersRef = useRef<THREE.InstancedMesh>(null)
+  const activeLightRef = useRef<THREE.PointLight>(null)
   const peopleById = useMemo(() => new Map(contributors.map((person) => [person.id, person])), [contributors])
-  const travelers = useMemo(() => snapshot.travelers.filter((traveler) => layout.buildings.has(traveler.path)), [layout, snapshot.travelers])
+  const travelers = useMemo(
+    () => snapshot.travelers.filter((traveler) => layout.buildings.has(traveler.path)),
+    [layout, snapshot.travelers],
+  )
   const scratch = useMemo(() => new THREE.Object3D(), [])
   useEffect(() => {
     if (!travelersRef.current) return
@@ -221,7 +276,11 @@ function Travelers({ snapshot, layout, contributors, cinematicProgress }: Pick<C
       const placement = layout.buildings.get(traveler.path)
       if (!placement) return
       const active = snapshot.commit.authorId === traveler.authorId
-      scratch.position.set(placement.x + placement.width * 0.6, active ? 1.48 : 0.72, placement.z + placement.depth * 0.5)
+      scratch.position.set(
+        placement.x + placement.width * 0.6,
+        active ? 1.48 : 0.72,
+        placement.z + placement.depth * 0.5,
+      )
       scratch.scale.setScalar(active ? 1.38 : 0.9)
       scratch.rotation.set(0, 0, 0)
       scratch.updateMatrix()
@@ -235,6 +294,13 @@ function Travelers({ snapshot, layout, contributors, cinematicProgress }: Pick<C
   const activeTraveler = travelers.find((traveler) => traveler.authorId === snapshot.commit.authorId)
   const activePlacement = activeTraveler ? layout.buildings.get(activeTraveler.path) : undefined
   const activePerson = activeTraveler ? peopleById.get(activeTraveler.authorId) : undefined
+  useFrame(({ clock }) => {
+    if (!activeLightRef.current || !activePlacement) return
+    const pulse = reducedMotion
+      ? 0
+      : Math.sin((cinematicProgress === undefined ? clock.elapsedTime : cinematicProgress * 18) * 3) * 0.08
+    activeLightRef.current.position.y = 1.48 + pulse
+  })
   return (
     <group>
       {travelers.length > 0 && (
@@ -243,16 +309,12 @@ function Travelers({ snapshot, layout, contributors, cinematicProgress }: Pick<C
           <meshBasicMaterial vertexColors toneMapped={false} />
         </instancedMesh>
       )}
-      {activePlacement && cinematicProgress === undefined && (
-        <Float speed={3} rotationIntensity={0} floatIntensity={0.5}>
-          <pointLight position={[activePlacement.x + activePlacement.width * 0.6, 1.48, activePlacement.z + activePlacement.depth * 0.5]} color={activePerson?.color ?? '#ffcb85'} intensity={8} distance={5} decay={2} />
-        </Float>
-      )}
-      {activePlacement && cinematicProgress !== undefined && (
+      {activePlacement && (
         <pointLight
+          ref={activeLightRef}
           position={[
             activePlacement.x + activePlacement.width * 0.6,
-            1.48 + Math.sin(cinematicProgress * Math.PI * 24) * 0.08,
+            1.48,
             activePlacement.z + activePlacement.depth * 0.5,
           ]}
           color={activePerson?.color ?? '#ffcb85'}
@@ -265,11 +327,21 @@ function Travelers({ snapshot, layout, contributors, cinematicProgress }: Pick<C
   )
 }
 
-function ReleaseEvent({ snapshot, span, cinematicProgress }: { snapshot: HistorySnapshot; span: number; cinematicProgress?: number }) {
+function ReleaseEvent({
+  snapshot,
+  span,
+  cinematicProgress,
+  reducedMotion,
+}: {
+  snapshot: HistorySnapshot
+  span: number
+  cinematicProgress?: number
+  reducedMotion: boolean
+}) {
   const ring = useRef<THREE.Mesh>(null)
   useFrame(({ clock }) => {
     if (!ring.current) return
-    const time = cinematicProgress === undefined ? clock.elapsedTime : cinematicProgress * 18
+    const time = reducedMotion ? 0 : cinematicProgress === undefined ? clock.elapsedTime : cinematicProgress * 18
     const pulse = 1 + Math.sin(time * 2.6) * 0.06
     ring.current.scale.setScalar(pulse)
     ring.current.rotation.z = time * 0.08
@@ -283,11 +355,21 @@ function ReleaseEvent({ snapshot, span, cinematicProgress }: { snapshot: History
   )
 }
 
-function MergeConfluence({ snapshot, span, cinematicProgress }: { snapshot: HistorySnapshot; span: number; cinematicProgress?: number }) {
+function MergeConfluence({
+  snapshot,
+  span,
+  cinematicProgress,
+  reducedMotion,
+}: {
+  snapshot: HistorySnapshot
+  span: number
+  cinematicProgress?: number
+  reducedMotion: boolean
+}) {
   const confluence = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     if (!confluence.current) return
-    const time = cinematicProgress === undefined ? clock.elapsedTime : cinematicProgress * 18
+    const time = reducedMotion ? 0 : cinematicProgress === undefined ? clock.elapsedTime : cinematicProgress * 18
     confluence.current.rotation.y = Math.sin(time * 0.45) * 0.08
     const pulse = 1 + Math.sin(time * 3) * 0.035
     confluence.current.scale.setScalar(pulse)
@@ -317,13 +399,48 @@ function CinematicCamera({ progress, span }: { progress?: number; span: number }
     const chapter = progress * Math.PI * 2
     const radius = span * (0.55 - Math.sin(progress * Math.PI) * 0.1)
     const height = span * (0.3 + Math.sin(progress * Math.PI * 1.3) * 0.08)
-    target.set(
-      Math.cos(chapter - 0.7) * radius,
-      Math.max(7, height),
-      Math.sin(chapter - 0.7) * radius,
-    )
+    target.set(Math.cos(chapter - 0.7) * radius, Math.max(7, height), Math.sin(chapter - 0.7) * radius)
     camera.position.copy(target)
     camera.lookAt(0, Math.max(1.2, span * 0.025), 0)
+  })
+  return null
+}
+
+function CameraControls({
+  enabled,
+  autoRotate,
+  span,
+  reducedMotion,
+}: {
+  enabled: boolean
+  autoRotate: boolean
+  span: number
+  reducedMotion: boolean
+}) {
+  const { camera, gl } = useThree()
+  const controlsRef = useRef<ThreeOrbitControls | null>(null)
+  useEffect(() => {
+    const controls = new ThreeOrbitControls(camera, gl.domElement)
+    controls.enableDamping = !reducedMotion
+    controls.dampingFactor = 0.06
+    controls.minDistance = 10
+    controls.maxDistance = span * 1.7
+    controls.maxPolarAngle = Math.PI * 0.48
+    controls.autoRotateSpeed = 0.22
+    controls.target.set(0, 1.5, 0)
+    controls.update()
+    controlsRef.current = controls
+    return () => {
+      controlsRef.current = null
+      controls.dispose()
+    }
+  }, [camera, gl.domElement, reducedMotion, span])
+  useFrame(() => {
+    const controls = controlsRef.current
+    if (!controls) return
+    controls.enabled = enabled
+    controls.autoRotate = autoRotate && !reducedMotion
+    if (enabled) controls.update()
   })
   return null
 }
@@ -334,26 +451,49 @@ function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
       <fog attach="fog" args={['#080b0a', props.layout.span * 0.72, props.layout.span * 2.1]} />
       <ambientLight intensity={0.8} color="#9cb4a8" />
       <hemisphereLight args={['#afc8c2', '#130e0b', 1.2]} />
-      <directionalLight position={[16, 28, -12]} intensity={3.4} color="#ffd6a0" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={120} />
+      <directionalLight
+        position={[16, 28, -12]}
+        intensity={3.4}
+        color="#ffd6a0"
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-far={120}
+      />
       <pointLight position={[-18, 8, 12]} intensity={120} distance={48} color="#316b66" decay={2} />
       <CityGround layout={props.layout} />
-      <Buildings snapshot={props.snapshot} layout={props.layout} selectedPath={props.selectedPath} onSelect={props.onSelect} comparison={props.comparison} />
+      <Buildings
+        snapshot={props.snapshot}
+        layout={props.layout}
+        selectedPath={props.selectedPath}
+        onSelect={props.onSelect}
+        comparison={props.comparison}
+      />
       <ChangeSignals snapshot={props.snapshot} layout={props.layout} />
-      <Travelers snapshot={props.snapshot} layout={props.layout} contributors={props.contributors} cinematicProgress={props.cinematicProgress} />
-      <ReleaseEvent snapshot={props.snapshot} span={props.layout.span} cinematicProgress={props.cinematicProgress} />
-      <MergeConfluence snapshot={props.snapshot} span={props.layout.span} cinematicProgress={props.cinematicProgress} />
+      <Travelers
+        snapshot={props.snapshot}
+        layout={props.layout}
+        contributors={props.contributors}
+        cinematicProgress={props.cinematicProgress}
+        reducedMotion={props.reducedMotion}
+      />
+      <ReleaseEvent
+        snapshot={props.snapshot}
+        span={props.layout.span}
+        cinematicProgress={props.cinematicProgress}
+        reducedMotion={props.reducedMotion}
+      />
+      <MergeConfluence
+        snapshot={props.snapshot}
+        span={props.layout.span}
+        cinematicProgress={props.cinematicProgress}
+        reducedMotion={props.reducedMotion}
+      />
       <CinematicCamera progress={props.cinematicProgress} span={props.layout.span} />
-      <OrbitControls
-        makeDefault
-        enableDamping
-        dampingFactor={0.06}
-        minDistance={10}
-        maxDistance={props.layout.span * 1.7}
-        maxPolarAngle={Math.PI * 0.48}
+      <CameraControls
         enabled={props.cinematicProgress === undefined}
         autoRotate={props.playing && props.cinematicProgress === undefined}
-        autoRotateSpeed={0.22}
-        target={[0, 1.5, 0]}
+        span={props.layout.span}
+        reducedMotion={props.reducedMotion}
       />
     </>
   )
@@ -362,12 +502,23 @@ function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
 export function CityScene({ onCanvas, ...props }: CitySceneProps) {
   const renderDpr = props.renderWidth
     ? Math.max(1.65, Math.min(4, props.renderWidth / Math.max(1, window.innerWidth)))
-    : [1, 1.65] as [number, number]
+    : ([1, 1.65] as [number, number])
   return (
     <Canvas
-      camera={{ position: [props.layout.span * 0.45, props.layout.span * 0.42, props.layout.span * 0.5], fov: 40, near: 0.1, far: 500 }}
+      camera={{
+        position: [props.layout.span * 0.45, props.layout.span * 0.42, props.layout.span * 0.5],
+        fov: 40,
+        near: 0.1,
+        far: 500,
+      }}
       dpr={renderDpr}
-      shadows
+      shadows={{ type: THREE.PCFShadowMap }}
+      fallback={
+        <div className="webgl-fallback" role="alert">
+          <strong>WebGL is unavailable.</strong>
+          <span>Enable hardware acceleration or try a current browser to render the repository city.</span>
+        </div>
+      }
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true }}
       onCreated={({ gl }) => {
         gl.setClearColor('#080a09')

@@ -40,10 +40,12 @@ export interface CityLayoutOptions {
 export function buildCityLayout(history: RepositoryHistory, options: CityLayoutOptions = {}): CityLayout {
   const allPaths = new Set(options.paths ?? options.finalFiles?.map((file) => file.path) ?? [])
   if (!options.paths) {
-    history.commits.forEach((commit) => commit.files.forEach((file) => {
-      allPaths.add(file.path)
-      if (file.previousPath) allPaths.add(file.previousPath)
-    }))
+    history.commits.forEach((commit) =>
+      commit.files.forEach((file) => {
+        allPaths.add(file.path)
+        if (file.previousPath) allPaths.add(file.previousPath)
+      }),
+    )
   }
 
   const districtPaths = new Map<string, string[]>()
@@ -56,7 +58,10 @@ export function buildCityLayout(history: RepositoryHistory, options: CityLayoutO
 
   const entries = Array.from(districtPaths.entries()).sort(([a], [b]) => a.localeCompare(b))
   const columns = Math.max(1, Math.ceil(Math.sqrt(entries.length)))
-  const districtSize = Math.max(14, Math.ceil(Math.sqrt(Math.max(...entries.map(([, paths]) => paths.length), 1))) * 4.2)
+  const districtSize = Math.max(
+    14,
+    Math.ceil(Math.sqrt(Math.max(...entries.map(([, paths]) => paths.length), 1))) * 4.2,
+  )
   const avenue = 5
   const buildings = new Map<string, BuildingLayout>()
   const districts: DistrictLayout[] = []
@@ -71,20 +76,22 @@ export function buildCityLayout(history: RepositoryHistory, options: CityLayoutO
 
     const grid = Math.ceil(Math.sqrt(paths.length))
     const cell = districtSize / Math.max(grid, 1)
-    paths.sort((a, b) => hash(a) - hash(b)).forEach((path, pathIndex) => {
-      const localColumn = pathIndex % grid
-      const localRow = Math.floor(pathIndex / grid)
-      const jitterX = ((hash(`${path}:x`) % 100) / 100 - 0.5) * cell * 0.12
-      const jitterZ = ((hash(`${path}:z`) % 100) / 100 - 0.5) * cell * 0.12
-      buildings.set(path, {
-        path,
-        district: name,
-        x: districtX - districtSize / 2 + cell * (localColumn + 0.5) + jitterX,
-        z: districtZ - districtSize / 2 + cell * (localRow + 0.5) + jitterZ,
-        width: Math.max(0.8, cell * 0.58),
-        depth: Math.max(0.8, cell * 0.58),
+    paths
+      .sort((a, b) => hash(a) - hash(b))
+      .forEach((path, pathIndex) => {
+        const localColumn = pathIndex % grid
+        const localRow = Math.floor(pathIndex / grid)
+        const jitterX = ((hash(`${path}:x`) % 100) / 100 - 0.5) * cell * 0.12
+        const jitterZ = ((hash(`${path}:z`) % 100) / 100 - 0.5) * cell * 0.12
+        buildings.set(path, {
+          path,
+          district: name,
+          x: districtX - districtSize / 2 + cell * (localColumn + 0.5) + jitterX,
+          z: districtZ - districtSize / 2 + cell * (localRow + 0.5) + jitterZ,
+          width: Math.max(0.8, cell * 0.58),
+          depth: Math.max(0.8, cell * 0.58),
+        })
       })
-    })
   })
 
   return {

@@ -1,75 +1,132 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { parseArgs } from 'node:util'
 import { analyzeRepositoryStreaming } from './git-reader'
 
+const packageVersion = (
+  JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string }
+).version
+
 function printHelp(): void {
-  console.log(`RepoRewind — turn Git history into a living city
+  process.stdout.write(`RepoRewind — turn Git history into a living city
 
 Usage:
   reporewind analyze [repository] [options]
 
 Options:
   -o, --output <file>       Output history file (default: reporewind-history.json)
-  --max-commits <count>     Limit imported commits for very large repositories
-  --branch <ref>            Analyze another branch or ref instead of the checked-out branch
-  --include-emails          Include contributor email addresses in the export
+      --stdout              Write only the history JSON to stdout
+      --max-commits <count> Limit imported commits for very large repositories
+      --branch <ref>        Analyze another branch or ref instead of the checked-out branch
+      --include-emails      Include contributor email addresses in the export
+  -q, --quiet               Suppress progress output
+  -v, --version             Print the RepoRewind version
   -h, --help                Show this help
 
-Example:
-  reporewind analyze ~/Projects/my-app -o ./my-app-history.json`)
+Examples:
+  reporewind analyze ~/Projects/my-app -o ./my-app-history.json
+  reporewind analyze . --branch release/3.x --max-commits 5000
+  reporewind analyze . --stdout > reporewind-history.json
+`)
 }
 
-const args = process.argv.slice(2)
-if (args.includes('--help') || args.includes('-h') || args.length === 0) {
-  printHelp()
-  process.exit(0)
+async function main(): Promise<void> {
+  let parsed: ReturnType<typeof parseArgs>
+  try {
+    parsed = parseArgs({
+      args: process.argv.slice(2),
+      allowPositionals: true,
+      strict: true,
+      options: {
+        output: { type: 'string', short: 'o' },
+        stdout: { type: 'boolean', default: false },
+        'max-commits': { type: 'string' },
+        branch: { type: 'string' },
+        'include-emails': { type: 'boolean', default: false },
+        quiet: { type: 'boolean', short: 'q', default: false },
+        version: { type: 'boolean', short: 'v', default: false },
+        help: { type: 'boolean', short: 'h', default: false },
+      },
+    })
+  } catch (error) {
+    process.stderr.write(
+      `RepoRewind: ${error instanceof Error ? error.message : String(error)}\nRun reporewind --help for usage.\n`,
+    )
+    process.exitCode = 1
+    return
+  }
+
+  const output = typeof parsed.values.output === 'string' ? parsed.values.output : undefined
+  const writeToStdout = parsed.values.stdout === true
+  const includeEmails = parsed.values['include-emails'] === true
+  const branch = typeof parsed.values.branch === 'string' ? parsed.values.branch : undefined
+  const maxCommitsOption = typeof parsed.values['max-commits'] === 'string' ? parsed.values['max-commits'] : undefined
+
+  if (parsed.values.version === true) {
+    process.stdout.write(`${packageVersion}\n`)
+    return
+  }
+  if (parsed.values.help === true || parsed.positionals.length === 0) {
+    printHelp()
+    return
+  }
+
+  const [command, repositoryPath = '.', ...extraPositionals] = parsed.positionals
+  if (command !== 'analyze') {
+    process.stderr.write(`Unknown command: ${command}\nRun reporewind --help for usage.\n`)
+    process.exitCode = 1
+    return
+  }
+  if (extraPositionals.length > 0) {
+    process.stderr.write(`Unexpected argument: ${extraPositionals[0]}\nRun reporewind --help for usage.\n`)
+    process.exitCode = 1
+    return
+  }
+  if (writeToStdout && output) {
+    process.stderr.write('Use either --stdout or --output, not both.\n')
+    process.exitCode = 1
+    return
+  }
+
+  const maxCommits = maxCommitsOption === undefined ? undefined : Number(maxCommitsOption)
+  if (maxCommits !== undefined && (!Number.isSafeInteger(maxCommits) || maxCommits <= 0)) {
+    process.stderr.write('The --max-commits option requires a positive integer.\n')
+    process.exitCode = 1
+    return
+  }
+
+  const quiet = parsed.values.quiet === true || writeToStdout
+  const outputPath = resolve(output ?? 'reporewind-history.json')
+  try {
+    if (!quiet) process.stdout.write(`Analyzing ${resolve(repositoryPath)}…\n`)
+    const history = await analyzeRepositoryStreaming(repositoryPath, {
+      maxCommits,
+      includeEmails,
+      branch,
+    })
+    const serialized = `${JSON.stringify(history, null, 2)}\n`
+    if (writeToStdout) {
+      process.stdout.write(serialized)
+      return
+    }
+
+    mkdirSync(dirname(outputPath), { recursive: true })
+    writeFileSync(outputPath, serialized, { encoding: 'utf8', mode: 0o600 })
+    if (!quiet) {
+      const count = (value: number, singular: string) =>
+        `${value.toLocaleString()} ${singular}${value === 1 ? '' : 's'}`
+      process.stdout.write(
+        `\n${count(history.commits.length, 'commit')} · ${count(history.contributors.length, 'traveler')} · ${count(history.releases.length, 'release')}\n`,
+      )
+      process.stdout.write(`History written to ${outputPath}\n`)
+    }
+  } catch (error) {
+    process.stderr.write(
+      `RepoRewind could not analyze this repository: ${error instanceof Error ? error.message : String(error)}\n`,
+    )
+    process.exitCode = 1
+  }
 }
 
-if (args[0] !== 'analyze') {
-  console.error(`Unknown command: ${args[0]}\n`)
-  printHelp()
-  process.exit(1)
-}
-
-const positional = args.slice(1).filter((arg, index, values) => {
-  if (arg.startsWith('-')) return false
-  const previous = values[index - 1]
-  return previous !== '--output' && previous !== '-o' && previous !== '--max-commits' && previous !== '--branch'
-})
-const repositoryPath = positional[0] ?? '.'
-const outputIndex = Math.max(args.indexOf('--output'), args.indexOf('-o'))
-if (outputIndex >= 0 && !args[outputIndex + 1]) {
-  console.error('The --output option requires a file path.')
-  process.exit(1)
-}
-const outputPath = resolve(outputIndex >= 0 ? args[outputIndex + 1] : 'reporewind-history.json')
-const maxIndex = args.indexOf('--max-commits')
-const maxCommits = maxIndex >= 0 ? Number.parseInt(args[maxIndex + 1], 10) : undefined
-const branchIndex = args.indexOf('--branch')
-const branch = branchIndex >= 0 ? args[branchIndex + 1] : undefined
-if (maxIndex >= 0 && (!Number.isFinite(maxCommits) || (maxCommits ?? 0) <= 0)) {
-  console.error('The --max-commits option requires a positive number.')
-  process.exit(1)
-}
-if (branchIndex >= 0 && !branch) {
-  console.error('The --branch option requires a Git ref.')
-  process.exit(1)
-}
-
-try {
-  console.log(`Analyzing ${resolve(repositoryPath)}…`)
-  const history = await analyzeRepositoryStreaming(repositoryPath, {
-    maxCommits: Number.isFinite(maxCommits) ? maxCommits : undefined,
-    includeEmails: args.includes('--include-emails'),
-    branch,
-  })
-  mkdirSync(dirname(outputPath), { recursive: true })
-  writeFileSync(outputPath, `${JSON.stringify(history, null, 2)}\n`, 'utf8')
-  const count = (value: number, singular: string) => `${value.toLocaleString()} ${singular}${value === 1 ? '' : 's'}`
-  console.log(`\n${count(history.commits.length, 'commit')} · ${count(history.contributors.length, 'traveler')} · ${count(history.releases.length, 'release')}`)
-  console.log(`History written to ${outputPath}`)
-} catch (error) {
-  console.error(`RepoRewind could not analyze this repository: ${error instanceof Error ? error.message : String(error)}`)
-  process.exit(1)
-}
+void main()

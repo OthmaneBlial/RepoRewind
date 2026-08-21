@@ -11,11 +11,13 @@ describe('historical comparisons', () => {
     expect(comparison.commits).toBe(2)
     expect(comparison.counts.renamed).toBe(2)
     expect(comparison.counts.deleted).toBe(1)
-    expect(comparison.files).toContainEqual(expect.objectContaining({
-      kind: 'renamed',
-      previousPath: 'src/renderer/city.ts',
-      path: 'src/scene/city.ts',
-    }))
+    expect(comparison.files).toContainEqual(
+      expect.objectContaining({
+        kind: 'renamed',
+        previousPath: 'src/renderer/city.ts',
+        path: 'src/scene/city.ts',
+      }),
+    )
     expect(comparison.linesDelta).toBe(comparison.after.totalLines - comparison.before.totalLines)
   })
 

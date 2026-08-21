@@ -45,14 +45,18 @@ export function compareHistoryFrames(
   const touchedPaths = new Set<string>()
   const commits = history.commits.slice(fromIndex + 1, toIndex + 1)
 
-  commits.forEach((commit) => commit.files.forEach((change) => {
-    touchedPaths.add(change.path)
-    if (change.previousPath) touchedPaths.add(change.previousPath)
-    if (change.status === 'renamed' && change.previousPath) {
-      const origin = Array.from(currentPathByOrigin.entries()).find(([, current]) => current === change.previousPath)?.[0]
-      if (origin) currentPathByOrigin.set(origin, change.path)
-    }
-  }))
+  commits.forEach((commit) =>
+    commit.files.forEach((change) => {
+      touchedPaths.add(change.path)
+      if (change.previousPath) touchedPaths.add(change.previousPath)
+      if (change.status === 'renamed' && change.previousPath) {
+        const origin = Array.from(currentPathByOrigin.entries()).find(
+          ([, current]) => current === change.previousPath,
+        )?.[0]
+        if (origin) currentPathByOrigin.set(origin, change.path)
+      }
+    }),
+  )
 
   const matchedBefore = new Set<string>()
   const matchedAfter = new Set<string>()
@@ -101,11 +105,20 @@ export function compareHistoryFrames(
   })
   afterFiles.forEach((file, path) => {
     if (matchedAfter.has(path)) return
-    files.push({ path, district: file.district, kind: 'added', beforeLines: 0, afterLines: file.lines, delta: file.lines })
+    files.push({
+      path,
+      district: file.district,
+      kind: 'added',
+      beforeLines: 0,
+      afterLines: file.lines,
+      delta: file.lines,
+    })
   })
 
   const counts: HistoryComparison['counts'] = { added: 0, deleted: 0, modified: 0, renamed: 0 }
-  files.forEach((file) => { counts[file.kind] += 1 })
+  files.forEach((file) => {
+    counts[file.kind] += 1
+  })
   files.sort((left, right) => Math.abs(right.delta) - Math.abs(left.delta) || left.path.localeCompare(right.path))
   const contributorIds = new Set(commits.map((commit) => commit.authorId))
 

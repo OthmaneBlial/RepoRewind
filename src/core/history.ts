@@ -1,25 +1,44 @@
-import type {
-  Commit,
-  FileSnapshot,
-  HistoryIndex,
-  HistorySnapshot,
-  RepositoryHistory,
-  TravelerSnapshot,
-} from './types'
+import type { Commit, FileSnapshot, HistoryIndex, HistorySnapshot, RepositoryHistory, TravelerSnapshot } from './types'
 
 const languageByExtension: Record<string, string> = {
-  ts: 'TypeScript', tsx: 'TypeScript', js: 'JavaScript', jsx: 'JavaScript',
-  rs: 'Rust', go: 'Go', py: 'Python', rb: 'Ruby', java: 'Java', kt: 'Kotlin',
-  swift: 'Swift', c: 'C', h: 'C', cpp: 'C++', cc: 'C++', cs: 'C#',
-  php: 'PHP', css: 'CSS', scss: 'CSS', html: 'HTML', vue: 'Vue', svelte: 'Svelte',
-  md: 'Docs', mdx: 'Docs', json: 'Data', yaml: 'Data', yml: 'Data', toml: 'Data',
-  sql: 'SQL', sh: 'Shell', zsh: 'Shell', dockerfile: 'Docker',
+  ts: 'TypeScript',
+  tsx: 'TypeScript',
+  js: 'JavaScript',
+  jsx: 'JavaScript',
+  rs: 'Rust',
+  go: 'Go',
+  py: 'Python',
+  rb: 'Ruby',
+  java: 'Java',
+  kt: 'Kotlin',
+  swift: 'Swift',
+  c: 'C',
+  h: 'C',
+  cpp: 'C++',
+  cc: 'C++',
+  cs: 'C#',
+  php: 'PHP',
+  css: 'CSS',
+  scss: 'CSS',
+  html: 'HTML',
+  vue: 'Vue',
+  svelte: 'Svelte',
+  md: 'Docs',
+  mdx: 'Docs',
+  json: 'Data',
+  yaml: 'Data',
+  yml: 'Data',
+  toml: 'Data',
+  sql: 'SQL',
+  sh: 'Shell',
+  zsh: 'Shell',
+  dockerfile: 'Docker',
 }
 
 export function languageForPath(path: string): string {
   const name = path.split('/').pop()?.toLowerCase() ?? ''
   if (name === 'dockerfile') return 'Docker'
-  const extension = name.includes('.') ? name.split('.').pop() ?? '' : name
+  const extension = name.includes('.') ? (name.split('.').pop() ?? '') : name
   return languageByExtension[extension] ?? 'Other'
 }
 
@@ -29,7 +48,9 @@ export function districtForPath(path: string): string {
 }
 
 export function isRefactorCommit(commit: Commit): boolean {
-  const messageSignal = /\b(refactor|restructure|reorganize|rewrite|cleanup|clean up|extract|move)\b/i.test(commit.message)
+  const messageSignal = /\b(refactor|restructure|reorganize|rewrite|cleanup|clean up|extract|move)\b/i.test(
+    commit.message,
+  )
   const renameSignal = commit.files.some((file) => file.status === 'renamed')
   const broadRewrite = commit.files.length >= 8 && commit.additions > 0 && commit.deletions > 0
   return messageSignal || renameSignal || broadRewrite
@@ -104,8 +125,7 @@ function applyCommit(state: ReplayState, commit: Commit, index: number): void {
     })
   })
 
-  const touchedPath = commit.files.find((file) => file.status !== 'deleted')?.path
-    ?? commit.files[0]?.path
+  const touchedPath = commit.files.find((file) => file.status !== 'deleted')?.path ?? commit.files[0]?.path
   if (touchedPath) {
     state.travelers.set(commit.authorId, {
       authorId: commit.authorId,
@@ -130,10 +150,7 @@ function restoreCheckpointState(checkpoint: HistoryIndex['checkpoints'][number])
   }
 }
 
-export function buildHistoryIndex(
-  history: RepositoryHistory,
-  onProgress?: (progress: number) => void,
-): HistoryIndex {
+export function buildHistoryIndex(history: RepositoryHistory, onProgress?: (progress: number) => void): HistoryIndex {
   const state = emptyReplayState()
   const checkpointInterval = Math.max(32, Math.ceil(history.commits.length / 64))
   const checkpoints: HistoryIndex['checkpoints'] = []
@@ -157,7 +174,9 @@ export function buildHistoryIndex(
       lastIndex: index,
       commits: (contributor?.commits ?? 0) + 1,
     })
-    commitSearch.push(`${commit.hash} ${commit.message} ${contributorNames.get(commit.authorId) ?? ''}`.toLocaleLowerCase())
+    commitSearch.push(
+      `${commit.hash} ${commit.message} ${contributorNames.get(commit.authorId) ?? ''}`.toLocaleLowerCase(),
+    )
     commit.files.forEach((file) => {
       paths.add(file.path)
       if (file.previousPath) paths.add(file.previousPath)
@@ -277,40 +296,189 @@ export function buildSnapshots(history: RepositoryHistory): HistorySnapshot[] {
   return history.commits.map((_, index) => engine.snapshotAt(index))
 }
 
+const MAX_COMMITS = 250_000
+const MAX_TOTAL_FILE_CHANGES = 2_000_000
+const MAX_CONTRIBUTORS = 100_000
+const MAX_LANDMARKS = 100_000
+const MAX_PATH_LENGTH = 4_096
+const MAX_MESSAGE_LENGTH = 32_768
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return Number.isSafeInteger(value) && Number(value) >= 0
+}
+
+function isValidDate(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && !Number.isNaN(new Date(value).getTime())
+}
+
+function validateString(value: unknown, label: string, maximum = MAX_MESSAGE_LENGTH): asserts value is string {
+  if (typeof value !== 'string' || value.length === 0 || value.length > maximum) {
+    throw new Error(`${label} must be a non-empty string no longer than ${maximum.toLocaleString()} characters.`)
+  }
+}
+
 export function validateHistory(input: unknown): RepositoryHistory {
-  if (!input || typeof input !== 'object') throw new Error('History file is not an object.')
+  if (!isRecord(input)) throw new Error('History file is not an object.')
   const history = input as Partial<RepositoryHistory>
   if (history.schemaVersion !== 1) throw new Error('Unsupported RepoRewind schema version.')
-  if (!history.repository?.name) throw new Error('History file has no repository name.')
+  if (!isRecord(history.repository)) throw new Error('History file has no repository metadata.')
+  validateString(history.repository.name, 'Repository name', 256)
+  validateString(history.repository.branch, 'Repository branch', 1_024)
+  if (
+    history.repository.scope !== undefined &&
+    history.repository.scope !== 'branch' &&
+    history.repository.scope !== 'all-branches'
+  ) {
+    throw new Error('Repository scope is invalid.')
+  }
+  if (history.repository.truncated !== undefined && typeof history.repository.truncated !== 'boolean') {
+    throw new Error('Repository truncation metadata is invalid.')
+  }
+  if (
+    history.repository.remote !== undefined &&
+    (typeof history.repository.remote !== 'string' || history.repository.remote.length > MAX_PATH_LENGTH)
+  ) {
+    throw new Error('Repository remote is invalid.')
+  }
+  if (
+    !isValidDate(history.repository.generatedAt) ||
+    !isValidDate(history.repository.firstCommitAt) ||
+    !isValidDate(history.repository.lastCommitAt)
+  ) {
+    throw new Error('Repository metadata contains an invalid date.')
+  }
   if (!Array.isArray(history.commits) || history.commits.length === 0) {
     throw new Error('History file contains no commits.')
+  }
+  if (history.commits.length > MAX_COMMITS) {
+    throw new Error(
+      `History file exceeds the ${MAX_COMMITS.toLocaleString()} commit safety limit. Re-run the analyzer with --max-commits.`,
+    )
   }
   if (!Array.isArray(history.contributors) || !Array.isArray(history.releases)) {
     throw new Error('History file is missing contributors or releases.')
   }
+  if (history.contributors.length > MAX_CONTRIBUTORS) throw new Error('History file contains too many contributors.')
+  if (history.releases.length > MAX_LANDMARKS) throw new Error('History file contains too many releases.')
+  if (history.branches !== undefined && (!Array.isArray(history.branches) || history.branches.length > MAX_LANDMARKS)) {
+    throw new Error('History file contains an invalid branch list.')
+  }
+
+  const contributorIds = new Set<string>()
+  history.contributors.forEach((contributor, contributorIndex) => {
+    if (!isRecord(contributor)) throw new Error(`Contributor ${contributorIndex + 1} has an invalid structure.`)
+    validateString(contributor.id, `Contributor ${contributorIndex + 1} id`, 512)
+    validateString(contributor.name, `Contributor ${contributorIndex + 1} name`, 1_024)
+    if (contributorIds.has(contributor.id)) throw new Error(`Contributor id ${contributor.id} is duplicated.`)
+    contributorIds.add(contributor.id)
+    if (!/^#[0-9a-f]{6}$/i.test(contributor.color))
+      throw new Error(`Contributor ${contributor.id} has an invalid color.`)
+    if (![contributor.commits, contributor.additions, contributor.deletions].every(isNonNegativeInteger)) {
+      throw new Error(`Contributor ${contributor.id} has invalid statistics.`)
+    }
+    if (contributor.email !== undefined && (typeof contributor.email !== 'string' || contributor.email.length > 320)) {
+      throw new Error(`Contributor ${contributor.id} has an invalid email field.`)
+    }
+  })
+
   const allowedStatuses = new Set(['added', 'modified', 'deleted', 'renamed'])
+  const commitHashes = new Set<string>()
+  let totalFileChanges = 0
   history.commits.forEach((commit, commitIndex) => {
-    if (!commit || typeof commit.hash !== 'string' || !commit.hash) {
+    if (!isRecord(commit) || typeof commit.hash !== 'string' || !commit.hash || commit.hash.length > 256) {
       throw new Error(`Commit ${commitIndex + 1} has no hash.`)
     }
+    if (commitHashes.has(commit.hash)) throw new Error(`Commit ${commit.hash.slice(0, 12)} is duplicated.`)
+    commitHashes.add(commit.hash)
     if (!Array.isArray(commit.parents) || typeof commit.authorId !== 'string' || !Array.isArray(commit.files)) {
       throw new Error(`Commit ${commit.hash.slice(0, 7)} has an invalid structure.`)
     }
-    if (typeof commit.message !== 'string' || !Number.isFinite(commit.additions) || !Number.isFinite(commit.deletions)) {
+    if (!contributorIds.has(commit.authorId))
+      throw new Error(`Commit ${commit.hash.slice(0, 7)} references an unknown contributor.`)
+    if (commit.parents.some((parent) => typeof parent !== 'string' || !parent || parent.length > 256)) {
+      throw new Error(`Commit ${commit.hash.slice(0, 7)} has invalid parent hashes.`)
+    }
+    if (
+      commit.refs !== undefined &&
+      (!Array.isArray(commit.refs) || commit.refs.some((ref) => typeof ref !== 'string' || ref.length > 1_024))
+    ) {
+      throw new Error(`Commit ${commit.hash.slice(0, 7)} has invalid refs.`)
+    }
+    if (
+      (commit.isMainline !== undefined && typeof commit.isMainline !== 'boolean') ||
+      (commit.isBaseline !== undefined && typeof commit.isBaseline !== 'boolean')
+    ) {
+      throw new Error(`Commit ${commit.hash.slice(0, 7)} has invalid flags.`)
+    }
+    if (
+      typeof commit.message !== 'string' ||
+      commit.message.length > MAX_MESSAGE_LENGTH ||
+      !isNonNegativeInteger(commit.additions) ||
+      !isNonNegativeInteger(commit.deletions)
+    ) {
       throw new Error(`Commit ${commit.hash.slice(0, 7)} has invalid metadata.`)
     }
-    if (typeof commit.authoredAt !== 'string' || Number.isNaN(new Date(commit.authoredAt).getTime())) {
+    if (!isValidDate(commit.authoredAt)) {
       throw new Error(`Commit ${commit.hash.slice(0, 7)} has an invalid date.`)
     }
+    totalFileChanges += commit.files.length
+    if (totalFileChanges > MAX_TOTAL_FILE_CHANGES) {
+      throw new Error(
+        `History file exceeds the ${MAX_TOTAL_FILE_CHANGES.toLocaleString()} file-change safety limit. Re-run the analyzer with --max-commits.`,
+      )
+    }
     commit.files.forEach((file, fileIndex) => {
-      if (!file || typeof file.path !== 'string' || !file.path || !allowedStatuses.has(file.status)) {
+      if (
+        !isRecord(file) ||
+        typeof file.path !== 'string' ||
+        !file.path ||
+        file.path.length > MAX_PATH_LENGTH ||
+        !allowedStatuses.has(file.status)
+      ) {
         throw new Error(`File change ${fileIndex + 1} in commit ${commit.hash.slice(0, 7)} is invalid.`)
       }
-      if (!Number.isFinite(file.additions) || !Number.isFinite(file.deletions)) {
+      if (!isNonNegativeInteger(file.additions) || !isNonNegativeInteger(file.deletions)) {
         throw new Error(`File change ${file.path} has invalid line counts.`)
+      }
+      if (
+        file.status === 'renamed' &&
+        (typeof file.previousPath !== 'string' || !file.previousPath || file.previousPath.length > MAX_PATH_LENGTH)
+      ) {
+        throw new Error(`Renamed file ${file.path} has no valid previous path.`)
       }
     })
   })
+
+  history.releases.forEach((release, releaseIndex) => {
+    if (!isRecord(release)) throw new Error(`Release ${releaseIndex + 1} has an invalid structure.`)
+    validateString(release.tag, `Release ${releaseIndex + 1} tag`, 1_024)
+    validateString(release.commitHash, `Release ${releaseIndex + 1} commit hash`, 256)
+    if (!isValidDate(release.date)) throw new Error(`Release ${release.tag} has an invalid date.`)
+    if (
+      release.message !== undefined &&
+      (typeof release.message !== 'string' || release.message.length > MAX_MESSAGE_LENGTH)
+    ) {
+      throw new Error(`Release ${release.tag} has an invalid message.`)
+    }
+  })
+
+  history.branches?.forEach((branch, branchIndex) => {
+    if (!isRecord(branch)) throw new Error(`Branch ${branchIndex + 1} has an invalid structure.`)
+    validateString(branch.name, `Branch ${branchIndex + 1} name`, 1_024)
+    validateString(branch.tipHash, `Branch ${branchIndex + 1} tip`, 256)
+    if (
+      !/^#[0-9a-f]{6}$/i.test(branch.color) ||
+      typeof branch.isCurrent !== 'boolean' ||
+      typeof branch.isRemote !== 'boolean'
+    ) {
+      throw new Error(`Branch ${branch.name} has invalid metadata.`)
+    }
+  })
+
   return {
     ...(history as RepositoryHistory),
     repository: {
@@ -318,5 +486,14 @@ export function validateHistory(input: unknown): RepositoryHistory {
       scope: history.repository.scope ?? 'branch',
     },
     branches: Array.isArray(history.branches) ? history.branches : [],
+  }
+}
+
+export function parseHistoryJson(text: string): RepositoryHistory {
+  try {
+    return validateHistory(JSON.parse(text))
+  } catch (error) {
+    if (error instanceof SyntaxError) throw new Error('This file is not valid JSON.')
+    throw error
   }
 }

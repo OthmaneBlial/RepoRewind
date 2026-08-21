@@ -5,23 +5,30 @@
   "type": "module",
   "description": "A cinematic visual history engine for Git repositories.",
   "license": "MIT",
+  "packageManager": "npm@11.12.1",
   "engines": {
-    "node": ">=20.19"
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   },
   "bin": {
     "reporewind": "./dist-cli/index.js"
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && tsup cli/index.ts --format esm --out-dir dist-cli --clean",
+    "build": "npm run typecheck && npm run build:web && npm run build:cli",
+    "build:web": "vite build",
+    "build:cli": "tsup cli/index.ts --format esm --out-dir dist-cli --clean",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --max-warnings 0 --react-plugin --jsx-a11y-plugin --vitest-plugin --import-plugin -A jsx-a11y/prefer-tag-over-role src cli vite.config.ts vitest.config.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "tsx cli/index.ts analyze",
-    "check": "npm run test && npm run build"
+    "check": "npm run format:check && npm run lint && npm run test && npm run build",
+    "verify": "npm run check && npm audit --audit-level=high"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "mediabunny": "1.55.1",
     "react": "^19.2.8",
@@ -29,12 +36,17 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.5",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^6.1.0",
     "jsdom": "^27.2.0",
+    "oxlint": "^1.79.0",
+    "prettier": "^3.9.6",
     "tsup": "^8.5.1",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",
