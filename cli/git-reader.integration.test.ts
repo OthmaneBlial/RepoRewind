@@ -1,8 +1,11 @@
+// @vitest-environment node
+
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import { HistoryEngine, validateHistory } from '../src/core/history'
 import { analyzeRepository, analyzeRepositoryStreaming } from './git-reader'
 
 const temporaryRepositories: string[] = []
@@ -24,6 +27,7 @@ describe('repository analysis integration', () => {
     git(repository, 'init', '-b', 'main')
     git(repository, 'config', 'user.name', 'Archive Builder')
     git(repository, 'config', 'user.email', 'archive@example.test')
+    git(repository, 'remote', 'add', 'origin', 'https://user:secret@example.test/team/city.git?access_token=secret')
     git(repository, 'add', '.')
     git(repository, 'commit', '-m', 'Plant the city')
     git(repository, 'tag', 'v0.1.0')
@@ -36,7 +40,9 @@ describe('repository analysis integration', () => {
     const streamedHistory = await analyzeRepositoryStreaming(repository)
     expect(history.commits).toHaveLength(2)
     expect(history.contributors).toMatchObject([{ name: 'Archive Builder', commits: 2 }])
+    expect(history.contributors[0].id).toMatch(/^author-[a-f0-9]{20}$/)
     expect(history.releases.map((release) => release.tag)).toEqual(['v0.1.0'])
+    expect(history.repository.remote).toBe('https://example.test/team/city.git')
     expect(history.commits[1].files).toContainEqual(
       expect.objectContaining({
         path: 'src/city.ts',
@@ -52,6 +58,11 @@ describe('repository analysis integration', () => {
         additions: 1,
       }),
     )
+
+    const portableHistory = validateHistory(JSON.parse(JSON.stringify(streamedHistory)))
+    const importedSnapshot = new HistoryEngine(portableHistory).snapshotAt(portableHistory.commits.length - 1)
+    expect(importedSnapshot.activeFiles).toBe(2)
+    expect(importedSnapshot.files.find((file) => file.path === 'src/city.ts')?.alive).toBe(true)
 
     const limited = analyzeRepository(repository, { maxCommits: 1 })
     expect(limited.repository.truncated).toBe(true)
@@ -107,7 +118,8 @@ describe('repository analysis integration', () => {
     const repository = mkdtempSync(join(tmpdir(), 'reporewind-path-test-'))
     temporaryRepositories.push(repository)
     mkdirSync(join(repository, 'src'))
-    const unusualPath = join(repository, 'src', ' city\tmap.ts ')
+    const unusualFilename = process.platform === 'win32' ? ' city map.ts' : ' city\tmap.ts '
+    const unusualPath = join(repository, 'src', unusualFilename)
     writeFileSync(unusualPath, "export const map = 'city'\n")
     git(repository, 'init', '-b', 'main')
     git(repository, 'config', 'user.name', 'Archive Builder')
@@ -118,7 +130,7 @@ describe('repository analysis integration', () => {
     const history = await analyzeRepositoryStreaming(repository)
     expect(history.commits[0].files).toContainEqual(
       expect.objectContaining({
-        path: 'src/ city\tmap.ts ',
+        path: `src/${unusualFilename}`,
         status: 'added',
       }),
     )

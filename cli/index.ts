@@ -20,6 +20,7 @@ Options:
       --max-commits <count> Limit imported commits for very large repositories
       --branch <ref>        Analyze another branch or ref instead of the checked-out branch
       --include-emails      Include contributor email addresses in the export
+  -f, --force               Replace an existing output file
   -q, --quiet               Suppress progress output
   -v, --version             Print the RepoRewind version
   -h, --help                Show this help
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
         'max-commits': { type: 'string' },
         branch: { type: 'string' },
         'include-emails': { type: 'boolean', default: false },
+        force: { type: 'boolean', short: 'f', default: false },
         quiet: { type: 'boolean', short: 'q', default: false },
         version: { type: 'boolean', short: 'v', default: false },
         help: { type: 'boolean', short: 'h', default: false },
@@ -60,6 +62,7 @@ async function main(): Promise<void> {
   const output = typeof parsed.values.output === 'string' ? parsed.values.output : undefined
   const writeToStdout = parsed.values.stdout === true
   const includeEmails = parsed.values['include-emails'] === true
+  const force = parsed.values.force === true
   const branch = typeof parsed.values.branch === 'string' ? parsed.values.branch : undefined
   const maxCommitsOption = typeof parsed.values['max-commits'] === 'string' ? parsed.values['max-commits'] : undefined
 
@@ -112,7 +115,7 @@ async function main(): Promise<void> {
     }
 
     mkdirSync(dirname(outputPath), { recursive: true })
-    writeFileSync(outputPath, serialized, { encoding: 'utf8', mode: 0o600 })
+    writeFileSync(outputPath, serialized, { encoding: 'utf8', mode: 0o600, flag: force ? 'w' : 'wx' })
     if (!quiet) {
       const count = (value: number, singular: string) =>
         `${value.toLocaleString()} ${singular}${value === 1 ? '' : 's'}`
@@ -122,9 +125,14 @@ async function main(): Promise<void> {
       process.stdout.write(`History written to ${outputPath}\n`)
     }
   } catch (error) {
-    process.stderr.write(
-      `RepoRewind could not analyze this repository: ${error instanceof Error ? error.message : String(error)}\n`,
-    )
+    const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
+    const message =
+      code === 'EEXIST'
+        ? `Output file already exists: ${outputPath}. Choose another --output path or add --force.`
+        : error instanceof Error
+          ? error.message
+          : String(error)
+    process.stderr.write(`RepoRewind failed: ${message}\n`)
     process.exitCode = 1
   }
 }

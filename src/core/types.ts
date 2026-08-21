@@ -134,4 +134,5 @@ export interface HistoryIndex {
     commits: number
   }>
   commitSearch: string[]
+  commitIndexByHash: Map<string, number>
 }

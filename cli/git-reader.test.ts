@@ -1,5 +1,7 @@
+// @vitest-environment node
+
 import { describe, expect, it } from 'vitest'
-import { parseNameStatus, parseNumstat } from './git-reader'
+import { parseNameStatus, parseNumstat, sanitizeRemote } from './git-reader'
 
 describe('git reader parsers', () => {
   it('parses additions, deletions, binaries, and compact rename paths', () => {
@@ -34,5 +36,14 @@ describe('git reader parsers', () => {
       { path: 'file\twith-tab.ts', status: 'modified' },
       { previousPath: ' old name.ts ', path: ' new name.ts ', status: 'renamed' },
     ])
+  })
+
+  it('removes credentials and token-bearing URL components from remotes', () => {
+    expect(sanitizeRemote('https://user:secret@example.test/team/repository.git?access_token=secret#fragment')).toBe(
+      'https://example.test/team/repository.git',
+    )
+    expect(sanitizeRemote('git@github.com:example/repository.git')).toBe('git@github.com:example/repository.git')
+    expect(sanitizeRemote('file:///Users/example/private-repository')).toBeUndefined()
+    expect(sanitizeRemote('remote\nwith-control')).toBeUndefined()
   })
 })

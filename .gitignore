@@ -3,5 +3,13 @@ dist
 dist-cli
 .DS_Store
 *.log
+*.tsbuildinfo
 coverage
 .reporewind
+.env
+.env.*
+!.env.example
+artifacts
+reports
+test-results
+playwright-report

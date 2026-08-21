@@ -25,6 +25,7 @@ import { buildHistoryIndex, HistoryEngine } from './core/history'
 import { buildCityLayout } from './core/layout'
 import { prepareHistoryFile } from './core/prepare-history'
 import { searchArchive, type ArchiveSearchKind, type ArchiveSearchResult } from './core/search'
+import { sampleEvenly } from './core/timeline'
 import type { FileSnapshot, HistoryIndex, RepositoryHistory } from './core/types'
 import { sampleHistory } from './data/sample-history'
 import {
@@ -37,6 +38,7 @@ import {
 } from './export/timelapse'
 
 const CityScene = lazy(() => import('./components/CityScene').then((module) => ({ default: module.CityScene })))
+const MAX_TIMELINE_MARKERS_PER_KIND = 96
 
 const formatDate = (date: string, options: Intl.DateTimeFormatOptions = {}) =>
   new Intl.DateTimeFormat('en', {
@@ -52,10 +54,22 @@ const formatCompact = (value: number) =>
 
 export function safeRepositoryUrl(remote?: string): string | undefined {
   if (!remote) return undefined
-  const normalized = remote.replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '')
+  if (
+    Array.from(remote).some((character) => {
+      const code = character.codePointAt(0) ?? 0
+      return code < 32 || code === 127
+    })
+  )
+    return undefined
+  const normalized = remote.replace(/^git@github\.com:/, 'https://github.com/')
   try {
     const url = new URL(normalized)
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined
+    if (url.username || url.password) return undefined
+    url.pathname = url.pathname.replace(/\.git$/, '')
+    url.search = ''
+    url.hash = ''
+    const loopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]'
+    return url.protocol === 'https:' || (url.protocol === 'http:' && loopback) ? url.href : undefined
   } catch {
     return undefined
   }
@@ -73,6 +87,7 @@ const eraName = (index: number, total: number) => {
 function useReducedMotionPreference(): boolean {
   const [reduced, setReduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
   useEffect(() => {
+    if (!window.matchMedia) return
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(query.matches)
     query.addEventListener('change', update)
@@ -113,6 +128,11 @@ function Modal({ title, eyebrow, children, onClose, className = '', closeLabel =
   }, [onClose])
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null
+    const dialog = dialogRef.current
+    if (dialog && !dialog.open) {
+      if (typeof dialog.showModal === 'function') dialog.showModal()
+      else dialog.setAttribute('open', '')
+    }
     const focusable = () =>
       Array.from(
         dialogRef.current?.querySelectorAll<HTMLElement>(
@@ -140,26 +160,31 @@ function Modal({ title, eyebrow, children, onClose, className = '', closeLabel =
     window.addEventListener('keydown', handleKey)
     return () => {
       window.removeEventListener('keydown', handleKey)
+      if (dialog?.open) {
+        if (typeof dialog.close === 'function') dialog.close()
+        else dialog.removeAttribute('open')
+      }
       previouslyFocused?.focus()
     }
   }, [])
   return (
-    <div
-      className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
+    <dialog
+      ref={dialogRef}
+      className={`modal ${className}`}
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault()
+        onClose()
       }}
     >
-      <dialog open ref={dialogRef} className={`modal ${className}`} aria-modal="true" aria-labelledby={titleId}>
-        <button className="icon-button modal-close" onClick={onClose} aria-label={closeLabel}>
-          <CloseIcon />
-        </button>
-        <p className="eyebrow">{eyebrow}</p>
-        <h2 id={titleId}>{title}</h2>
-        {children}
-      </dialog>
-    </div>
+      <button className="icon-button modal-close" onClick={onClose} aria-label={closeLabel}>
+        <CloseIcon />
+      </button>
+      <p className="eyebrow">{eyebrow}</p>
+      <h2 id={titleId}>{title}</h2>
+      {children}
+    </dialog>
   )
 }
 
@@ -466,7 +491,7 @@ function ArchiveSearchModal({
         kind: 'release' as const,
         title: release.tag,
         subtitle: release.message ?? 'Historical release',
-        index: history.commits.findIndex((commit) => commit.hash === release.commitHash),
+        index: index.commitIndexByHash.get(release.commitHash) ?? -1,
         score: 0,
       }))
       .filter((result) => result.index >= 0)
@@ -754,6 +779,32 @@ export default function App() {
     )
   }, [comparison])
   const sourceUrl = safeRepositoryUrl(history.repository.remote)
+  const timelineReleases = useMemo(
+    () =>
+      sampleEvenly(
+        history.releases.flatMap((release) => {
+          const index = historyIndex.commitIndexByHash.get(release.commitHash)
+          return index === undefined ? [] : [{ release, index }]
+        }),
+        MAX_TIMELINE_MARKERS_PER_KIND,
+      ),
+    [history.releases, historyIndex],
+  )
+  const timelineMerges = useMemo(
+    () => sampleEvenly(historyIndex.mergeIndices, MAX_TIMELINE_MARKERS_PER_KIND),
+    [historyIndex],
+  )
+  const timelineBranches = useMemo(
+    () =>
+      sampleEvenly(
+        (history.branches ?? []).flatMap((branch) => {
+          const index = historyIndex.commitIndexByHash.get(branch.tipHash)
+          return index === undefined ? [] : [{ branch, index }]
+        }),
+        MAX_TIMELINE_MARKERS_PER_KIND,
+      ),
+    [history.branches, historyIndex],
+  )
 
   const showNotice = useCallback((message: string, tone: 'status' | 'error' = 'status', timeout = 4_000) => {
     if (noticeTimer.current !== undefined) window.clearTimeout(noticeTimer.current)
@@ -928,7 +979,11 @@ export default function App() {
             <strong>Repo</strong>Rewind
           </span>
         </div>
-        <button className="repository-switcher" onClick={() => setImportOpen(true)}>
+        <button
+          className="repository-switcher"
+          onClick={() => setImportOpen(true)}
+          aria-label={`Open repository menu: ${archiveSource === 'demo' ? 'fictional demo' : 'local archive'}, ${history.repository.name}`}
+        >
           <span className="repo-icon">
             <LayersIcon />
           </span>
@@ -1196,22 +1251,19 @@ export default function App() {
             </span>
           </div>
           <div className="timeline-track">
-            {history.releases.map((release) => {
-              const releaseIndex = history.commits.findIndex((commit) => commit.hash === release.commitHash)
-              return releaseIndex >= 0 ? (
-                <button
-                  key={release.tag}
-                  className="release-marker"
-                  style={{ left: `${(releaseIndex / Math.max(1, historyLength - 1)) * 100}%` }}
-                  onClick={() => {
-                    setPlaying(false)
-                    setFrame(releaseIndex)
-                  }}
-                  aria-label={`Go to release ${release.tag}: ${formatDate(release.date)}`}
-                />
-              ) : null
-            })}
-            {historyIndex.mergeIndices.map((mergeIndex) => (
+            {timelineReleases.map(({ release, index }) => (
+              <button
+                key={release.tag}
+                className="release-marker"
+                style={{ left: `${(index / Math.max(1, historyLength - 1)) * 100}%` }}
+                onClick={() => {
+                  setPlaying(false)
+                  setFrame(index)
+                }}
+                aria-label={`Go to release ${release.tag}: ${formatDate(release.date)}`}
+              />
+            ))}
+            {timelineMerges.map((mergeIndex) => (
               <button
                 key={`merge-${mergeIndex}`}
                 className="merge-marker"
@@ -1223,26 +1275,23 @@ export default function App() {
                 aria-label={`Go to merge: ${history.commits[mergeIndex].message}`}
               />
             ))}
-            {(history.branches ?? []).map((branch) => {
-              const branchIndex = history.commits.findIndex((commit) => commit.hash === branch.tipHash)
-              return branchIndex >= 0 ? (
-                <button
-                  key={branch.name}
-                  className="branch-marker"
-                  style={
-                    {
-                      left: `${(branchIndex / Math.max(1, historyLength - 1)) * 100}%`,
-                      '--branch-color': branch.color,
-                    } as React.CSSProperties
-                  }
-                  onClick={() => {
-                    setPlaying(false)
-                    setFrame(branchIndex)
-                  }}
-                  aria-label={`Go to branch tip ${branch.name}`}
-                />
-              ) : null
-            })}
+            {timelineBranches.map(({ branch, index }) => (
+              <button
+                key={branch.name}
+                className="branch-marker"
+                style={
+                  {
+                    left: `${(index / Math.max(1, historyLength - 1)) * 100}%`,
+                    '--branch-color': branch.color,
+                  } as React.CSSProperties
+                }
+                onClick={() => {
+                  setPlaying(false)
+                  setFrame(index)
+                }}
+                aria-label={`Go to branch tip ${branch.name}`}
+              />
+            ))}
             <input
               aria-label="History position"
               aria-valuetext={`${formatDate(snapshot.date)}: ${snapshot.commit.message}`}

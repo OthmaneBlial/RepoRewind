@@ -39,7 +39,8 @@ button {
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+summary:focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 3px;
 }
@@ -1156,13 +1157,7 @@ input:focus-visible {
   width: 12px;
 }
 
-.modal-backdrop {
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+.modal::backdrop {
   background: rgba(3, 5, 4, 0.72);
   backdrop-filter: blur(11px);
   animation: fade-in 0.2s both;
@@ -1173,11 +1168,14 @@ input:focus-visible {
   }
 }
 .modal {
-  position: relative;
+  position: fixed;
+  inset: 0;
   width: min(540px, 100%);
   max-height: calc(100vh - 48px);
+  margin: auto;
   overflow: auto;
   padding: 34px 38px 31px;
+  color: inherit;
   border: 1px solid rgba(232, 224, 207, 0.18);
   border-radius: 5px;
   background: linear-gradient(150deg, #151b18, #0b0e0d 65%);
@@ -2113,15 +2111,25 @@ input:focus-visible {
     height: 65px;
     padding: 0 17px;
   }
-  .text-button,
   .top-actions .icon-button {
     display: none;
   }
+  .text-button,
+  .export-button {
+    width: 39px;
+    height: 39px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    font-size: 0;
+  }
+  .text-button svg,
+  .export-button svg {
+    width: 17px;
+    height: 17px;
+  }
   .archive-search-trigger {
     display: flex;
-  }
-  .export-button {
-    padding: 0 11px;
   }
   .city-stage {
     top: 65px;

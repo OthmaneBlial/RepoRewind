@@ -16,7 +16,7 @@
         "branch": { "type": "string", "minLength": 1, "maxLength": 1024 },
         "scope": { "enum": ["branch", "all-branches"] },
         "truncated": { "type": "boolean" },
-        "remote": { "type": "string", "maxLength": 4096 },
+        "remote": { "type": "string", "maxLength": 4096, "pattern": "^[^\\u0000-\\u001F\\u007F]*$" },
         "generatedAt": { "type": "string", "format": "date-time" },
         "firstCommitAt": { "type": "string", "format": "date-time" },
         "lastCommitAt": { "type": "string", "format": "date-time" }
@@ -60,7 +60,10 @@
       "allOf": [
         {
           "if": { "properties": { "status": { "const": "renamed" } }, "required": ["status"] },
-          "then": { "required": ["previousPath"] }
+          "then": {
+            "properties": { "previousPath": { "type": "string", "minLength": 1, "maxLength": 4096 } },
+            "required": ["previousPath"]
+          }
         }
       ]
     },

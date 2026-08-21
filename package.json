@@ -19,13 +19,14 @@
     "build:cli": "tsup cli/index.ts --format esm --out-dir dist-cli --clean",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --max-warnings 0 --react-plugin --jsx-a11y-plugin --vitest-plugin --import-plugin -A jsx-a11y/prefer-tag-over-role src cli vite.config.ts vitest.config.ts",
+    "lint": "oxlint --max-warnings 0 --react-plugin --jsx-a11y-plugin --vitest-plugin --import-plugin -A jsx-a11y/prefer-tag-over-role src cli scripts vite.config.ts vitest.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "docs:check": "node scripts/check-docs.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "tsx cli/index.ts analyze",
-    "check": "npm run format:check && npm run lint && npm run test && npm run build",
+    "check": "npm run format:check && npm run lint && npm run docs:check && npm run test && npm run build",
     "verify": "npm run check && npm audit --audit-level=high"
   },
   "dependencies": {
@@ -33,7 +34,7 @@
     "mediabunny": "1.55.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "three": "^0.185.1"
+    "three": "0.182.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
@@ -42,8 +43,10 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/three": "^0.185.0",
+    "@types/three": "0.182.0",
     "@vitejs/plugin-react": "^6.1.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "jsdom": "^27.2.0",
     "oxlint": "^1.79.0",
     "prettier": "^3.9.6",

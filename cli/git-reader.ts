@@ -1,5 +1,6 @@
 import { basename, resolve } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import type {
   BranchRef,
   ChangeStatus,
@@ -21,6 +22,23 @@ function containsControlCharacter(value: string): boolean {
     const code = character.codePointAt(0) ?? 0
     return code < 32 || code === 127
   })
+}
+
+export function sanitizeRemote(remote: string): string | undefined {
+  const candidate = remote.trim()
+  if (!candidate || containsControlCharacter(candidate)) return undefined
+  if (/^git@github\.com:[^\s?#]+$/i.test(candidate)) return candidate
+  try {
+    const url = new URL(candidate)
+    if (!['https:', 'http:', 'ssh:', 'git:'].includes(url.protocol)) return undefined
+    url.username = ''
+    url.password = ''
+    url.search = ''
+    url.hash = ''
+    return url.href
+  } catch {
+    return undefined
+  }
 }
 
 function runGit(repositoryPath: string, args: string[]): string {
@@ -66,12 +84,7 @@ async function streamGitRecords(
 }
 
 function stableId(value: string): string {
-  let hash = 2166136261
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index)
-    hash = Math.imul(hash, 16777619)
-  }
-  return `author-${(hash >>> 0).toString(36)}`
+  return `author-${createHash('sha256').update(value).digest('hex').slice(0, 20)}`
 }
 
 interface StatusEntry {
@@ -437,7 +450,7 @@ function assembleHistory(
 
   if (commits.length === 0) throw new Error('The repository has no reachable commits.')
   const remoteResult = spawnSync('git', ['-C', repositoryPath, 'remote', 'get-url', 'origin'], { encoding: 'utf8' })
-  const remote = remoteResult.status === 0 ? remoteResult.stdout.trim() : undefined
+  const remote = remoteResult.status === 0 ? sanitizeRemote(remoteResult.stdout) : undefined
   const commitHashes = new Set(commits.map((commit) => commit.hash))
   const releases = readReleases(repositoryPath).filter((release) => commitHashes.has(release.commitHash))
 
@@ -448,7 +461,7 @@ function assembleHistory(
       branch: selectedBranch,
       scope: 'branch',
       truncated: needsBaseline,
-      remote: remote || undefined,
+      remote,
       generatedAt: new Date().toISOString(),
       firstCommitAt: commits[0].authoredAt,
       lastCommitAt: commits[commits.length - 1].authoredAt,

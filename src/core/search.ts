@@ -123,8 +123,8 @@ export function searchArchive(
 
   if (include('release')) {
     history.releases.forEach((release) => {
-      const commitIndex = history.commits.findIndex((commit) => commit.hash === release.commitHash)
-      if (commitIndex < 0) return
+      const commitIndex = index.commitIndexByHash.get(release.commitHash)
+      if (commitIndex === undefined) return
       const score = scoreText(release.tag, `${release.tag} ${release.message ?? ''}`, tokens)
       if (score > 0)
         results.push({
@@ -140,8 +140,8 @@ export function searchArchive(
 
   if (include('branch')) {
     ;(history.branches ?? []).forEach((branch) => {
-      const commitIndex = history.commits.findIndex((commit) => commit.hash === branch.tipHash)
-      if (commitIndex < 0) return
+      const commitIndex = index.commitIndexByHash.get(branch.tipHash)
+      if (commitIndex === undefined) return
       const score = scoreText(branch.name, branch.name, tokens)
       if (score > 0)
         results.push({

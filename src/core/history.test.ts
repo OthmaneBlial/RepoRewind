@@ -67,6 +67,23 @@ describe('history engine', () => {
     const duplicateCommit = structuredClone(sampleHistory)
     duplicateCommit.commits[1].hash = duplicateCommit.commits[0].hash
     expect(() => validateHistory(duplicateCommit)).toThrow('duplicated')
+
+    const invalidOptionalField = structuredClone(sampleHistory) as unknown as Record<string, unknown>
+    const invalidCommit = (invalidOptionalField.commits as Array<Record<string, unknown>>)[0]
+    ;(invalidCommit.files as Array<Record<string, unknown>>)[0].binary = 'yes'
+    expect(() => validateHistory(invalidOptionalField)).toThrow('invalid optional metadata')
+
+    const unsupportedField = structuredClone(sampleHistory) as unknown as Record<string, unknown>
+    unsupportedField.telemetry = true
+    expect(() => validateHistory(unsupportedField)).toThrow('unsupported field')
+
+    const unknownRelease = structuredClone(sampleHistory)
+    unknownRelease.releases[0].commitHash = 'not-in-history'
+    expect(() => validateHistory(unknownRelease)).toThrow('unknown commit')
+
+    const mismatchedBounds = structuredClone(sampleHistory)
+    mismatchedBounds.repository.firstCommitAt = mismatchedBounds.commits[1].authoredAt
+    expect(() => validateHistory(mismatchedBounds)).toThrow('date bounds')
   })
 
   it('indexes long histories with bounded checkpoints and deterministic random access', () => {
@@ -109,6 +126,7 @@ describe('history engine', () => {
     const engine = new HistoryEngine(history, index)
 
     expect(index.checkpoints.length).toBeLessThanOrEqual(66)
+    expect(index.commitIndexByHash.get('commit-4999')).toBe(4_999)
     expect(progress.at(-1)).toBe(1)
     expect(engine.snapshotAt(4_999)).toMatchObject({ activeFiles: 120, totalLines: 5_000 })
     expect(engine.snapshotAt(999).totalLines).toBe(1_000)

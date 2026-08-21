@@ -1,96 +1,176 @@
 # RepoRewind
 
-**Your codebase has a past. Watch it become a city.**
+**Turn a local Git history into a living city you can replay, search, compare, and film.**
 
-RepoRewind is an open-source cinematic Git history explorer. It turns files into buildings, folders into districts, contributors into travelers, releases into historic events, refactors into rebuilt neighborhoods, and deleted code into ruins that remain visible in the archive.
+[![MIT License](https://img.shields.io/badge/license-MIT-f1a35f.svg)](./LICENSE)
+[![Node.js 22.12 or 24](https://img.shields.io/badge/node-22.12%20%7C%2024-79d6bc.svg)](./package.json)
+[![No telemetry](https://img.shields.io/badge/telemetry-none-82aaff.svg)](./docs/privacy.md)
 
-The current foundation includes a streaming local Git analyzer, truthful first-parent branch replay, bounded temporal checkpoints, worker-based imports, an interactive WebGL city, merge/release/refactor events, contributor tracking, accessible playback controls, portable history archives, and browser-native 1080p/4K MP4 and WebM time-lapse export.
+RepoRewind is a local-first visual history explorer for software teams, maintainers, educators, and anyone trying to understand how a codebase actually evolved. Files become buildings, folders become districts, contributors become travelers, releases become landmarks, refactors rebuild neighborhoods, and deleted code remains visible as ruins.
 
-## Start the observatory
+The experience opens immediately with a clearly labeled fictional ten-year archive. Real repositories are analyzed locally into a portable JSON file—no account, cloud service, source upload, paid API, or hidden credential required.
 
-Requirements: Node.js 20.19+ and Git.
+## Quick start
+
+Requirements: [Node.js](https://nodejs.org/) 24 (recommended) or Node.js 22.12+, npm 10+, and Git.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-The built-in ten-year sample opens immediately.
+Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The deterministic demo is already loaded. Select **Import** at any time to see the two-command real-repository workflow.
 
-## Explore a real repository
+No environment variables, database, service account, or network API are required. To restore the demo after an import, open the repository switcher and choose **Open demo**; reloading also clears the memory-only archive.
 
-Analyze locally. RepoRewind reads Git metadata and numeric diffs; it does not upload or embed source code.
+## Explore your own repository
+
+Analyze locally from this checkout:
 
 ```bash
 npm run analyze -- /path/to/repository --output ./reporewind-history.json
 ```
 
-Open RepoRewind, choose **Import**, and select the generated JSON file. Contributor email addresses are omitted unless `--include-emails` is explicitly supplied.
+Then select **Import** in the app and choose `reporewind-history.json`. The analyzer exports Git structure and numeric diffs—not file contents. Contributor email addresses are omitted unless `--include-emails` is explicitly supplied.
 
-The checked-out branch is the default source of truth. RepoRewind follows its first-parent history so every city frame represents a state that genuinely existed; merge commits bring the merged neighborhood into view as a confluence event. Use `--branch <ref>` to explore another local or remote branch without flattening incompatible histories together.
+The checked-out branch is the default source of truth. RepoRewind follows first-parent history so every city frame represents a real state on that line of development; merges appear as confluence events rather than flattening incompatible histories together.
 
 ```bash
+# Explore another local or remote ref
 npm run analyze -- /path/to/repository --branch release/3.x
-```
 
-Large histories can be sampled during early exploration:
-
-```bash
+# Bound an exceptionally large history
 npm run analyze -- /path/to/repository --max-commits 5000
+
+# Pipe clean JSON to another tool
+npm run --silent analyze -- /path/to/repository --stdout > reporewind-history.json
+
+# Explicitly replace an existing archive
+npm run analyze -- /path/to/repository --output ./reporewind-history.json --force
 ```
 
-When a limit omits older commits, RepoRewind reconstructs the earliest retained commit against Git’s empty tree. The first frame is therefore a truthful complete baseline, not a city assembled from an incomplete diff.
-
-## City grammar
-
-| Git history       | RepoRewind city                                        |
-| ----------------- | ------------------------------------------------------ |
-| File              | A building whose height follows its current line count |
-| Top-level folder  | A stable district separated by avenues                 |
-| Contributor       | A colored traveler located at their latest work site   |
-| Commit            | A pulse of construction, demolition, or rebuilding     |
-| Tag / release     | A city-wide historical ring and timeline marker        |
-| Rename / refactor | A neighborhood rebuilding event                        |
-| Deleted file      | A permanent, selectable ruin                           |
-
-Layout is derived from stable path hashes across the full history. Scrubbing backward never randomly rearranges the city, and demolished sites remain geographically meaningful.
-
-## Investigate the archive
-
-Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> or <kbd>/</kbd> to find files, commit messages and hashes, travelers, releases, or reachable branch tips. Queries can be narrowed with `file:`, `commit:`, `author:`, `release:`, and `branch:`.
-
-Choose **Pin this era**, travel elsewhere on the timeline, then open the temporal diff. RepoRewind compares the two real city states, reports line and building deltas, follows rename chains, lists consequential sites, and recolors the city as a live diff lens: mint for construction, amber for rebuilding, blue for renames, and red for demolition.
-
-## Film export
-
-Choose **Export film**, select 1080p or 4K, a duration, and either activity-based or calendar-accurate pacing. RepoRewind choreographs the camera and records a clean 16:9 composition with opening and closing titles, dates, current commits, city statistics, merge/release event cards, and a cinematic grade.
-
-On secure origins with H.264 WebCodecs support, MP4 export renders an explicit fixed-frame timeline and applies encoder backpressure without dropping frames. The visual sequence, timestamps, event pacing, and keyframe schedule are deterministic; the final encoded bytes may vary with the browser or hardware codec. When H.264 is unavailable, the export dialog keeps the MediaRecorder WebM path available, preferring VP9 and then VP8.
-
-## Commands
+Run `npm run analyze -- --help` for every option. The standalone build has the same interface:
 
 ```bash
-npm run dev          # local Vite development server
-npm run test         # temporal engine and Git parser tests
-npm run build        # production web app and distributable CLI
-npm run check        # full test + build gate
-npm run analyze -- . # generate a history file for a Git repository
+npm run build:cli
+node dist-cli/index.js analyze /path/to/repository --output ./reporewind-history.json
 ```
+
+## What you can do
+
+### Replay a truthful city
+
+Scrub, play, pause, jump to releases/merges/branch tips, change playback speed, orbit the camera, or select a building. Stable path hashing keeps districts geographically consistent across time; a demolished site does not teleport when you rewind.
+
+| Git evidence     | City grammar                                              |
+| ---------------- | --------------------------------------------------------- |
+| File             | A building whose height follows its current line count    |
+| Top-level folder | A stable district separated by avenues                    |
+| Contributor      | A colored traveler at their latest work site              |
+| Commit           | Construction, demolition, or rebuilding signals           |
+| Tag/release      | A historical ring and keyboard-accessible timeline marker |
+| Rename/refactor  | A neighborhood rebuilding event                           |
+| Deleted file     | A permanent, selectable ruin                              |
+
+### Find any trace
+
+Press <kbd>⌘K</kbd>, <kbd>Ctrl K</kbd>, or <kbd>/</kbd> to search files, commit messages and hashes, contributors, releases, or reachable branch tips. Narrow queries with `file:`, `commit:`, `author:`, `release:`, and `branch:`. Results move the timeline and open the relevant building when possible.
+
+### Compare two eras
+
+Choose **Pin this era**, travel elsewhere, and open the temporal diff. RepoRewind follows rename chains, reports line/building deltas, ranks consequential sites, and recolors the live city: mint for construction, amber for rebuilding, blue for renames, and red for demolition.
+
+### Export a history film
+
+Choose **Export film** for a fixed-timeline 1080p or 4K MP4/WebM time-lapse with dates, commit titles, statistics, merge/release cards, and a cinematic grade. H.264/MP4 is enabled only when the exact browser/hardware configuration passes a runtime WebCodecs probe. WebM remains visible as the compatibility path.
+
+Visual frame selection, timestamps, event pacing, and keyframe scheduling are deterministic. Hardware encoders may produce different final bytes. Exports are cancelable and rendered entirely in the current browser tab.
+
+## Privacy and security
+
+RepoRewind has no backend, analytics, telemetry, cookies, user accounts, or remote ingestion. The browser keeps imports and indexes in memory; reload or close the tab to delete them. The CLI is the only component that reads Git, and it writes one operator-selected JSON file.
+
+History archives can still contain sensitive names, paths, messages, and remotes. Review them before sharing. Runtime validation enforces a 256 MB file limit, bounded record counts and strings, valid relationships, and known change statuses before indexing untrusted input.
+
+See [Privacy and trust boundaries](./docs/privacy.md) and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
 
 ## Architecture
 
-- `cli/` streams two Git metadata views without holding giant command outputs in memory and emits schema v1 history files.
-- `src/core/` builds roughly 64 temporal checkpoints plus searchable file/contributor activity indexes, reconstructs requested frames through a bounded LRU cache, and computes rename-aware historical diffs.
-- `src/workers/` parses and indexes imported archives off the browser’s main thread.
-- `src/components/CityScene.tsx` renders buildings, ruins, change signals, and travelers with instanced geometry.
-- `src/export/` composites professional time-lapse video and exports fixed-timeline MP4 or compatible WebM entirely in the browser.
-- `src/data/` contains the fictional ten-year sample used for the first-run experience.
-- `schema/` defines the portable public archive contract as JSON Schema 2020-12.
+```mermaid
+flowchart LR
+  Git[Local Git repository] --> CLI[Streaming analyzer]
+  CLI --> JSON[Schema v1 archive]
+  JSON --> Validate[Bounded runtime validation]
+  Validate --> Worker[Worker-built checkpoints and indexes]
+  Worker --> Explore[Search, replay, compare]
+  Explore --> City[Lazy WebGL city]
+  Explore --> Film[MP4 or WebM compositor]
+```
 
-## Privacy and scale
+- `cli/` streams NUL-delimited Git metadata with fixed argument arrays and emits the public schema.
+- `src/core/` validates archives, builds roughly 64 checkpoints plus activity indexes, reconstructs frames through a bounded LRU cache, and computes rename-aware diffs.
+- `src/workers/` prepares imported histories without blocking the main thread when workers are available.
+- `src/components/CityScene.tsx` renders buildings, ruins, travelers, and event signals with instanced Three.js geometry.
+- `src/export/` owns deterministic film scheduling, composition, capability probing, encoding, cancellation, and downloads.
+- `src/data/` contains the fictional deterministic first-run archive.
+- `schema/` contains the portable JSON Schema 2020-12 archive contract.
 
-The analyzer exports hashes, timestamps, commit messages, contributor display names, file paths, numeric diffs, statuses, branch tips, merge parents, and tag metadata. It does not export file contents. Email addresses are excluded by default. Imported archives are indexed in a Web Worker, temporal memory is checkpoint-bounded, and rendering uses instanced geometry for buildings, ruins, travelers, and commit signals.
+Read the complete [architecture guide](./docs/architecture.md), [video export decision](./docs/decisions/browser-video-export.md), [Three.js compatibility decision](./docs/decisions/three-compatibility.md), and [performance notes](./docs/performance.md).
 
-## Contributing
+## Development and validation
 
-Issues and focused pull requests are welcome. Run `npm run check` before submitting changes. RepoRewind is licensed under the [MIT License](./LICENSE).
+| Command              | Purpose                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| `npm run dev`        | Start the localhost-only Vite development server                  |
+| `npm run test:watch` | Run focused Vitest development loops                              |
+| `npm run format`     | Apply the project Prettier configuration                          |
+| `npm run lint`       | Run strict React, accessibility, import, and test lint rules      |
+| `npm run typecheck`  | Validate TypeScript without emitting files                        |
+| `npm run docs:check` | Verify every local Markdown link target                           |
+| `npm run test`       | Run core, Git, CLI, import/export, and frontend interaction tests |
+| `npm run build`      | Build the static browser app and distributable CLI                |
+| `npm run check`      | Run formatting, lint, docs, tests, type checking, and builds      |
+| `npm run verify`     | Run `check` plus the high-severity dependency audit               |
+
+GitHub Actions is configured to run the quality gate on pinned Node.js 24 and exercise supported Node/OS combinations on Linux, macOS, and Windows. Dependency updates are grouped weekly.
+
+See [Contributing](./CONTRIBUTING.md) for repository conventions and the [release checklist](./docs/release-checklist.md) for public evidence requirements.
+
+## Production build and deployment
+
+```bash
+npm run build
+npm run preview
+```
+
+The browser application is emitted to `dist/`; the CLI is emitted to `dist-cli/`. Preview binds to `http://127.0.0.1:4173` by default. Set `SOURCE_MAPS=true` only when a production debugging workflow explicitly requires source maps.
+
+Deploy `dist/` to a static HTTPS host. `public/_headers` supplies a restrictive CSP, clickjacking protection, privacy-oriented browser permissions, and immutable asset caching on hosts that support Netlify-style header files. Configure equivalent headers on other hosts.
+
+Docker is intentionally not included: the web output is static, while the analyzer needs direct access to the operator's local Git repository. A container would add mounts and permission friction without improving isolation or deployment of the actual product. Any standard static server can host `dist/`.
+
+## Compatibility and limits
+
+- Node.js 24 is pinned for development; Node.js 22.12+ is supported. EOL Node releases are excluded.
+- The CLI is designed for current Git on Linux, macOS, and Windows; CI is configured to exercise all three.
+- The web app targets ES2022 and requires a current desktop browser with modules, Web Workers, Canvas, and WebGL. Search/import validation can still report useful errors if WebGL initialization fails.
+- MP4 requires HTTPS/localhost and H.264 WebCodecs support. WebM depends on MediaRecorder codec support.
+- The 3D city chunk is lazy-loaded but remains the largest asset (about 896.6 kB minified / 238.6 kB gzip in the recorded production build).
+- Imported archives are intentionally memory-only; there is no cross-session library.
+- Safety limits are 256 MB, 250,000 commits, and 2,000,000 file-change entries. Use `--max-commits` well before those ceilings on ordinary laptops.
+- The selected branch's first-parent path is the canonical film; side branches appear through refs, tips, and merge events rather than as parallel simulated timelines.
+
+For common failures and recovery steps, see [Troubleshooting](./docs/troubleshooting.md).
+
+## Roadmap
+
+The production scope stays centered on one exceptional workflow. Potential post-1.0 extensions are a streaming file target for longer films, a versioned additive archive schema for richer ref metadata, and measured renderer quality tiers for lower-power devices.
+
+## Project information
+
+- Changes: [CHANGELOG.md](./CHANGELOG.md)
+- Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Code of Conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
+- Security: [SECURITY.md](./SECURITY.md)
+- Third-party notices: [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
+- License: [MIT](./LICENSE)

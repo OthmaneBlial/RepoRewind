@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a focused improvement to the local Git-history experience.
+title: 'feature: '
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What real Git-history task is difficult today, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the user-visible result, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Proposed workflow
+      description: Explain how this fits analyze → import → explore → compare/export.
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Product principles
+      options:
+        - label: This can remain local-first and require no telemetry or account.
+          required: true
+        - label: This strengthens the core workflow rather than creating an unrelated platform.
+          required: true

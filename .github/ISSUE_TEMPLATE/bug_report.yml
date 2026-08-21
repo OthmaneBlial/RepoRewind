@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a reproducible RepoRewind failure or visual regression.
+title: 'bug: '
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve RepoRewind. Do not attach private repositories, source files, contributor emails, or sensitive history archives.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the failure and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide the smallest safe sequence of steps or a public fixture repository.
+      placeholder: |
+        1. Run ...
+        2. Import ...
+        3. Select ...
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Web visualization
+        - Local Git analyzer
+        - Archive import
+        - Search or temporal comparison
+        - Film export
+        - Documentation or build tooling
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: RepoRewind version or commit
+      placeholder: v0.1.0 or 1a2b3c4
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Node.js version, browser name/version, and GPU only when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Safe diagnostics
+      description: Paste redacted errors. Remove local paths, names, emails, remotes, commit messages, and repository content.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for this failure.
+          required: true
+        - label: I removed private source, history, paths, names, emails, and credentials.
+          required: true
+        - label: This is not a security vulnerability; I will use SECURITY.md for vulnerabilities.
+          required: true
