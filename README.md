@@ -222,6 +222,8 @@ The product stays centered on one exceptional local-first workflow: analyze → 
 ## Project information
 
 - Changes: [CHANGELOG.md](./CHANGELOG.md)
+- Documentary gallery: [three reviewed public histories](https://othmaneblial.github.io/RepoRewind/gallery.html)
+- Discussions: [Q&A, ideas, releases, and show-and-tell](https://github.com/OthmaneBlial/RepoRewind/discussions)
 - Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Code of Conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - Security: [SECURITY.md](./SECURITY.md)

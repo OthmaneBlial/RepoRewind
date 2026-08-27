@@ -18,6 +18,8 @@ The canonical starter-task bodies live in [`.github/contributor-issues`](https:/
 
 ## Discussions and public stories
 
+The live surfaces are [RepoRewind Discussions](https://github.com/OthmaneBlial/RepoRewind/discussions) and the [curated documentary gallery](https://othmaneblial.github.io/RepoRewind/gallery.html).
+
 - **Q&A** is for reproducible usage and interpretation questions. Remove repository-sensitive details before posting.
 - **Ideas** must name a real analyze → explore → understand → review → export job.
 - **Show and tell** accepts only fictional fixtures or an explicitly reviewed public repository story. Include provenance, RepoRewind version, ref/range, redaction choices, exact replay command, and the finding—not only an image.

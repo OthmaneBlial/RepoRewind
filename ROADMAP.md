@@ -388,6 +388,8 @@ Goal: convert interest into examples, feedback, integrations, and maintained rel
 
 ### P2.1 — Open community surfaces with real content
 
+**Implemented and verified 2026-08-27; ongoing response target.** Discussions is live with `Show and tell`, answerable `Q&A`, `Ideas`, and restricted `Releases`. Show and tell launched with three reviewed, reproducible histories ([RepoRewind](https://github.com/OthmaneBlial/RepoRewind/discussions/11), [LightClaw](https://github.com/OthmaneBlial/RepoRewind/discussions/12), and [PDF Editor Offline](https://github.com/OthmaneBlial/RepoRewind/discussions/13)) rather than an empty prompt. Seven public issues ([#4–#10](https://github.com/OthmaneBlial/RepoRewind/issues)) cover every defined contribution lane with scope, files, acceptance, commands, and visual references where needed; a checked-in contract keeps 5–10 tasks complete. The full gate passed from a clean clone under Node 24.20.0. The community guide records the 48-hour target, and generated release notes route labeled first contributions into a linked `First-time contributors` section.
+
 - Enable Discussions with `Show and tell`, `Q&A`, `Ideas`, and `Releases`.
 - Seed `Show and tell` with three reviewed histories made by the current release.
 - Publish 5–10 genuinely ready `good first issue` or `help wanted` tasks. Each needs scope, relevant files, acceptance criteria, test commands, and visual references where applicable.
@@ -408,6 +410,8 @@ Effort: **S ongoing**. Dependency: stable P0 contracts.
 ### P2.2 — Publish a curated documentary gallery
 
 Invite maintainers to submit an explicitly reviewed story pack for a public repository. Each gallery entry should explain a real finding, not merely show a pretty skyline.
+
+**Implemented, published, and verified 2026-08-27.** The [documentary gallery](https://othmaneblial.github.io/RepoRewind/gallery.html) launches with three owner-permissioned public MIT repositories and editorial findings about productization, module extraction, and a project-wide rename. Every entry records an immutable source head, complete first-parent range, release-candidate generator version/SHA, fixed public redaction choices, interpretation limit, checksum-verified 1200×630 poster and privacy report, plus an exact clone/build/analyze command tested against the pinned RepoRewind commit. The [machine-readable manifest](https://othmaneblial.github.io/RepoRewind/gallery/entries.json) is enforced by the main gate. Temporary clones and history JSON were deleted after review; only aggregate public posters and privacy reports are published. Pages deployment, live HTTP/SHA and desktop-browser checks, plus mobile layout/navigation over the byte-identical bundle, lazy images, and zero console errors were verified.
 
 Possible editorial formats:
 
