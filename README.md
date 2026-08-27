@@ -164,6 +164,8 @@ flowchart LR
 
 Read the complete [architecture guide](./docs/architecture.md), [video export decision](./docs/decisions/browser-video-export.md), [Three.js compatibility decision](./docs/decisions/three-compatibility.md), and [performance notes](./docs/performance.md).
 
+The [versioned performance envelope](./docs/performance.md) includes reproducible 120/1,000/5,000-commit fixtures, machine-readable baselines, adaptive renderer tiers, worker/no-worker observations, and real browser export timing. Performance jobs are advisory and remain separate from the main quality gate until repeated hosted runs establish variance.
+
 ## Development and validation
 
 | Command                  | Purpose                                                           |
@@ -180,6 +182,7 @@ Read the complete [architecture guide](./docs/architecture.md), [video export de
 | `npm run check`          | Run formatting, lint, docs/licenses, tests, type checking, builds |
 | `npm run package:smoke`  | Install and exercise the exact packed CLI in a clean directory    |
 | `npm run pages:build`    | Build and verify the canonical showcase plus interactive app      |
+| `npm run benchmark`      | Run advisory Git, browser, playback, and export measurements      |
 | `npm run verify`         | Run the full quality, Pages, package, and dependency audit gate   |
 
 GitHub Actions is configured to run the quality gate on pinned Node.js 24 and exercise supported Node/OS combinations on Linux, macOS, and Windows. Dependency updates are grouped weekly.

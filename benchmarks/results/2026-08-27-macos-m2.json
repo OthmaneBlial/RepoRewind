@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "v1",
+  "repoRewindVersion": "0.2.0",
+  "generatedAt": "2026-08-27T15:54:49.494Z",
+  "advisoryOnly": true,
+  "environment": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "architecture": "arm64",
+    "cpu": "Apple M2",
+    "cpuCount": 8,
+    "memoryGiB": 16,
+    "node": "v24.20.0",
+    "git": "git version 2.50.1 (Apple Git-155)",
+    "browser": "151.0.7922.175",
+    "deviceScaleFactor": 2,
+    "headless": true
+  },
+  "node": [
+    {
+      "fixture": "small",
+      "commits": 120,
+      "fileChanges": 480,
+      "finalPaths": 80,
+      "contributors": 4,
+      "releases": 3,
+      "archiveBytes": 81410,
+      "analyzerMs": 342.98,
+      "analyzerPeakRssDeltaMiB": 0.41,
+      "analyzerPeakHeapDeltaMiB": 1.97,
+      "parseMs": 0.42,
+      "validationMs": 2.52,
+      "indexMs": 2.75,
+      "layoutMs": 2.09,
+      "firstSnapshotMs": 0.33,
+      "snapshotTraversalFps": 6039.66,
+      "budget": {
+        "analyzerMs": 2000,
+        "indexMs": 250,
+        "firstInteractiveMs": 3500
+      },
+      "withinAdvisoryNodeBudget": true
+    },
+    {
+      "fixture": "medium",
+      "commits": 1000,
+      "fileChanges": 8000,
+      "finalPaths": 1200,
+      "contributors": 12,
+      "releases": 5,
+      "archiveBytes": 1060956,
+      "analyzerMs": 705.47,
+      "analyzerPeakRssDeltaMiB": 1.47,
+      "analyzerPeakHeapDeltaMiB": 16.47,
+      "parseMs": 4.85,
+      "validationMs": 8.73,
+      "indexMs": 34,
+      "layoutMs": 7.12,
+      "firstSnapshotMs": 0.58,
+      "snapshotTraversalFps": 1596.26,
+      "budget": {
+        "analyzerMs": 12000,
+        "indexMs": 1500,
+        "firstInteractiveMs": 8000
+      },
+      "withinAdvisoryNodeBudget": true
+    },
+    {
+      "fixture": "large",
+      "commits": 5000,
+      "fileChanges": 60000,
+      "finalPaths": 8000,
+      "contributors": 40,
+      "releases": 8,
+      "archiveBytes": 7261436,
+      "analyzerMs": 6356.17,
+      "analyzerPeakRssDeltaMiB": 13.23,
+      "analyzerPeakHeapDeltaMiB": 54.89,
+      "parseMs": 42.97,
+      "validationMs": 71.44,
+      "indexMs": 492.05,
+      "layoutMs": 52.64,
+      "firstSnapshotMs": 8.41,
+      "snapshotTraversalFps": 200.55,
+      "budget": {
+        "analyzerMs": 60000,
+        "indexMs": 8000,
+        "firstInteractiveMs": 20000
+      },
+      "withinAdvisoryNodeBudget": true
+    }
+  ],
+  "browser": {
+    "workers": [
+      {
+        "fixture": "small",
+        "worker": true,
+        "firstInteractiveMs": 1338.73,
+        "playbackFps": 56.19,
+        "longTasks": 6,
+        "maxLongTaskMs": 175,
+        "totalLongTaskMs": 557,
+        "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium) · WebKit WebGL",
+        "canvasPixels": "2112×1059",
+        "rendererTier": "cinematic",
+        "withinAdvisoryBudget": true
+      },
+      {
+        "fixture": "medium",
+        "worker": true,
+        "firstInteractiveMs": 1406.55,
+        "playbackFps": 53.83,
+        "longTasks": 8,
+        "maxLongTaskMs": 152,
+        "totalLongTaskMs": 668,
+        "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium) · WebKit WebGL",
+        "canvasPixels": "1600×802",
+        "rendererTier": "balanced",
+        "withinAdvisoryBudget": true
+      },
+      {
+        "fixture": "large",
+        "worker": true,
+        "firstInteractiveMs": 3545.03,
+        "playbackFps": 59.95,
+        "longTasks": 6,
+        "maxLongTaskMs": 947,
+        "totalLongTaskMs": 1362,
+        "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium) · WebKit WebGL",
+        "canvasPixels": "1280×642",
+        "rendererTier": "dense",
+        "withinAdvisoryBudget": true
+      }
+    ],
+    "noWorker": {
+      "fixture": "large",
+      "worker": false,
+      "firstInteractiveMs": 1452.35,
+      "playbackFps": 60.52,
+      "longTasks": 4,
+      "maxLongTaskMs": 462,
+      "totalLongTaskMs": 680,
+      "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium) · WebKit WebGL",
+      "canvasPixels": "1280×642",
+      "rendererTier": "dense",
+      "withinAdvisoryBudget": true
+    },
+    "noWebgl": {
+      "fallbackVisible": false,
+      "insightsUsable": true,
+      "pageError": "Error creating WebGL context."
+    },
+    "export": {
+      "fixture": "small",
+      "format": "webm",
+      "durationSeconds": 12,
+      "filmMs": 30305.8,
+      "storyPackMs": 2491.5,
+      "totalMs": 33150.01,
+      "bytes": 28128560
+    }
+  }
+}

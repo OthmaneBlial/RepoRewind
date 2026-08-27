@@ -1374,6 +1374,10 @@ export default function App() {
         }
         const storyPackSource = settings.delivery === 'story-pack' ? cloneCanvas(sourceCanvas!) : undefined
         const storyPackSnapshot = settings.delivery === 'story-pack' ? engine.snapshotAt(previousFrame) : undefined
+        performance.clearMarks('reporewind:film-export-start')
+        performance.clearMarks('reporewind:film-export-end')
+        performance.clearMeasures('reporewind:film-export')
+        performance.mark('reporewind:film-export-start')
         const blob = await exportTimelapse({
           ...settings,
           history,
@@ -1384,7 +1388,13 @@ export default function App() {
           onProgress: setExportProgress,
           signal: controller.signal,
         })
+        performance.mark('reporewind:film-export-end')
+        performance.measure('reporewind:film-export', 'reporewind:film-export-start', 'reporewind:film-export-end')
         if (settings.delivery === 'story-pack' && storyPackSource && storyPackSnapshot) {
+          performance.clearMarks('reporewind:story-pack-start')
+          performance.clearMarks('reporewind:story-pack-end')
+          performance.clearMeasures('reporewind:story-pack')
+          performance.mark('reporewind:story-pack-start')
           const pack = await buildStoryPack({
             history,
             snapshot: storyPackSnapshot,
@@ -1396,6 +1406,8 @@ export default function App() {
             story: settings.story,
             storyCustomTitles: settings.storyCustomTitles,
           })
+          performance.mark('reporewind:story-pack-end')
+          performance.measure('reporewind:story-pack', 'reporewind:story-pack-start', 'reporewind:story-pack-end')
           downloadBlob(pack.blob, pack.filename)
         } else {
           downloadBlob(blob, historyFilmFilename(history.repository.name, settings.format))

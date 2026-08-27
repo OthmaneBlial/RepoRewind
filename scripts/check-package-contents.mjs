@@ -14,6 +14,8 @@ if (!pack || !Array.isArray(pack.files)) throw new Error('npm pack did not retur
 
 const paths = pack.files.map((file) => file.path)
 const required = [
+  'benchmarks/fixtures/v1.json',
+  'benchmarks/results/2026-08-27-macos-m2.json',
   'LICENSE',
   'README.md',
   'THIRD_PARTY_NOTICES.md',

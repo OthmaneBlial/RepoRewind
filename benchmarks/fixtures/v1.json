@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "v1",
+  "fixtures": [
+    {
+      "id": "small",
+      "commits": 120,
+      "changesPerCommit": 4,
+      "paths": 80,
+      "contributors": 4,
+      "releases": 3,
+      "budgets": {
+        "analyzerMs": 2000,
+        "indexMs": 250,
+        "firstInteractiveMs": 3500
+      }
+    },
+    {
+      "id": "medium",
+      "commits": 1000,
+      "changesPerCommit": 8,
+      "paths": 1200,
+      "contributors": 12,
+      "releases": 5,
+      "budgets": {
+        "analyzerMs": 12000,
+        "indexMs": 1500,
+        "firstInteractiveMs": 8000
+      }
+    },
+    {
+      "id": "large",
+      "commits": 5000,
+      "changesPerCommit": 12,
+      "paths": 8000,
+      "contributors": 40,
+      "releases": 8,
+      "budgets": {
+        "analyzerMs": 60000,
+        "indexMs": 8000,
+        "firstInteractiveMs": 20000
+      }
+    }
+  ]
+}

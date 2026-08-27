@@ -339,6 +339,8 @@ Effort: **L**. Dependency: the existing index is sufficient for a first slice.
 
 ### P1.6 — Publish a real performance envelope
 
+**Implementation complete 2026-08-27; hosted baseline pending.** Fixture contract `v1` now covers 120, 1,000, and 5,000 commits; the production analyzer, validation/index, layout/snapshot, worker/no-worker browser load, WebGL playback, non-WebGL behavior, and a real story-pack export are measured into versioned JSON. An Apple M2 baseline and [methodology](./docs/performance.md) are checked in. A pinned monthly/manual workflow publishes advisory artifacts separately from the pass/fail CI gate. Measurements justified deterministic cinematic, balanced, and dense renderer tiers.
+
 Create versioned public fixtures and benchmarks for small, medium, and large histories.
 
 Measure:

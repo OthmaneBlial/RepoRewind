@@ -24,6 +24,8 @@
     "webgl"
   ],
   "files": [
+    "benchmarks/**/*.json",
+    "benchmarks/**/*.md",
     "dist/",
     "dist-cli/",
     "docs/**/*.md",
@@ -71,7 +73,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "tsx cli/index.ts analyze",
-    "check": "npm run format:check && npm run lint && npm run docs:check && npm run licenses:check && npm run test && npm run build",
+    "benchmark": "npm run build:web && node --expose-gc --import tsx scripts/benchmarks/run.ts",
+    "benchmark:check": "node scripts/check-benchmark-results.mjs",
+    "benchmark:install": "playwright install chromium",
+    "check": "npm run format:check && npm run lint && npm run docs:check && npm run licenses:check && npm run benchmark:check && npm run test && npm run build",
     "verify": "npm run check && npm run pages:verify && npm run package:check && npm audit --audit-level=high"
   },
   "devDependencies": {
@@ -89,6 +94,7 @@
     "jsdom": "^29.1.1",
     "mediabunny": "1.55.1",
     "oxlint": "^1.79.0",
+    "playwright": "1.62.1",
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

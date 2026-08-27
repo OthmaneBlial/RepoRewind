@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { OrbitControls as ThreeOrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { CityLayout } from '../core/layout'
 import type { ComparisonKind } from '../core/compare'
+import { rendererQualityForPathCount } from '../core/renderer-quality'
 import type { Contributor, HistorySnapshot } from '../core/types'
 
 const languageColors: Record<string, string> = {
@@ -445,7 +446,7 @@ function CameraControls({
   return null
 }
 
-function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
+function SceneContents(props: Omit<CitySceneProps, 'onCanvas'> & { shadowMapSize: 1024 | 2048 }) {
   return (
     <>
       <fog attach="fog" args={['#d8d3c7', props.layout.span * 0.82, props.layout.span * 2.35]} />
@@ -456,7 +457,7 @@ function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
         intensity={4.8}
         color="#fff0c9"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[props.shadowMapSize, props.shadowMapSize]}
         shadow-camera-far={120}
       />
       <directionalLight position={[-22, 18, 20]} intensity={1.5} color="#b8d9cf" />
@@ -501,11 +502,14 @@ function SceneContents(props: Omit<CitySceneProps, 'onCanvas'>) {
 }
 
 export function CityScene({ onCanvas, ...props }: CitySceneProps) {
+  const quality = rendererQualityForPathCount(props.layout.buildings.size)
   const renderDpr = props.renderWidth
     ? Math.max(1.65, Math.min(4, props.renderWidth / Math.max(1, window.innerWidth)))
-    : ([1, 1.65] as [number, number])
+    : ([1, quality.maximumDpr] as [number, number])
   return (
     <Canvas
+      key={quality.tier}
+      data-renderer-tier={quality.tier}
       camera={{
         position: [props.layout.span * 0.45, props.layout.span * 0.42, props.layout.span * 0.5],
         fov: 40,
@@ -513,23 +517,29 @@ export function CityScene({ onCanvas, ...props }: CitySceneProps) {
         far: 500,
       }}
       dpr={renderDpr}
-      shadows={{ type: THREE.PCFSoftShadowMap }}
+      shadows={quality.shadows ? { type: THREE.PCFSoftShadowMap } : false}
       fallback={
         <div className="webgl-fallback" role="alert">
           <strong>WebGL is unavailable.</strong>
           <span>Enable hardware acceleration or try a current browser to render the repository city.</span>
         </div>
       }
-      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true }}
+      gl={{
+        antialias: quality.antialias,
+        alpha: false,
+        powerPreference: 'high-performance',
+        preserveDrawingBuffer: true,
+      }}
       onCreated={({ gl }) => {
         gl.setClearColor('#d8d3c7')
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.28
+        gl.domElement.dataset.rendererTier = quality.tier
         onCanvas(gl.domElement)
       }}
       onPointerMissed={() => props.onSelect(undefined)}
     >
-      <SceneContents {...props} />
+      <SceneContents {...props} shadowMapSize={quality.shadowMapSize} />
     </Canvas>
   )
 }
