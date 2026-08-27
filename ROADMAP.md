@@ -113,7 +113,7 @@ Effort: **S**. Dependency: none.
 
 ### P0.2 — Publish a real npm/npx CLI
 
-**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. Linux, macOS, and Windows now exercise that tarball contract in CI. The remaining acceptance gate is the public npm release and provenance verification.
+**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. [CI run `33082632368`](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33082632368) proves that tarball contract on Node 22/Linux and Node 24/macOS/Windows. The remaining acceptance gate is the public npm release and provenance verification.
 
 Turn the existing executable foundation into two supported public workflows:
 
@@ -147,6 +147,8 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
+**Implementation complete 2026-08-27; repository social-preview upload pending.** The README now leads with a real 12-second 640×360 product replay (4.6 MB), a reduced-motion/static fallback, the canonical command and expected result, the local-first contract, and three repeat workflows. A reproducible 1280×640 social-preview source and 322 kB PNG are ready in `docs/`; GitHub must still report that image as the repository Open Graph preview.
+
 The README should sell one result before cataloguing the architecture.
 
 Recommended order:
@@ -177,6 +179,8 @@ Acceptance:
 Effort: **S**. Dependency: use the final P0.2 command, not a placeholder.
 
 ### P0.4 — Ship `v0.2.0` as the activation release
+
+**Release candidate prepared 2026-08-27; external publication pending.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC release workflow are present. The package name must first be created by an authenticated npm publisher before npm can attach the trusted GitHub workflow and issue provenance for the stable release.
 
 Release theme: **“Your repository, one command away.”**
 

@@ -29,6 +29,10 @@ const forbidden = paths.filter(
     path.startsWith('.env') ||
     path.startsWith('artifacts/') ||
     path.startsWith('cli/') ||
+    path.startsWith('docs/assets/') ||
+    path.startsWith('docs/screenshots/') ||
+    path === 'docs/social-preview.png' ||
+    path === 'docs/social-preview.svg' ||
     path.startsWith('research_') ||
     path.startsWith('scripts/') ||
     path.startsWith('site/') ||

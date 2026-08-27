@@ -38,7 +38,8 @@ afterEach(async () => {
 describe('RepoRewind CLI', () => {
   it('reports its package version without requiring a command', async () => {
     const { stdout, stderr } = await runCli('--version')
-    expect(stdout.trim()).toBe('0.1.0')
+    const packageJson = JSON.parse(await readFile(join(projectRoot, 'package.json'), 'utf8')) as { version: string }
+    expect(stdout.trim()).toBe(packageJson.version)
     expect(stderr).toBe('')
   })
 

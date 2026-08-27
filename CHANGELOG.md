@@ -4,12 +4,19 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-27
+
 ### Added
 
 - Published the real interactive application at `https://othmaneblial.github.io/RepoRewind/play/` and linked it from the showcase, documentation, and README.
 - Added a reproducible Pages bundle that combines the static showcase with the production app, verifies subpath-safe assets, blocks source maps, and participates in the full verification gate.
 - Added the one-command `reporewind [repository]` workflow: it analyzes Git, starts a tokenized read-only loopback viewer, loads the validated history automatically, and opens the browser without a temporary archive.
 - Added public npm metadata, a narrow package allowlist, clean-tarball inspection, and an exact-package smoke test for version output, portable analysis, viewer loading, and shutdown across the CI operating-system matrix.
+- Added a real 12-second moving product proof plus a reproducible 1280×640 social preview built from the actual RepoRewind interface.
+
+### Changed
+
+- Rebuilt the README around the first real-repository success, one canonical command, explicit expected output, the local-first contract, and repeatable onboarding, investigation, and presentation jobs.
 
 ### Security
 
@@ -48,5 +55,6 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Contributor grouping uses archive-local sequential identifiers instead of an email-derived hash, preventing cross-archive correlation through contributor IDs.
 - Production-host examples include restrictive security headers and no telemetry.
 
-[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.1.0

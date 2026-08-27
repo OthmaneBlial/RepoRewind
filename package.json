@@ -1,6 +1,6 @@
 {
   "name": "reporewind",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "A cinematic visual history engine for Git repositories.",
   "license": "MIT",
@@ -26,7 +26,7 @@
   "files": [
     "dist/",
     "dist-cli/",
-    "docs/",
+    "docs/**/*.md",
     "schema/",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",
@@ -56,6 +56,7 @@
     "package:check": "node scripts/check-package-contents.mjs",
     "package:smoke": "npm run build && npm run package:smoke:prepared",
     "package:smoke:prepared": "node scripts/smoke-packed-cli.mjs",
+    "release:check": "node scripts/check-release-version.mjs",
     "pages:bundle": "node scripts/build-pages-site.mjs",
     "pages:check": "node scripts/check-pages-site.mjs",
     "pages:build": "npm run build:web && npm run pages:bundle && npm run pages:check",

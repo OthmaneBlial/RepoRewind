@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish-npm:
+    name: Verify and publish npm package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Use the supported release runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24.19.0
+          package-manager-cache: false
+      - name: Install the locked toolchain
+        run: npm ci
+      - name: Match the tag, package, and changelog
+        run: npm run release:check
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+      - name: Run the complete release gate
+        run: npm run verify
+      - name: Exercise the exact release tarball
+        run: npm run package:smoke:prepared
+      - name: Publish with npm trusted publishing and provenance
+        run: npm publish --access public
