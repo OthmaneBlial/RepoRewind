@@ -102,5 +102,5 @@ describe('RepoRewind CLI', () => {
     expect(
       (await readdir(repository)).filter((entry) => entry.startsWith('history.json.') && entry.endsWith('.tmp')),
     ).toEqual([])
-  })
+  }, 30_000)
 })

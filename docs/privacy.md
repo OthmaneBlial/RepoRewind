@@ -44,6 +44,8 @@ Every film-only export is accompanied by `reporewind-privacy-report.json`; a [hi
 
 The film overlay and privacy report use the same immutable disclosure settings. Export tests snapshot both public-safe and private overlay copy so a redaction regression fails the verification gate.
 
+The [opt-in evidence-poster Action](./github-action.md) uses that same fixed public projection. Its manual workflow grants only `contents: read`, sends the four-file result to a private Actions artifact for at most seven days, and has no commit, comment, Pages, Release, or package publication path. Private and internal repositories do not receive broader behavior.
+
 ## Network behavior
 
 The hosted application makes no repository-data requests. Browser dependencies and fonts are bundled locally. A sanitized HTTPS repository remote (or loopback HTTP URL for local development) may be shown as a user-activated source link; RepoRewind never fetches that URL.

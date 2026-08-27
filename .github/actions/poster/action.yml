@@ -1,0 +1,57 @@
+name: RepoRewind evidence poster
+description: Generate a deterministic public-safe repository poster without publishing repository data.
+
+inputs:
+  ref:
+    description: Optional Git ref to analyze. Defaults to the checked-out branch.
+    required: false
+    default: ''
+  max-commits:
+    description: Maximum first-parent commits to analyze.
+    required: false
+    default: '5000'
+  output-directory:
+    description: Output directory inside the caller workspace.
+    required: false
+    default: reporewind-action-output
+  retention-days:
+    description: Retention recorded in the manifest. The upload step must use the same value.
+    required: false
+    default: '3'
+
+outputs:
+  artifact-path:
+    description: Absolute directory containing the poster, privacy report, manifest, and checksums.
+    value: ${{ steps.generate.outputs.artifact-path }}
+  poster-sha256:
+    description: SHA-256 of the deterministic PNG poster.
+    value: ${{ steps.generate.outputs.poster-sha256 }}
+
+runs:
+  using: composite
+  steps:
+    - id: generate
+      name: Generate a reviewed local artifact
+      shell: bash
+      env:
+        REPOREWIND_ACTION_REPOSITORY: ${{ github.workspace }}
+        REPOREWIND_ACTION_REF: ${{ inputs.ref }}
+        REPOREWIND_ACTION_MAX_COMMITS: ${{ inputs.max-commits }}
+        REPOREWIND_ACTION_OUTPUT_DIR: ${{ github.workspace }}/${{ inputs.output-directory }}
+        REPOREWIND_ACTION_RETENTION_DAYS: ${{ inputs.retention-days }}
+        REPOREWIND_ACTION_REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+      run: |
+        set -euo pipefail
+        if [ "${RUNNER_OS:-}" != "Linux" ]; then
+          echo "RepoRewind poster generation currently supports GitHub-hosted Linux runners only." >&2
+          exit 1
+        fi
+        action_root="$(cd "${GITHUB_ACTION_PATH}/../../.." && pwd)"
+        cd "${action_root}"
+        npm ci
+        npm run build:web
+        npx playwright install --with-deps chromium
+        node --import tsx scripts/actions/render-poster.ts
+        poster_sha="$(awk '$2 == "repo-rewind-evidence-poster.png" { print $1 }' "${REPOREWIND_ACTION_OUTPUT_DIR}/SHA256SUMS")"
+        printf 'artifact-path=%s\n' "${REPOREWIND_ACTION_OUTPUT_DIR}" >> "${GITHUB_OUTPUT}"
+        printf 'poster-sha256=%s\n' "${poster_sha}" >> "${GITHUB_OUTPUT}"

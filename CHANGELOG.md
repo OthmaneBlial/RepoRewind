@@ -7,6 +7,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 ### Added
 
 - Added an automatic non-WebGL evidence mode over the same archive engine, with search, Insights, timeline comparison, Story Director navigation, keyboard-readable file evidence, a compact mobile layout, and a public-safe 1200×630 PNG poster plus privacy report.
+- Added a manual read-only evidence-poster Action that checks deterministic pixels, emits checksums and a non-publication manifest, and retains only a private short-lived Actions artifact.
 
 ### Changed
 

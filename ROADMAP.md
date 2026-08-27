@@ -282,6 +282,8 @@ Effort: **L**. Dependency: P1.1; can ship after the basic story pack.
 
 Start with a deterministic poster, not CI video.
 
+**Implemented and verified locally 2026-08-27; hosted run pending.** A manual read-only workflow now renders the fixed public-safe evidence poster twice, rejects pixel drift, and uploads only a private 1/3/7-day artifact containing the poster, privacy report, non-publication manifest, and SHA-256 checksums. Third-party Actions are immutable-SHA pinned, complete history is explicit, caller and GitHub values enter the generator only through environment variables, and contract tests reject automatic triggers, write permissions, or publication commands. Private/internal visibility changes only the manifest label and never enables publishing.
+
 Safe rollout:
 
 1. manual `workflow_dispatch` generation;
