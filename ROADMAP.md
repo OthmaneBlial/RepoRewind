@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Implementation complete 2026-08-27; repository social-preview upload pending.** The README now leads with a real 12-second 640×360 product replay (4.6 MB), a reduced-motion/static fallback, the canonical command and expected result, the local-first contract, and three repeat workflows. A reproducible 1280×640 social-preview source and 322 kB PNG are ready in `docs/`; GitHub must still report that image as the repository Open Graph preview.
+**Implemented, published, and verified 2026-08-27.** The README now leads with a real 12-second 640×360 product replay (4.6 MB), a reduced-motion/static fallback, the canonical command and expected result, the local-first contract, and three repeat workflows. GitHub serves the custom 1280×640 social preview from `repository-images.githubusercontent.com`; the downloaded public image is byte-for-byte identical to `docs/social-preview.png` (SHA-256 `da160f8b03a0aa7f36a795a2226fa2da5811a0c003ee9a4f129fc483b52a9bf7`). Clean-directory command proof remains part of P0.2's public npm release gate.
 
 The README should sell one result before cataloguing the architecture.
 
