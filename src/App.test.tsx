@@ -44,10 +44,11 @@ describe('RepoRewind application', () => {
     }
     const fetchMock = vi.fn<typeof fetch>(
       async () =>
-        new Response(JSON.stringify(localHistory), {
-          headers: { 'content-type': 'application/json' },
+        ({
+          blob: async () => new Blob([JSON.stringify(localHistory)], { type: 'application/json' }),
+          ok: true,
           status: 200,
-        }),
+        }) as Response,
     )
     vi.stubGlobal('fetch', fetchMock)
     vi.stubGlobal('Worker', undefined)

@@ -10,6 +10,13 @@ const packRoot = join(temporaryRoot, 'pack')
 const installRoot = join(temporaryRoot, 'install')
 let viewerProcess
 
+function runNpm(args, options = {}) {
+  const npmCli = process.env.npm_execpath
+  return npmCli
+    ? run(process.execPath, [npmCli, ...args], options)
+    : run(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, options)
+}
+
 function run(command, args, options = {}) {
   return new Promise((resolveRun, rejectRun) => {
     const child = spawn(command, args, { ...options, stdio: ['ignore', 'pipe', 'pipe'] })
@@ -66,12 +73,12 @@ try {
   await mkdir(installRoot)
   await writeFile(join(installRoot, 'package.json'), '{"name":"reporewind-smoke","private":true}\n')
 
-  const packed = await run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', packRoot], {
+  const packed = await runNpm(['pack', '--json', '--ignore-scripts', '--pack-destination', packRoot], {
     cwd: projectRoot,
   })
   const [pack] = JSON.parse(packed.stdout)
   const tarball = join(packRoot, pack.filename)
-  await run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', tarball], { cwd: installRoot })
+  await runNpm(['install', '--ignore-scripts', '--no-audit', '--no-fund', tarball], { cwd: installRoot })
 
   const cli = join(installRoot, 'node_modules', 'reporewind', 'dist-cli', 'index.js')
   const version = await run(process.execPath, [cli, '--version'], { cwd: installRoot })
