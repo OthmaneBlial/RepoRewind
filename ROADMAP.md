@@ -2,7 +2,7 @@
 
 > **Positioning:** the private documentary of your codebase.
 
-Status: proposed roadmap based on a repository, product, distribution, and competitive audit completed on **2026-08-27**.
+Status: active delivery plan based on a repository, product, distribution, and competitive audit completed on **2026-08-27**.
 
 RepoRewind already has a coherent product: it turns truthful Git history into a stable city that can be replayed, searched, compared, inspected, and filmed. The next milestone is not “more 3D.” It is making that value immediate, useful, safe to share, and easy for other people to extend.
 
@@ -87,6 +87,8 @@ Every roadmap item must respect these boundaries:
 Goal: remove every unnecessary step between curiosity and the first truthful city.
 
 ### P0.1 — Deploy the real interactive playground
+
+**Shipped 2026-08-27.** The production app is live at [othmaneblial.github.io/RepoRewind/play/](https://othmaneblial.github.io/RepoRewind/play/). Source commit: [`d3e2896`](https://github.com/OthmaneBlial/RepoRewind/commit/d3e2896). Pages commit: [`96454fb`](https://github.com/OthmaneBlial/OthmaneBlial.github.io/commit/96454fb).
 
 Publish the production web app at a stable route such as `/RepoRewind/play/` and make **Try the live demo** the primary showcase and README call to action.
 

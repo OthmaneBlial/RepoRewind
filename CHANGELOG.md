@@ -4,6 +4,16 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Added
+
+- Published the real interactive application at `https://othmaneblial.github.io/RepoRewind/play/` and linked it from the showcase, documentation, and README.
+- Added a reproducible Pages bundle that combines the static showcase with the production app, verifies subpath-safe assets, blocks source maps, and participates in the full verification gate.
+
+### Security
+
+- Added an HTML Content Security Policy for static hosts and clarified which response-header protections GitHub Pages does not apply from the checked-in `_headers` file.
+- Made the import dialog explicit that selected archives stay in the current tab and are never uploaded.
+
 ## [0.1.0] - 2026-08-21
 
 ### Added
