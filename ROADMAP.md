@@ -341,7 +341,7 @@ Effort: **L**. Dependency: the existing index is sufficient for a first slice.
 
 ### P1.6 — Publish a real performance envelope
 
-**Implementation complete 2026-08-27; hosted baseline pending.** Fixture contract `v1` now covers 120, 1,000, and 5,000 commits; the production analyzer, validation/index, layout/snapshot, worker/no-worker browser load, WebGL playback, non-WebGL behavior, and a real story-pack export are measured into versioned JSON. An Apple M2 baseline and [methodology](./docs/performance.md) are checked in. A pinned monthly/manual workflow publishes advisory artifacts separately from the pass/fail CI gate. Measurements justified deterministic cinematic, balanced, and dense renderer tiers.
+**Implemented and verified 2026-08-27.** Fixture contract `v1` now covers 120, 1,000, and 5,000 commits; the production analyzer, validation/index, layout/snapshot, worker/no-worker browser load, WebGL playback, non-WebGL behavior, and a real story-pack export are measured into versioned JSON. An Apple M2 baseline and [methodology](./docs/performance.md) are checked in. The [hosted Node 24 + Chromium run](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33095688793) completed successfully and published the complete advisory JSON: all Node and first-interactive budgets passed, forced-no-WebGL workflows and 1200×630 poster passed, and the real 12-second 640×360 export completed. Measurements justified deterministic cinematic, balanced, and dense renderer tiers; hosted software-render playback remains advisory because its low FPS is not representative of an interactive GPU session.
 
 Create versioned public fixtures and benchmarks for small, medium, and large histories.
 

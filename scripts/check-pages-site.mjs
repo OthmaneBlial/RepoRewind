@@ -55,8 +55,16 @@ const documents = new Map()
 for (const file of htmlFiles) documents.set(file, await checkDocument(file))
 
 const landing = documents.get(join(pagesRoot, 'index.html')) ?? ''
+const gallery = documents.get(join(pagesRoot, 'gallery.html')) ?? ''
 const playground = documents.get(join(pagesRoot, 'play', 'index.html')) ?? ''
 if (!landing.includes('href="./play/"')) failures.push('index.html: missing canonical ./play/ link')
+if (!landing.includes('href="./gallery.html"')) failures.push('index.html: missing canonical gallery link')
+for (const storyId of ['reporewind-productization', 'lightclaw-module-extraction', 'pdf-editor-offline-rename']) {
+  if (!gallery.includes(`id="${storyId}"`)) failures.push(`gallery.html: missing reviewed story ${storyId}`)
+}
+if (!gallery.includes('href="./gallery/entries.json"')) {
+  failures.push('gallery.html: missing machine-readable provenance link')
+}
 if (!playground.includes('http-equiv="Content-Security-Policy"')) {
   failures.push('play/index.html: missing Content-Security-Policy meta policy')
 }
