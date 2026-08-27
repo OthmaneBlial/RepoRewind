@@ -113,7 +113,7 @@ Effort: **S**. Dependency: none.
 
 ### P0.2 — Publish a real npm/npx CLI
 
-**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. [CI run `33082632368`](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33082632368) proves that tarball contract on Node 22/Linux and Node 24/macOS/Windows. The remaining acceptance gate is the public npm release and provenance verification.
+**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. [CI run `33082632368`](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33082632368) proves that tarball contract on Node 22/Linux and Node 24/macOS/Windows. The final audit on 2026-08-27 confirmed `npm whoami` returns `E401 Unauthorized` and `npm view reporewind` returns `E404 Not Found`; an authenticated npm owner must create/publish the package before public install and provenance can be verified.
 
 Turn the existing executable foundation into two supported public workflows:
 
@@ -180,7 +180,7 @@ Effort: **S**. Dependency: use the final P0.2 command, not a placeholder.
 
 ### P0.4 — Ship `v0.2.0` as the activation release
 
-**Release candidate prepared 2026-08-27; external publication pending.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC release workflow are present. The package name must first be created by an authenticated npm publisher before npm can attach the trusted GitHub workflow and issue provenance for the stable release.
+**Release candidate prepared 2026-08-27; external publication pending.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC release workflow are present. The package name must first be created by an authenticated npm publisher before npm can attach the trusted GitHub workflow and issue provenance for the stable release. The handoff is deliberately manual: run `npm login`, publish the first package, configure npm trusted publishing for `OthmaneBlial/RepoRewind`, then resume the tag/release verification here.
 
 Release theme: **“Your repository, one command away.”**
 
@@ -315,7 +315,7 @@ Goal: help maintainers answer real questions and return to RepoRewind.
 
 ### P1.5 — Add an evidence-backed archaeology desk
 
-**Implementation complete 2026-08-27; release verification pending.** The viewer now exposes eight deterministic, bounded text views with visible definitions and limits, archive-specific warnings, and direct timeline/path evidence navigation. Single-author, no-tag, truncated monorepo-like, and rename-heavy fixtures are covered. The exact [metric contract](./docs/archaeology.md) is versioned with the source.
+**Implementation complete 2026-08-27; release verification pending the npm gate.** The viewer now exposes eight deterministic, bounded text views with visible definitions and limits, archive-specific warnings, and direct timeline/path evidence navigation. Single-author, no-tag, truncated monorepo-like, and rename-heavy fixtures are covered. The exact [metric contract](./docs/archaeology.md) is versioned with the source; the implementation itself is locally verified, while the release-level command proof waits for the public package.
 
 Introduce a focused insights panel derived only from existing metadata:
 
