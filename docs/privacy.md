@@ -26,13 +26,13 @@ Downloaded films and privacy reports are normal local files controlled by the br
 
 ## Share Safety and presentation projections
 
-Film export starts with a **Public share** projection. It preserves month-level dates and aggregate counts while replacing the repository name and commit titles with generic labels and omitting contributor names, emails, commit hashes, paths, branch/tag names, and the remote. A **Private review** preset exposes identifying presentation fields except emails. Either preset can be adjusted field by field before rendering.
+Film export starts with a **Public share** projection. It preserves month-level dates, aggregate counts, and a removable **Made with RepoRewind** attribution while replacing the repository name and commit titles with generic labels and omitting contributor names, emails, commit hashes, paths, branch/tag names, and the remote. A **Private review** preset exposes identifying presentation fields except emails. Either preset can be adjusted field by field before rendering.
 
 The review is a presentation projection only. It never rewrites or deletes values in the canonical in-memory archive. Switching presets, canceling an export, closing the dialog, or closing the tab creates no durable browser state.
 
 Enabling an identifying field in a public projection disables rendering until the operator confirms the exact sensitive fields. If the canonical archive contains contributor emails, every public export also requires a separate acknowledgement even though emails remain omitted. RepoRewind never silently fetches missing history; a shallow archive is labeled as partial in the review and report.
 
-Every completed film is accompanied by `reporewind-privacy-report.json`. The report records:
+Every film-only export is accompanied by `reporewind-privacy-report.json`; a [history story pack](./story-pack.md) includes the same report as `privacy-report.json`. The report records:
 
 - the selected disclosure settings and public/private preset;
 - included and omitted field names, but never omitted field values;

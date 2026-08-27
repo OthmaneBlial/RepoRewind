@@ -15,6 +15,7 @@ export interface SharePrivacySettings {
   refNames: boolean
   dateDisclosure: DateDisclosure
   aggregates: boolean
+  attribution: boolean
   includeEmails: boolean
 }
 
@@ -42,6 +43,7 @@ export const publicShareSettings: SharePrivacySettings = {
   refNames: false,
   dateDisclosure: 'month',
   aggregates: true,
+  attribution: true,
   includeEmails: false,
 }
 
@@ -55,6 +57,7 @@ export const privateShareSettings: SharePrivacySettings = {
   refNames: true,
   dateDisclosure: 'exact',
   aggregates: true,
+  attribution: true,
   includeEmails: false,
 }
 
@@ -140,6 +143,7 @@ export function buildPrivacyReport(history: RepositoryHistory, settings: SharePr
     ...(settings.refNames ? ['branches.name', 'releases.tag'] : ['refs.genericLabel']),
     `dates:${settings.dateDisclosure}`,
     ...(settings.aggregates ? ['aggregates'] : []),
+    ...(settings.attribution ? ['product.attribution', 'product.link'] : []),
   ]
   const omittedFields = [
     ...(!settings.repositoryName ? ['repository.name', 'repository.remote'] : ['repository.remote']),
@@ -150,6 +154,7 @@ export function buildPrivacyReport(history: RepositoryHistory, settings: SharePr
     ...(settings.pathDisclosure === 'hidden' ? ['files.path', 'files.previousPath'] : []),
     ...(!settings.refNames ? ['commits.refs', 'branches.name', 'releases.tag'] : []),
     ...(!settings.aggregates ? ['aggregates'] : []),
+    ...(!settings.attribution ? ['product.attribution', 'product.link'] : []),
   ]
   const warnings = [
     ...(history.repository.truncated ? ['The archive is partial history.'] : []),

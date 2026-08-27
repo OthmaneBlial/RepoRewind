@@ -14,6 +14,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Added public npm metadata, a narrow package allowlist, clean-tarball inspection, and an exact-package smoke test for version output, portable analysis, viewer loading, and shutdown across the CI operating-system matrix.
 - Added a real 12-second moving product proof plus a reproducible 1280×640 social preview built from the actual RepoRewind interface.
 - Added a field-level Share Safety review with public/private projections, explicit sensitive-data gates, deterministic film redaction, and a versioned machine-readable privacy report.
+- Added a one-click history story pack with four fixed-size PNG variants, the selected trailer, GitHub-ready Markdown, a privacy report, and a SHA-256 manifest in one stable ZIP.
 
 ### Changed
 

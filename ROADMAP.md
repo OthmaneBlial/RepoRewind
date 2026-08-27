@@ -230,6 +230,8 @@ Effort: **M**. Dependency: P0.2.
 
 ### P1.2 — Ship a “history story pack”
 
+**Implemented and verified locally 2026-08-27.** One reviewed export now produces a stable eight-file ZIP with four documented PNG sizes, the selected MP4/WebM trailer, a GitHub-ready Markdown snippet, a privacy report, and a versioned SHA-256 manifest. A real 12-second public WebM pack was rendered in Chrome, visually inspected, extracted successfully, verified against every checksum, and scanned for omitted sample names, messages, remotes, and paths.
+
 One reviewed export should produce a coherent optional bundle:
 
 - 1200×630 social card;

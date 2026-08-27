@@ -48,6 +48,7 @@ import {
   type Mp4ExportSupport,
   type TimelapseFormat,
 } from './export/timelapse'
+import { buildStoryPack, cloneCanvas } from './export/story-pack'
 
 const CityScene = lazy(() => import('./components/CityScene').then((module) => ({ default: module.CityScene })))
 const MAX_TIMELINE_MARKERS_PER_KIND = 96
@@ -339,6 +340,7 @@ interface ExportSettings {
   height: number
   pacing: 'activity' | 'chronological'
   privacy: SharePrivacySettings
+  delivery: 'story-pack' | 'film'
 }
 
 function ExportModal({
@@ -360,12 +362,13 @@ function ExportModal({
   const [resolution, setResolution] = useState('1080')
   const [pacing, setPacing] = useState<'activity' | 'chronological'>('activity')
   const [format, setFormat] = useState<TimelapseFormat>('mp4')
+  const [delivery, setDelivery] = useState<'story-pack' | 'film'>('story-pack')
   const [mp4Support, setMp4Support] = useState<Mp4ExportSupport>()
   const [privacy, setPrivacy] = useState<SharePrivacySettings>(() => shareSettingsForPreset('public'))
   const [sensitiveReviewed, setSensitiveReviewed] = useState(false)
   const [emailReviewed, setEmailReviewed] = useState(false)
   const dimensions = resolution === '4k' ? { width: 3840, height: 2160 } : { width: 1920, height: 1080 }
-  const settings = { format, duration, fps: 30, ...dimensions, pacing, privacy }
+  const settings = { format, duration, fps: 30, ...dimensions, pacing, privacy, delivery }
   const privacyReport = useMemo(() => buildPrivacyReport(history, privacy), [history, privacy])
   const sensitiveFields = sensitivePublicFields(privacy)
   const emailReviewRequired = privacy.preset === 'public' && historyContainsEmails(history)
@@ -463,6 +466,7 @@ function ExportModal({
               ['commitHashes', 'Commit hashes'],
               ['refNames', 'Branch and release names'],
               ['aggregates', 'Aggregate counts'],
+              ['attribution', 'Made with RepoRewind attribution'],
             ].map(([key, label]) => (
               <label key={key}>
                 <input
@@ -531,11 +535,23 @@ function ExportModal({
           </label>
         )}
         <p className="privacy-report-note">
-          A machine-readable privacy report downloads with the film. It records scope, completeness, archive size,
-          schema, version, included fields, and omissions—never the omitted values.
+          A machine-readable privacy report is included in the story pack, or downloaded beside a film-only export. It
+          records scope, completeness, archive size, schema, version, included fields, and omissions—never the omitted
+          values.
         </p>
       </section>
       <div className="option-grid">
+        <fieldset>
+          <legend>Output</legend>
+          <div className="segmented">
+            <button className={delivery === 'story-pack' ? 'active' : ''} onClick={() => setDelivery('story-pack')}>
+              Story pack
+            </button>
+            <button className={delivery === 'film' ? 'active' : ''} onClick={() => setDelivery('film')}>
+              Film only
+            </button>
+          </div>
+        </fieldset>
         <fieldset>
           <legend>Resolution</legend>
           <div className="segmented">
@@ -581,7 +597,7 @@ function ExportModal({
           </div>
         </fieldset>
         <fieldset>
-          <legend>Delivery</legend>
+          <legend>Video format</legend>
           <div className="segmented">
             <button
               className={format === 'mp4' ? 'active' : ''}
@@ -616,7 +632,7 @@ function ExportModal({
         </div>
       ) : (
         <button className="primary-action" disabled={!privacyReady} onClick={() => onExport(settings)}>
-          <FilmIcon /> Render {format.toUpperCase()} film
+          <FilmIcon /> {delivery === 'story-pack' ? 'Build story pack' : `Render ${format.toUpperCase()} film`}
         </button>
       )}
       <p className="privacy-note">
@@ -1123,6 +1139,12 @@ export default function App() {
       setExportProgress(0)
       const previousFrame = frame
       try {
+        const sourceCanvas = canvasRef.current
+        if (settings.delivery === 'story-pack' && !sourceCanvas) {
+          throw new Error('The city renderer is not ready for a story pack. Wait for the city and retry.')
+        }
+        const storyPackSource = settings.delivery === 'story-pack' ? cloneCanvas(sourceCanvas!) : undefined
+        const storyPackSnapshot = settings.delivery === 'story-pack' ? engine.snapshotAt(previousFrame) : undefined
         const blob = await exportTimelapse({
           ...settings,
           history,
@@ -1133,13 +1155,30 @@ export default function App() {
           onProgress: setExportProgress,
           signal: controller.signal,
         })
-        downloadBlob(blob, historyFilmFilename(history.repository.name, settings.format))
-        downloadBlob(
-          new Blob([privacyReportJson(history, settings.privacy)], { type: 'application/json' }),
-          'reporewind-privacy-report.json',
-        )
+        if (settings.delivery === 'story-pack' && storyPackSource && storyPackSnapshot) {
+          const pack = await buildStoryPack({
+            history,
+            snapshot: storyPackSnapshot,
+            privacy: settings.privacy,
+            sourceCanvas: storyPackSource,
+            trailer: blob,
+            trailerFormat: settings.format,
+            signal: controller.signal,
+          })
+          downloadBlob(pack.blob, pack.filename)
+        } else {
+          downloadBlob(blob, historyFilmFilename(history.repository.name, settings.format))
+          downloadBlob(
+            new Blob([privacyReportJson(history, settings.privacy)], { type: 'application/json' }),
+            'reporewind-privacy-report.json',
+          )
+        }
         setExportOpen(false)
-        showNotice('Your time-lapse film and privacy report have been rendered.')
+        showNotice(
+          settings.delivery === 'story-pack'
+            ? 'Your reviewed story pack has been rendered.'
+            : 'Your time-lapse film and privacy report have been rendered.',
+        )
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === 'AbortError') {
           showNotice('Film export canceled.')

@@ -105,6 +105,9 @@ describe('RepoRewind application', () => {
     const dialog = screen.getByRole('dialog', { name: 'Direct your time-lapse.' })
     expect(await within(dialog).findByText(/WebM is selected/)).toBeVisible()
     expect(within(dialog).getByRole('button', { name: 'MP4' })).toBeDisabled()
+    expect(within(dialog).getByRole('button', { name: 'Story pack' })).toHaveClass('active')
+    expect(within(dialog).getByRole('button', { name: 'Build story pack' })).toBeEnabled()
+    await user.click(within(dialog).getByRole('button', { name: 'Film only' }))
     expect(within(dialog).getByRole('button', { name: 'Render WEBM film' })).toBeEnabled()
   })
 
@@ -118,7 +121,7 @@ describe('RepoRewind application', () => {
     expect(within(dialog).getByLabelText('Current export field preview')).toHaveTextContent('Repository history')
     expect(within(dialog).getByText(/repository\.genericLabel/)).toBeVisible()
 
-    const renderButton = await within(dialog).findByRole('button', { name: /Render (MP4|WEBM) film/ })
+    const renderButton = await within(dialog).findByRole('button', { name: 'Build story pack' })
     expect(renderButton).toBeEnabled()
     await user.click(within(dialog).getByRole('checkbox', { name: 'Repository name' }))
     expect(renderButton).toBeDisabled()
@@ -143,7 +146,7 @@ describe('RepoRewind application', () => {
     await user.click(screen.getByRole('button', { name: 'Export film' }))
 
     const dialog = screen.getByRole('dialog', { name: 'Direct your time-lapse.' })
-    const renderButton = await within(dialog).findByRole('button', { name: /Render (MP4|WEBM) film/ })
+    const renderButton = await within(dialog).findByRole('button', { name: 'Build story pack' })
     const emailReview = within(dialog).getByRole('checkbox', { name: /canonical archive contains emails/i })
     expect(renderButton).toBeDisabled()
     expect(within(dialog).getByText(/contributors\.email/)).toBeVisible()
