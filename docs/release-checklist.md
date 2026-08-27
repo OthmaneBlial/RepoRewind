@@ -13,11 +13,15 @@ Use this checklist for a public tag or hosted demo. It records evidence; it is n
 ## Automated validation
 
 - [ ] `npm run verify`
+- [ ] `npm run package:smoke`
+- [ ] `npm pack --dry-run --json` contains only the reviewed allowlist.
+- [ ] Install the exact tarball in a clean directory and exercise `--version`, `analyze`, and the loopback viewer.
 - [ ] `npm run analyze -- . --output ./artifacts/reporewind-history.json`
 - [ ] `node dist-cli/index.js --version`
 - [ ] `npm run preview -- --host 127.0.0.1`
 - [ ] Production HTML and immutable assets return successfully over HTTP.
 - [ ] `dist/LICENSE` and `dist/THIRD_PARTY_NOTICES.md` are present in the deployable artifact.
+- [ ] `npm view reporewind version` matches the release and provenance is visible on npm.
 
 ## Product validation
 

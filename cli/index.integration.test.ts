@@ -42,10 +42,25 @@ describe('RepoRewind CLI', () => {
     expect(stderr).toBe('')
   })
 
+  it('documents the one-command viewer and portable archive workflows', async () => {
+    const { stdout, stderr } = await runCli('--help')
+    expect(stderr).toBe('')
+    expect(stdout).toContain('reporewind [repository] [options]')
+    expect(stdout).toContain('reporewind analyze [repository] [options]')
+    expect(stdout).toContain('--no-open')
+  })
+
   it('rejects unknown options with an actionable non-zero failure', async () => {
     await expect(runCli('analyze', '.', '--unknown-option')).rejects.toMatchObject({
       code: 1,
       stderr: expect.stringContaining('Run reporewind --help for usage.'),
+    })
+  })
+
+  it('keeps archive-writing flags out of the local viewer mode', async () => {
+    await expect(runCli('.', '--output', 'history.json')).rejects.toMatchObject({
+      code: 1,
+      stderr: expect.stringContaining('available only with reporewind analyze'),
     })
   })
 

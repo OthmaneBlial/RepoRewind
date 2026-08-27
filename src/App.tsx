@@ -75,6 +75,17 @@ export function safeRepositoryUrl(remote?: string): string | undefined {
   }
 }
 
+export function bootstrapArchiveUrl(): string | undefined {
+  const value = document.querySelector<HTMLMetaElement>('meta[name="reporewind-archive"]')?.content.trim()
+  if (!value) return undefined
+  try {
+    const url = new URL(value, window.location.href)
+    return url.origin === window.location.origin ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
 const eraName = (index: number, total: number) => {
   const progress = index / Math.max(1, total - 1)
   if (progress < 0.14) return 'The foundation'
@@ -295,7 +306,7 @@ function ImportModal({
           <span>Terminal</span>
         </div>
         <code>
-          <b>$</b> npm run analyze -- /path/to/repository --output ./reporewind-history.json
+          <b>$</b> npx reporewind analyze /path/to/repository --output ./reporewind-history.json
           <br />
           <b>→</b> Select Import and choose the generated JSON
         </code>
@@ -734,6 +745,7 @@ function FileInspector({
 }
 
 export default function App() {
+  const sessionArchiveUrl = useMemo(() => bootstrapArchiveUrl(), [])
   const [history, setHistory] = useState<RepositoryHistory>(sampleHistory)
   const [historyIndex, setHistoryIndex] = useState<HistoryIndex>(() => buildHistoryIndex(sampleHistory))
   const [archiveSource, setArchiveSource] = useState<'demo' | 'imported'>('demo')
@@ -751,6 +763,10 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState(0)
   const [exportWidth, setExportWidth] = useState<number>()
+  const [sessionProgress, setSessionProgress] = useState(0)
+  const [sessionState, setSessionState] = useState<'idle' | 'loading' | 'ready' | 'error'>(() =>
+    sessionArchiveUrl ? 'loading' : 'idle',
+  )
   const [notice, setNotice] = useState<{ message: string; tone: 'status' | 'error' }>()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -812,6 +828,41 @@ export default function App() {
     setNotice({ message, tone })
     if (timeout > 0) noticeTimer.current = window.setTimeout(() => setNotice(undefined), timeout)
   }, [])
+
+  useEffect(() => {
+    if (!sessionArchiveUrl) return
+    const controller = new AbortController()
+    void (async () => {
+      try {
+        const response = await fetch(sessionArchiveUrl, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        })
+        if (!response.ok) throw new Error(`The local history endpoint returned HTTP ${response.status}.`)
+        const archive = new File([await response.blob()], 'reporewind-local-session.json', {
+          type: 'application/json',
+        })
+        const prepared = await prepareHistoryFile(archive, setSessionProgress, controller.signal)
+        setHistory(prepared.history)
+        setHistoryIndex(prepared.index)
+        setArchiveSource('imported')
+        setFrame(0)
+        setPlaying(false)
+        setSelectedPath(undefined)
+        setComparisonBase(undefined)
+        setComparisonOpen(false)
+        setSessionState('ready')
+        showNotice(`${prepared.history.repository.name} is ready in this local session.`)
+      } catch (reason) {
+        if (reason instanceof DOMException && reason.name === 'AbortError') return
+        setSessionState('error')
+        showNotice(reason instanceof Error ? reason.message : 'The local history could not be loaded.', 'error', 0)
+      }
+    })()
+    return () => controller.abort()
+  }, [sessionArchiveUrl, showNotice])
 
   useEffect(
     () => () => {
@@ -969,6 +1020,19 @@ export default function App() {
         Skip to timeline controls
       </a>
       <div className="atmosphere" aria-hidden="true" />
+      {sessionState === 'loading' && (
+        <output className="session-bootstrap" aria-live="polite">
+          <span className="brand-mark" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <p className="eyebrow">Local session</p>
+          <strong>Mapping your repository’s history…</strong>
+          <progress value={sessionProgress} max={1} aria-label="Local history preparation" />
+          <small>{Math.round(sessionProgress * 100)}% · no repository data leaves this machine</small>
+        </output>
+      )}
       <header className="topbar">
         <div className="brand" aria-label="RepoRewind home">
           <span className="brand-mark">

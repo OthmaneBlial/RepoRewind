@@ -113,6 +113,8 @@ Effort: **S**. Dependency: none.
 
 ### P0.2 — Publish a real npm/npx CLI
 
+**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. Linux, macOS, and Windows now exercise that tarball contract in CI. The remaining acceptance gate is the public npm release and provenance verification.
+
 Turn the existing executable foundation into two supported public workflows:
 
 ```bash

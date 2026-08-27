@@ -1,12 +1,15 @@
 # Architecture
 
-RepoRewind is deliberately split into a local Git analyzer and a static browser application. There is no application server or hosted data plane.
+RepoRewind is deliberately split into a local Git analyzer and a static browser application. There is no hosted data plane. The one-command workflow adds an ephemeral, read-only loopback server that connects those two local components without writing a temporary archive.
 
 ```mermaid
 flowchart LR
   A[Local Git repository] -->|fixed Git commands| B[Streaming analyzer CLI]
-  B -->|schema v1 JSON; no source contents| C[Portable history archive]
-  C -->|user-selected file| D[Runtime validation]
+  B -->|schema v1 JSON; no source contents| C{Delivery}
+  C -->|explicit analyze command| P[Portable history archive]
+  C -->|tokenized 127.0.0.1 session| L[In-memory loopback response]
+  P -->|user-selected file| D[Runtime validation]
+  L -->|same-origin fetch| D
   D --> E[Web Worker indexer]
   E --> F[Checkpointed history engine]
   F --> G[Search and temporal diff]
@@ -20,6 +23,8 @@ flowchart LR
 `cli/git-reader.ts` uses `execFile`, argument arrays, `--end-of-options`, validated refs, and NUL-delimited Git output. It reads commit metadata, names/statuses, numeric diffs, refs, and tags. It never reads file contents into the archive. The selected branch is replayed in first-parent order so each frame is a state that existed on that line of history.
 
 The CLI emits the public contract in `schema/reporewind-history.schema.json`. Runtime validation in `src/core/history.ts` is the security boundary used by the browser; TypeScript interfaces alone are not trusted.
+
+`cli/viewer-server.ts` serves the packaged static app, assets, and in-memory archive on a random `127.0.0.1` port behind a cryptographically random path. It accepts only `GET` and `HEAD`, applies strict response headers, prevents path traversal, and exposes no write endpoint. The browser bootstrap accepts only a same-origin archive URL and validates the response through the normal import worker.
 
 ## Browser boundary
 

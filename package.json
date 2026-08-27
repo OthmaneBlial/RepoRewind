@@ -1,10 +1,45 @@
 {
   "name": "reporewind",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "A cinematic visual history engine for Git repositories.",
   "license": "MIT",
+  "homepage": "https://othmaneblial.github.io/RepoRewind/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OthmaneBlial/RepoRewind.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OthmaneBlial/RepoRewind/issues"
+  },
+  "keywords": [
+    "git",
+    "git-history",
+    "git-visualization",
+    "repository-analysis",
+    "developer-tools",
+    "local-first",
+    "cli",
+    "threejs",
+    "webgl"
+  ],
+  "files": [
+    "dist/",
+    "dist-cli/",
+    "docs/",
+    "schema/",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "packageManager": "npm@11.12.1",
   "engines": {
     "node": "^22.13.0 || ^24.0.0"
@@ -17,6 +52,10 @@
     "build": "npm run typecheck && npm run build:web && npm run build:cli",
     "build:web": "vite build && node scripts/copy-distribution-notices.mjs",
     "build:cli": "tsup cli/index.ts --format esm --out-dir dist-cli --clean",
+    "prepack": "npm run build",
+    "package:check": "node scripts/check-package-contents.mjs",
+    "package:smoke": "npm run build && npm run package:smoke:prepared",
+    "package:smoke:prepared": "node scripts/smoke-packed-cli.mjs",
     "pages:bundle": "node scripts/build-pages-site.mjs",
     "pages:check": "node scripts/check-pages-site.mjs",
     "pages:build": "npm run build:web && npm run pages:bundle && npm run pages:check",
@@ -32,16 +71,10 @@
     "test:watch": "vitest",
     "analyze": "tsx cli/index.ts analyze",
     "check": "npm run format:check && npm run lint && npm run docs:check && npm run licenses:check && npm run test && npm run build",
-    "verify": "npm run check && npm run pages:verify && npm audit --audit-level=high"
-  },
-  "dependencies": {
-    "@react-three/fiber": "^9.7.0",
-    "mediabunny": "1.55.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "three": "0.182.0"
+    "verify": "npm run check && npm run pages:verify && npm run package:check && npm audit --audit-level=high"
   },
   "devDependencies": {
+    "@react-three/fiber": "^9.7.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.5",
@@ -53,8 +86,12 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "jsdom": "^29.1.1",
+    "mediabunny": "1.55.1",
     "oxlint": "^1.79.0",
     "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "0.182.0",
     "tsup": "^8.5.1",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",

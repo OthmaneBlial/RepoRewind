@@ -8,11 +8,14 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 - Published the real interactive application at `https://othmaneblial.github.io/RepoRewind/play/` and linked it from the showcase, documentation, and README.
 - Added a reproducible Pages bundle that combines the static showcase with the production app, verifies subpath-safe assets, blocks source maps, and participates in the full verification gate.
+- Added the one-command `reporewind [repository]` workflow: it analyzes Git, starts a tokenized read-only loopback viewer, loads the validated history automatically, and opens the browser without a temporary archive.
+- Added public npm metadata, a narrow package allowlist, clean-tarball inspection, and an exact-package smoke test for version output, portable analysis, viewer loading, and shutdown across the CI operating-system matrix.
 
 ### Security
 
 - Added an HTML Content Security Policy for static hosts and clarified which response-header protections GitHub Pages does not apply from the checked-in `_headers` file.
 - Made the import dialog explicit that selected archives stay in the current tab and are never uploaded.
+- Bound the one-command viewer exclusively to a random `127.0.0.1` port behind a cryptographically random session path; it accepts only `GET`/`HEAD`, prevents path traversal, exposes no mutation endpoint, and sends restrictive response headers.
 
 ## [0.1.0] - 2026-08-21
 

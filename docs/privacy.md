@@ -20,13 +20,15 @@ Commit messages, names, file paths, and remotes can still be sensitive. Treat a 
 
 ## Storage and retention
 
-The CLI writes one JSON file to the path selected by the operator. The browser reads a user-selected file into memory, builds in-memory indexes, and does not write it to local storage, IndexedDB, cookies, or a server. Reloading the page or closing the tab deletes the browser copy. Delete the JSON file using normal operating-system controls to remove the durable copy.
+The explicit `analyze` command writes one JSON file to the path selected by the operator. The one-command viewer keeps the generated archive in process memory and exposes it only through its tokenized loopback session; it creates no temporary archive file. The browser builds in-memory indexes and does not write history to local storage, IndexedDB, or cookies. Reloading a hosted import or closing its tab deletes that browser copy. Delete an explicitly generated JSON file using normal operating-system controls to remove the durable copy.
 
 Downloaded films are normal local files controlled by the browser and operating system.
 
 ## Network behavior
 
-The application makes no repository-data requests. Browser dependencies and fonts are bundled locally. A sanitized HTTPS repository remote (or loopback HTTP URL for local development) may be shown as a user-activated source link; RepoRewind never fetches that URL.
+The hosted application makes no repository-data requests. Browser dependencies and fonts are bundled locally. A sanitized HTTPS repository remote (or loopback HTTP URL for local development) may be shown as a user-activated source link; RepoRewind never fetches that URL.
+
+The one-command viewer binds to `127.0.0.1` on a random port and uses an unpredictable single-session path. The browser fetches the validated archive once from that same-origin loopback server. The server accepts only `GET` and `HEAD`, exposes no mutation endpoint, sends restrictive security headers, and stops on <kbd>Ctrl C</kbd>. This loopback transfer does not send repository data to npm, GitHub, or another remote service.
 
 The public playground downloads the same static application assets from GitHub Pages. A history archive selected there is parsed and retained in the current browser tab; it is not submitted to GitHub Pages or another application service. Browser developer tools can be used to verify that no repository-data request occurs.
 

@@ -1,12 +1,17 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
-import App, { safeRepositoryUrl } from './App'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import App, { bootstrapArchiveUrl, safeRepositoryUrl } from './App'
 import { sampleHistory } from './data/sample-history'
 
 vi.mock('./components/CityScene', () => ({
   CityScene: () => <div data-testid="repository-city">Interactive city renderer</div>,
 }))
+
+afterEach(() => {
+  document.querySelector('meta[name="reporewind-archive"]')?.remove()
+  vi.unstubAllGlobals()
+})
 
 describe('RepoRewind application', () => {
   it('opens the deterministic demo and keeps modal focus and keyboard dismissal accessible', async () => {
@@ -26,6 +31,36 @@ describe('RepoRewind application', () => {
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(importButton).toHaveFocus()
+  })
+
+  it('loads a same-origin loopback archive into the local session automatically', async () => {
+    const meta = document.createElement('meta')
+    meta.name = 'reporewind-archive'
+    meta.content = './history.json'
+    document.head.append(meta)
+    const localHistory = {
+      ...sampleHistory,
+      repository: { ...sampleHistory.repository, name: 'automatic-local-fixture' },
+    }
+    const fetchMock = vi.fn<typeof fetch>(
+      async () =>
+        new Response(JSON.stringify(localHistory), {
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+        }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('Worker', undefined)
+
+    render(<App />)
+
+    expect(screen.getByRole('status')).toHaveTextContent('Mapping your repository’s history')
+    expect(await screen.findByText('automatic-local-fixture')).toBeVisible()
+    expect((await screen.findAllByText('Local archive'))[0]).toBeVisible()
+    expect(fetchMock).toHaveBeenCalledWith(
+      new URL('./history.json', window.location.href).href,
+      expect.objectContaining({ cache: 'no-store', credentials: 'same-origin' }),
+    )
   })
 
   it('searches the archive from the keyboard and opens a real file inspector', async () => {
@@ -124,6 +159,17 @@ describe('RepoRewind application', () => {
 })
 
 describe('repository URL sanitization', () => {
+  it('accepts only same-origin archive bootstrap URLs', () => {
+    const meta = document.createElement('meta')
+    meta.name = 'reporewind-archive'
+    meta.content = './history.json'
+    document.head.append(meta)
+    expect(bootstrapArchiveUrl()).toBe(new URL('./history.json', window.location.href).href)
+
+    meta.content = 'https://example.test/history.json'
+    expect(bootstrapArchiveUrl()).toBeUndefined()
+  })
+
   it('allows web remotes, normalizes GitHub SSH remotes, and rejects active or local protocols', () => {
     expect(safeRepositoryUrl('git@github.com:example/reporewind.git')).toBe('https://github.com/example/reporewind')
     expect(safeRepositoryUrl('https://code.example/repository.git')).toBe('https://code.example/repository')

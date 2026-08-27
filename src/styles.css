@@ -355,6 +355,63 @@ summary:focus-visible {
   }
 }
 
+.session-bootstrap {
+  position: absolute;
+  z-index: 190;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px;
+  color: #65716b;
+  background: radial-gradient(circle at 50% 38%, rgba(255, 251, 238, 0.98), rgba(206, 203, 191, 0.98) 64%), #d8d2c5;
+  text-align: center;
+}
+.session-bootstrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+.session-bootstrap .brand-mark {
+  margin-bottom: 4px;
+  animation: loading-city 1.5s ease-in-out infinite alternate;
+}
+.session-bootstrap .eyebrow {
+  margin: 0;
+}
+.session-bootstrap strong {
+  color: #2b3731;
+  font:
+    400 clamp(27px, 4vw, 44px)/1.05 'Bodoni 72',
+    Didot,
+    Georgia,
+    serif;
+  letter-spacing: -0.035em;
+}
+.session-bootstrap progress {
+  width: min(320px, 82vw);
+  height: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 99px;
+  color: var(--amber);
+  background: rgba(39, 49, 43, 0.12);
+  accent-color: var(--amber);
+}
+.session-bootstrap small {
+  font:
+    500 8px ui-monospace,
+    monospace;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
 .glass-panel {
   border: 1px solid var(--line);
   border-radius: 8px;

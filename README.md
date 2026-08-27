@@ -29,45 +29,50 @@ The experience opens immediately with a clearly labeled fictional ten-year archi
 Requirements: [Node.js](https://nodejs.org/) 24 (recommended) or Node.js 22.13+, npm 10+, and Git.
 
 ```bash
-npm ci
-npm run dev
+cd /path/to/your/repository
+npx reporewind .
 ```
 
-Open the URL printed by Vite, normally `http://127.0.0.1:5173`. The deterministic demo is already loaded. Select **Import** at any time to see the local real-repository workflow.
+RepoRewind analyzes the checked-out branch, starts a read-only server on a random `127.0.0.1` port, opens the browser, and loads the real history automatically. Press <kbd>Ctrl C</kbd> in the terminal to stop it. Use `--no-open` to print the local URL without launching a browser.
 
-No environment variables, database, service account, or network API are required. To restore the demo after an import, open the repository switcher and choose **Open demo**; reloading also clears the memory-only archive.
+The first `npx` run contacts npm to download RepoRewind. Git analysis and viewing then stay on the machine: no environment variables, account, database, source upload, or application API is required. To explore without installing anything, open the [live fictional demo](https://othmaneblial.github.io/RepoRewind/play/).
 
 ## Explore your own repository
 
-Analyze locally from this checkout:
-
-```bash
-npm run analyze -- /path/to/repository --output ./reporewind-history.json
-```
-
-Then select **Import** in the app and choose `reporewind-history.json`. The analyzer exports Git structure and numeric diffs—not file contents. Contributor email addresses are omitted unless `--include-emails` is explicitly supplied.
-
-The checked-out branch is the default source of truth. RepoRewind follows first-parent history so every city frame represents a real state on that line of development; merges appear as confluence events rather than flattening incompatible histories together.
+Choose another ref or bound an exceptionally large history while keeping the same automatic viewer:
 
 ```bash
 # Explore another local or remote ref
-npm run analyze -- /path/to/repository --branch release/3.x
+npx reporewind /path/to/repository --branch release/3.x
 
 # Bound an exceptionally large history
-npm run analyze -- /path/to/repository --max-commits 5000
-
-# Pipe clean JSON to another tool
-npm run --silent analyze -- /path/to/repository --stdout > reporewind-history.json
-
-# Explicitly replace an existing archive
-npm run analyze -- /path/to/repository --output ./reporewind-history.json --force
+npx reporewind /path/to/repository --max-commits 5000
 ```
 
-Run `npm run analyze -- --help` for every option. The standalone build has the same interface:
+The analyzer reads Git structure and numeric diffs—not file contents. Contributor email addresses are omitted unless `--include-emails` is explicitly supplied.
+
+The checked-out branch is the default source of truth. RepoRewind follows first-parent history so every city frame represents a real state on that line of development; merges appear as confluence events rather than flattening incompatible histories together.
+
+### Create a portable archive
+
+Use the explicit `analyze` command when you need JSON for the hosted viewer or another tool:
 
 ```bash
-npm run build:cli
-node dist-cli/index.js analyze /path/to/repository --output ./reporewind-history.json
+npx reporewind analyze /path/to/repository --output ./reporewind-history.json
+
+# Pipe clean JSON to another tool
+npx reporewind analyze /path/to/repository --stdout > reporewind-history.json
+
+# Explicitly replace an existing archive
+npx reporewind analyze /path/to/repository --output ./reporewind-history.json --force
+```
+
+Then select **Import** in the [live viewer](https://othmaneblial.github.io/RepoRewind/play/) and choose `reporewind-history.json`. Run `npx reporewind --help` for every option. Contributors working from a source checkout can use the equivalent npm scripts:
+
+```bash
+npm ci
+npm run dev
+npm run analyze -- /path/to/repository --output ./reporewind-history.json
 ```
 
 ## What you can do
