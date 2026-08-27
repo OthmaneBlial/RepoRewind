@@ -42,6 +42,7 @@ import { buildStoryPlan, type StoryChapter, type StoryChapterSelection } from '.
 import { sampleEvenly } from './core/timeline'
 import type { FileSnapshot, HistoryIndex, RepositoryHistory } from './core/types'
 import { sampleHistory } from './data/sample-history'
+import { buildEvidencePosterModel, EVIDENCE_POSTER_FILENAME, exportEvidencePoster } from './export/evidence-poster'
 import {
   downloadBlob,
   exportTimelapse,
@@ -378,7 +379,12 @@ function ExportModal({
   const [storyChapters, setStoryChapters] = useState<Array<StoryChapter & { included: boolean; defaultTitle: string }>>(
     () => storyPlan.chapters.map((chapter) => ({ ...chapter, included: true, defaultTitle: chapter.title })),
   )
-  const dimensions = resolution === '4k' ? { width: 3840, height: 2160 } : { width: 1920, height: 1080 }
+  const dimensions =
+    resolution === '4k'
+      ? { width: 3840, height: 2160 }
+      : resolution === 'preview'
+        ? { width: 640, height: 360 }
+        : { width: 1920, height: 1080 }
   const story = useMemo<StoryChapterSelection[]>(
     () =>
       storyChapters
@@ -703,6 +709,16 @@ function ExportModal({
         <fieldset>
           <legend>Resolution</legend>
           <div className="segmented">
+            <button
+              className={resolution === 'preview' ? 'active' : ''}
+              onClick={() => {
+                setMp4Support(undefined)
+                setResolution('preview')
+              }}
+              title="Fast 640×360 proof render"
+            >
+              Preview
+            </button>
             <button
               className={resolution === '1080' ? 'active' : ''}
               onClick={() => {
@@ -1092,6 +1108,139 @@ function ArchaeologyModal({
   )
 }
 
+function EvidenceWorkspace({
+  history,
+  snapshot,
+  rendererAvailable,
+  rendererReason,
+  exportingPoster,
+  onTryCity,
+  onSearch,
+  onInsights,
+  onPinCompare,
+  onExportPoster,
+  onSelectPath,
+  onNavigateStory,
+}: {
+  history: RepositoryHistory
+  snapshot: ReturnType<HistoryEngine['snapshotAt']>
+  rendererAvailable: boolean
+  rendererReason?: string
+  exportingPoster: boolean
+  onTryCity: () => void
+  onSearch: () => void
+  onInsights: () => void
+  onPinCompare: () => void
+  onExportPoster: () => void
+  onSelectPath: (path: string) => void
+  onNavigateStory: (chapter: StoryChapter) => void
+}) {
+  const story = useMemo(() => buildStoryPlan(history), [history])
+  const changes = snapshot.commit.files.slice(0, 6)
+  return (
+    <section className="evidence-workspace" aria-label="Repository evidence view">
+      <header className="evidence-workspace-heading">
+        <div>
+          <span className="eyebrow">Accessible archive</span>
+          <h2>{rendererAvailable ? 'Evidence view is active.' : 'WebGL is unavailable.'}</h2>
+          <p>
+            {rendererAvailable
+              ? 'Use the same Git engine without the 3D scene. Search, compare, inspect chapters, and export a public-safe poster.'
+              : `${rendererReason ?? 'The 3D renderer could not start'} The archive remains searchable, comparable, and exportable.`}
+          </p>
+        </div>
+        {rendererAvailable && (
+          <button className="evidence-city-action" onClick={onTryCity}>
+            <SparkIcon /> Open 3D city
+          </button>
+        )}
+      </header>
+      <div className="evidence-actions" aria-label="Evidence actions">
+        <button onClick={onSearch}>
+          <SearchIcon />
+          <span>
+            <strong>Search archive</strong>
+            <small>Files, commits, people, releases</small>
+          </span>
+        </button>
+        <button onClick={onInsights}>
+          <LayersIcon />
+          <span>
+            <strong>Open Insights</strong>
+            <small>Eight bounded archaeology views</small>
+          </span>
+        </button>
+        <button onClick={onPinCompare}>
+          <CompareIcon />
+          <span>
+            <strong>Pin or compare era</strong>
+            <small>Use the shared timeline evidence</small>
+          </span>
+        </button>
+        <button onClick={onExportPoster} disabled={exportingPoster}>
+          <FilmIcon />
+          <span>
+            <strong>{exportingPoster ? 'Rendering poster…' : 'Export evidence poster'}</strong>
+            <small>Public-safe PNG + privacy report</small>
+          </span>
+        </button>
+      </div>
+      <div className="evidence-columns">
+        <section aria-labelledby="current-evidence-title">
+          <div className="evidence-section-heading">
+            <span>Current commit</span>
+            <strong>
+              {snapshot.index + 1}/{history.commits.length}
+            </strong>
+          </div>
+          <h3 id="current-evidence-title">{snapshot.commit.message}</h3>
+          <p>
+            {formatDate(snapshot.date)} · {changes.length} visible file changes
+          </p>
+          <div className="evidence-file-list">
+            {changes.map((change) => (
+              <button
+                key={`${change.status}:${change.previousPath ?? ''}:${change.path}`}
+                aria-label={`Open file evidence ${change.path}`}
+                onClick={() => onSelectPath(change.path)}
+              >
+                <FileIcon />
+                <span>
+                  <strong>{change.path}</strong>
+                  <small>
+                    {change.status} · +{change.additions} −{change.deletions}
+                  </small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section aria-labelledby="evidence-story-title">
+          <div className="evidence-section-heading">
+            <span>Story Director</span>
+            <strong>{story.chapters.length} chapters</strong>
+          </div>
+          <h3 id="evidence-story-title">Jump through the evidence.</h3>
+          <p>Deterministic chapters remain available without selecting a building.</p>
+          <div className="evidence-story-list">
+            {story.chapters.slice(0, 5).map((chapter, chapterIndex) => (
+              <button key={chapter.id} onClick={() => onNavigateStory(chapter)}>
+                <span>{String(chapterIndex + 1).padStart(2, '0')}</span>
+                <strong>{chapter.title}</strong>
+                <small>Commit {chapter.evidence[0].index + 1} →</small>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+      <footer>
+        Same schema, timeline, search, comparison, privacy projection, and Story Director. Only the 3D canvas and film
+        encoding are unavailable in this view.
+      </footer>
+    </section>
+  )
+}
+
 function FileInspector({
   file,
   contributorName,
@@ -1133,6 +1282,7 @@ function FileInspector({
 
 export default function App() {
   const sessionArchiveUrl = useMemo(() => bootstrapArchiveUrl(), [])
+  const [webglCapability, setWebglCapability] = useState<{ available: boolean; reason?: string }>({ available: true })
   const [history, setHistory] = useState<RepositoryHistory>(sampleHistory)
   const [historyIndex, setHistoryIndex] = useState<HistoryIndex>(() => buildHistoryIndex(sampleHistory))
   const [archiveSource, setArchiveSource] = useState<'demo' | 'imported'>('demo')
@@ -1151,6 +1301,8 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState(0)
   const [exportWidth, setExportWidth] = useState<number>()
+  const [rendererMode, setRendererMode] = useState<'city' | 'evidence'>('city')
+  const [exportingEvidencePoster, setExportingEvidencePoster] = useState(false)
   const [sessionProgress, setSessionProgress] = useState(0)
   const [sessionState, setSessionState] = useState<'idle' | 'loading' | 'ready' | 'error'>(() =>
     sessionArchiveUrl ? 'loading' : 'idle',
@@ -1162,9 +1314,17 @@ export default function App() {
   const exportController = useRef<AbortController | undefined>(undefined)
   const reducedMotion = useReducedMotionPreference()
   const frameRef = useRef(frame)
+  const handleRendererUnavailable = useCallback((reason: string) => {
+    canvasRef.current = null
+    setWebglCapability({ available: false, reason })
+    setRendererMode('evidence')
+  }, [])
   useEffect(() => {
     frameRef.current = frame
   }, [frame])
+  useEffect(() => {
+    if (rendererMode === 'evidence') canvasRef.current = null
+  }, [rendererMode])
   const snapshot = engine.snapshotAt(Math.min(frame, historyLength - 1))
   const layout = useMemo(() => buildCityLayout(history, { paths: historyIndex.paths }), [history, historyIndex])
   const contributors = useMemo(() => new Map(history.contributors.map((person) => [person.id, person])), [history])
@@ -1357,6 +1517,45 @@ export default function App() {
     showNotice(`Evidence opened at commit ${item.evidenceIndex + 1}.`)
   }
 
+  const navigateToStoryEvidence = (chapter: StoryChapter) => {
+    const evidence = chapter.evidence[0]
+    setPlaying(false)
+    setFrame(evidence.index)
+    setSelectedPath(evidence.path)
+    showNotice(`${chapter.title} opened at commit ${evidence.index + 1}.`)
+  }
+
+  const pinOrCompareEra = () => {
+    if (comparisonBase === undefined) {
+      setComparisonBase(frame)
+      showNotice('Era pinned. Travel elsewhere on the timeline to compare.')
+    } else if (comparisonBase !== frame) setComparisonOpen(true)
+  }
+
+  const renderEvidencePoster = async () => {
+    setExportingEvidencePoster(true)
+    try {
+      const privacy = shareSettingsForPreset('public')
+      const model = buildEvidencePosterModel(history, historyIndex, snapshot, privacy)
+      const poster = await exportEvidencePoster(model)
+      downloadBlob(poster, EVIDENCE_POSTER_FILENAME)
+      downloadBlob(
+        new Blob(
+          [privacyReportJson(history, privacy, { storyChapterCount: buildStoryPlan(history).chapters.length })],
+          {
+            type: 'application/json',
+          },
+        ),
+        'reporewind-evidence-privacy-report.json',
+      )
+      showNotice('Your public-safe evidence poster and privacy report have been rendered.')
+    } catch (reason) {
+      showNotice(reason instanceof Error ? reason.message : 'The evidence poster could not be rendered.', 'error', 0)
+    } finally {
+      setExportingEvidencePoster(false)
+    }
+  }
+
   const renderExport = useCallback(
     async (settings: ExportSettings) => {
       const controller = new AbortController()
@@ -1462,7 +1661,7 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell" ref={stageRef}>
+    <main className={`app-shell ${rendererMode === 'evidence' ? 'evidence-mode' : ''}`} ref={stageRef}>
       <a href="#timeline" className="skip-link">
         Skip to timeline controls
       </a>
@@ -1514,36 +1713,75 @@ export default function App() {
           <button className="icon-button" onClick={() => void enterFullscreen()} aria-label="Toggle fullscreen">
             <ExpandIcon />
           </button>
+          <button
+            className="text-button view-mode-button"
+            aria-label={rendererMode === 'city' ? 'Open evidence view' : 'Open 3D city'}
+            aria-pressed={rendererMode === 'evidence'}
+            disabled={rendererMode === 'evidence' && !webglCapability.available}
+            title={rendererMode === 'evidence' && !webglCapability.available ? webglCapability.reason : undefined}
+            onClick={() => {
+              setExportOpen(false)
+              setRendererMode((current) => (current === 'city' ? 'evidence' : 'city'))
+            }}
+          >
+            {rendererMode === 'city' ? <FileIcon /> : <SparkIcon />}
+            {rendererMode === 'city' ? 'Evidence' : '3D city'}
+          </button>
           <button className="text-button insights-button" onClick={() => setArchaeologyOpen(true)}>
             <LayersIcon /> Insights
           </button>
           <button className="text-button" onClick={() => setImportOpen(true)}>
             <UploadIcon /> Import
           </button>
-          <button className="export-button" onClick={() => setExportOpen(true)}>
-            <FilmIcon /> Export film
+          <button
+            className="export-button"
+            disabled={exportingEvidencePoster}
+            onClick={() => (rendererMode === 'evidence' ? void renderEvidencePoster() : setExportOpen(true))}
+          >
+            <FilmIcon /> {rendererMode === 'evidence' ? 'Export poster' : 'Export film'}
           </button>
         </div>
       </header>
 
-      <section className="city-stage" aria-label="Interactive repository city">
-        <Suspense fallback={<CityLoading />}>
-          <CityScene
+      <section
+        className="city-stage"
+        aria-label={rendererMode === 'city' ? 'Interactive repository city' : 'Repository evidence workspace'}
+      >
+        {rendererMode === 'city' ? (
+          <Suspense fallback={<CityLoading />}>
+            <CityScene
+              snapshot={snapshot}
+              layout={layout}
+              contributors={history.contributors}
+              selectedPath={selectedPath}
+              onSelect={setSelectedPath}
+              playing={playing}
+              reducedMotion={reducedMotion}
+              cinematicProgress={exporting ? exportProgress : undefined}
+              renderWidth={exportWidth}
+              comparison={comparisonHighlights}
+              onUnavailable={handleRendererUnavailable}
+              onCanvas={(canvas) => {
+                canvasRef.current = canvas
+              }}
+            />
+          </Suspense>
+        ) : (
+          <EvidenceWorkspace
+            history={history}
             snapshot={snapshot}
-            layout={layout}
-            contributors={history.contributors}
-            selectedPath={selectedPath}
-            onSelect={setSelectedPath}
-            playing={playing}
-            reducedMotion={reducedMotion}
-            cinematicProgress={exporting ? exportProgress : undefined}
-            renderWidth={exportWidth}
-            comparison={comparisonHighlights}
-            onCanvas={(canvas) => {
-              canvasRef.current = canvas
-            }}
+            rendererAvailable={webglCapability.available}
+            rendererReason={webglCapability.reason}
+            exportingPoster={exportingEvidencePoster}
+            onTryCity={() => setRendererMode('city')}
+            onSearch={() => setSearchOpen(true)}
+            onInsights={() => setArchaeologyOpen(true)}
+            onPinCompare={pinOrCompareEra}
+            onExportPoster={() => void renderEvidencePoster()}
+            onSelectPath={setSelectedPath}
+            onNavigateStory={navigateToStoryEvidence}
           />
-        </Suspense>
+        )}
       </section>
 
       <aside className="era-panel glass-panel">
@@ -1608,15 +1846,7 @@ export default function App() {
           </div>
         )}
         <div className="era-compare-actions">
-          <button
-            disabled={comparisonBase === frame}
-            onClick={() => {
-              if (comparisonBase === undefined) {
-                setComparisonBase(frame)
-                showNotice('Era pinned. Travel elsewhere on the timeline to compare.')
-              } else setComparisonOpen(true)
-            }}
-          >
+          <button disabled={comparisonBase === frame} onClick={pinOrCompareEra}>
             {comparisonBase === undefined ? <PinIcon /> : <CompareIcon />}
             {comparisonBase === undefined ? 'Pin this era' : comparisonBase === frame ? 'Era pinned' : 'Compare eras'}
           </button>

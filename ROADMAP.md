@@ -366,6 +366,8 @@ Effort: **M**. Dependency: P0.2 provides the realistic entry path to measure.
 
 ### P1.7 — Provide a useful non-WebGL mode
 
+**Implemented and verified 2026-08-27.** Renderer creation now fails closed into an [evidence workspace](./docs/non-webgl.md) over the same imported archive and timeline engine, without an extra WebGL probe or an uncaught page error. Search, eight Insights views, keyboard-readable file evidence, pin/compare, Story Director jumps, and a fixed public-safe 1200×630 PNG plus privacy report remain available. Unit/UI tests and a real Chrome run with WebGL and GPU disabled verify every workflow, 390 px no-overflow behavior, poster dimensions, and the absence of an uncaught page error.
+
 Search, compare, timeline evidence, and story chapters should remain usable when 3D rendering is unavailable, reduced, or impractical on a small device.
 
 This is not a second product. It is an accessible archive/table view over the same engine and evidence.

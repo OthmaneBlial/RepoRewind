@@ -4,11 +4,22 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import App, { bootstrapArchiveUrl, safeRepositoryUrl } from './App'
 import { sampleHistory } from './data/sample-history'
 
-vi.mock('./components/CityScene', () => ({
-  CityScene: () => <div data-testid="repository-city">Interactive city renderer</div>,
-}))
+const webglCapability = vi.hoisted(() => ({ available: true }))
+
+vi.mock('./components/CityScene', async () => {
+  const { useEffect } = await vi.importActual<typeof import('react')>('react')
+  return {
+    CityScene: ({ onUnavailable }: { onUnavailable: (reason: string) => void }) => {
+      useEffect(() => {
+        if (!webglCapability.available) onUnavailable('WebGL is unavailable in this test browser.')
+      }, [onUnavailable])
+      return webglCapability.available ? <div data-testid="repository-city">Interactive city renderer</div> : null
+    },
+  }
+})
 
 afterEach(() => {
+  webglCapability.available = true
   document.querySelector('meta[name="reporewind-archive"]')?.remove()
   vi.unstubAllGlobals()
 })
@@ -116,6 +127,31 @@ describe('RepoRewind application', () => {
     expect(screen.queryByRole('dialog', { name: 'What changed, where, and when?' })).not.toBeInTheDocument()
     expect(screen.getByRole('slider', { name: 'History position' })).toHaveValue(String(evidenceCommit - 1))
     expect(screen.getByRole('status')).toHaveTextContent(`Evidence opened at commit ${evidenceCommit}`)
+  })
+
+  it('keeps the archive useful when WebGL is unavailable', async () => {
+    webglCapability.available = false
+    const user = userEvent.setup()
+    render(<App />)
+
+    const evidenceView = await screen.findByRole('region', { name: 'Repository evidence view' })
+    expect(within(evidenceView).getByRole('heading', { name: 'WebGL is unavailable.' })).toBeVisible()
+    expect(screen.queryByTestId('repository-city')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open 3D city' })).toBeDisabled()
+
+    await user.click(within(evidenceView).getByRole('button', { name: /Search archive/ }))
+    expect(screen.getByRole('combobox', { name: 'Search repository history' })).toBeVisible()
+    await user.keyboard('{Escape}')
+
+    await user.click(within(evidenceView).getByRole('button', { name: /Open Insights/ }))
+    expect(screen.getByRole('dialog', { name: 'What changed, where, and when?' })).toBeVisible()
+    await user.keyboard('{Escape}')
+
+    await user.click(within(evidenceView).getByRole('button', { name: /Pin or compare era/ }))
+    expect(screen.getByRole('status')).toHaveTextContent('Era pinned')
+    fireEvent.change(screen.getByRole('slider', { name: 'History position' }), { target: { value: '24' } })
+    await user.click(within(evidenceView).getByRole('button', { name: /Pin or compare era/ }))
+    expect(screen.getByRole('dialog', { name: 'Two eras. Every structural change.' })).toBeVisible()
   })
 
   it('keeps WebM available when the runtime cannot encode MP4', async () => {

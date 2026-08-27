@@ -96,12 +96,23 @@ for (const filename of resultFiles) {
   }
   if (
     typeof result.browser?.noWebgl?.fallbackVisible !== 'boolean' ||
-    typeof result.browser?.noWebgl?.insightsUsable !== 'boolean'
+    typeof result.browser?.noWebgl?.searchUsable !== 'boolean' ||
+    typeof result.browser?.noWebgl?.insightsUsable !== 'boolean' ||
+    typeof result.browser?.noWebgl?.comparisonUsable !== 'boolean' ||
+    typeof result.browser?.noWebgl?.storyNavigationUsable !== 'boolean' ||
+    typeof result.browser?.noWebgl?.compactLayoutUsable !== 'boolean' ||
+    typeof result.browser?.noWebgl?.posterFilename !== 'string' ||
+    !finiteNonnegative(result.browser?.noWebgl?.posterBytes) ||
+    !finiteNonnegative(result.browser?.noWebgl?.posterWidth) ||
+    !finiteNonnegative(result.browser?.noWebgl?.posterHeight)
   ) {
     failures.push(`${filename}: the no-WebGL observation is missing.`)
   }
   for (const field of ['filmMs', 'storyPackMs', 'totalMs', 'bytes']) {
     if (!finiteNonnegative(result.browser?.export?.[field])) failures.push(`${filename}: invalid export.${field}.`)
+  }
+  if (result.browser?.export?.width !== 640 || result.browser?.export?.height !== 360) {
+    failures.push(`${filename}: the deterministic preview export must be 640x360.`)
   }
 }
 

@@ -206,7 +206,7 @@ Docker is intentionally not included: the web output is static, while the analyz
 
 - Node.js 24 is pinned for development; Node.js 22.13+ is supported. EOL Node releases are excluded.
 - The CLI is designed for current Git on Linux, macOS, and Windows; CI is configured to exercise all three.
-- The web app targets ES2022 and requires a current desktop browser with modules, Web Workers, Canvas, and WebGL. Search/import validation can still report useful errors if WebGL initialization fails.
+- The web app targets ES2022 and requires a current browser with modules and Canvas. WebGL enables the 3D city and film rendering; when it is unavailable, the same archive opens in a searchable, comparable [evidence mode](./docs/non-webgl.md) with a public-safe PNG poster export.
 - MP4 requires HTTPS/localhost and H.264 WebCodecs support. WebM depends on MediaRecorder codec support.
 - The 3D city chunk is lazy-loaded but remains the largest asset (about 896.6 kB minified / 238.6 kB gzip in the recorded production build).
 - Imported archives are intentionally memory-only; there is no cross-session library.

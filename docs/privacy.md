@@ -34,7 +34,7 @@ Enabling an identifying field in a public projection disables rendering until th
 
 [Story Director](./story-director.md) chapter titles are visible export fields. Its deterministic defaults are generic; editing a title under the public preset adds a separate confirmation gate. Reports record the chapter count and whether titles were customized, but never a discarded title or raw evidence value.
 
-Every film-only export is accompanied by `reporewind-privacy-report.json`; a [history story pack](./story-pack.md) includes the same report as `privacy-report.json`. The report records:
+Every film-only export is accompanied by `reporewind-privacy-report.json`; a [history story pack](./story-pack.md) includes the same report as `privacy-report.json`. The [non-WebGL evidence mode](./non-webgl.md) downloads `repo-rewind-evidence-poster.png` with `reporewind-evidence-privacy-report.json`. Its fixed public projection uses only generic repository labels, aggregate counts, month-level activity, and deterministic generic chapter titles; it omits contributor identities, messages, hashes, refs, remotes, and paths. The report records:
 
 - the selected disclosure settings and public/private preset;
 - included and omitted field names, but never omitted field values;

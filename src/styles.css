@@ -318,6 +318,238 @@ summary:focus-visible {
 .city-stage canvas:active {
   cursor: grabbing;
 }
+.evidence-mode .city-stage {
+  background:
+    radial-gradient(circle at 72% 20%, rgba(191, 112, 52, 0.11), transparent 34%),
+    linear-gradient(145deg, #e5e0d4, #c8c9bf 72%);
+}
+.evidence-workspace {
+  position: absolute;
+  inset: 24px 245px 125px 350px;
+  z-index: 15;
+  min-width: 0;
+  overflow: auto;
+  padding: 23px;
+  color: #2b3831;
+  border: 1px solid rgba(45, 59, 51, 0.18);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(190, 102, 42, 0.07), transparent 27%), rgba(255, 253, 247, 0.89);
+  box-shadow:
+    0 22px 50px rgba(53, 55, 50, 0.13),
+    inset 0 1px rgba(255, 255, 255, 0.9);
+}
+.evidence-workspace-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(47, 61, 53, 0.12);
+}
+.evidence-workspace-heading h2 {
+  margin: 5px 0 6px;
+  color: #243129;
+  font:
+    500 28px/1.05 'Bodoni 72',
+    Didot,
+    Georgia,
+    serif;
+}
+.evidence-workspace-heading p {
+  max-width: 620px;
+  margin: 0;
+  color: #5a6960;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.evidence-city-action {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: #fff9ee;
+  border: 1px solid #9c4a1b;
+  border-radius: 4px;
+  background: #ad521b;
+  font:
+    700 8px ui-monospace,
+    monospace;
+  cursor: pointer;
+}
+.evidence-city-action svg {
+  width: 14px;
+}
+.evidence-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 16px 0;
+}
+.evidence-actions > button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 11px;
+  color: #2d3b33;
+  border: 1px solid rgba(47, 61, 53, 0.15);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.54);
+  text-align: left;
+  cursor: pointer;
+}
+.evidence-actions > button:hover,
+.evidence-actions > button:focus-visible {
+  border-color: rgba(155, 77, 28, 0.5);
+  background: rgba(190, 102, 42, 0.08);
+}
+.evidence-actions > button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.evidence-actions svg {
+  width: 17px;
+  color: #a64f1d;
+}
+.evidence-actions span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.evidence-actions strong,
+.evidence-actions small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evidence-actions strong {
+  font-size: 9px;
+}
+.evidence-actions small {
+  color: #69776f;
+  font:
+    500 7px ui-monospace,
+    monospace;
+}
+.evidence-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 12px;
+}
+.evidence-columns > section {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(47, 61, 53, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.35);
+}
+.evidence-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #9b4b1d;
+  font:
+    700 7px ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.evidence-columns h3 {
+  margin: 9px 0 4px;
+  overflow: hidden;
+  color: #26342c;
+  font:
+    600 17px/1.2 'Bodoni 72',
+    Didot,
+    Georgia,
+    serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evidence-columns > section > p {
+  margin: 0 0 12px;
+  color: #68776e;
+  font-size: 8px;
+}
+.evidence-file-list,
+.evidence-story-list {
+  display: grid;
+  gap: 5px;
+}
+.evidence-file-list button,
+.evidence-story-list button {
+  min-width: 0;
+  display: grid;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  color: #304038;
+  border: 1px solid rgba(47, 61, 53, 0.12);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.48);
+  text-align: left;
+  cursor: pointer;
+}
+.evidence-file-list button {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.evidence-file-list svg {
+  width: 14px;
+  color: #9b4b1d;
+}
+.evidence-file-list button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.evidence-file-list strong,
+.evidence-file-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evidence-file-list strong {
+  font-size: 9px;
+}
+.evidence-file-list small {
+  color: #718078;
+  font:
+    500 7px ui-monospace,
+    monospace;
+}
+.evidence-story-list button {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.evidence-story-list button > span {
+  color: #a6501e;
+  font:
+    700 7px ui-monospace,
+    monospace;
+}
+.evidence-story-list strong {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evidence-story-list small {
+  color: #718078;
+  font:
+    500 7px ui-monospace,
+    monospace;
+}
+.evidence-workspace > footer {
+  margin-top: 13px;
+  padding-top: 11px;
+  color: #66756d;
+  border-top: 1px solid rgba(47, 61, 53, 0.12);
+  font:
+    500 7px/1.55 ui-monospace,
+    monospace;
+}
 .city-loading,
 .webgl-fallback {
   position: absolute;
@@ -3145,6 +3377,13 @@ summary:focus-visible {
   .archive-panel {
     display: none;
   }
+  .evidence-workspace {
+    right: 24px;
+    left: 325px;
+  }
+  .evidence-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .file-inspector {
     right: 20px;
     top: 100px;
@@ -3172,8 +3411,12 @@ summary:focus-visible {
     min-height: 540px;
   }
   .topbar {
+    grid-template-columns: auto 1fr;
     height: 65px;
     padding: 0 17px;
+  }
+  .brand > span:last-child {
+    display: none;
   }
   .top-actions .icon-button {
     display: none;
@@ -3197,6 +3440,28 @@ summary:focus-visible {
   }
   .city-stage {
     top: 65px;
+  }
+  .evidence-mode .era-panel,
+  .evidence-mode .archive-panel {
+    display: none;
+  }
+  .evidence-workspace {
+    inset: 14px 13px 128px;
+    padding: 18px;
+  }
+  .evidence-workspace-heading {
+    display: grid;
+    gap: 12px;
+  }
+  .evidence-workspace-heading h2 {
+    font-size: 25px;
+  }
+  .evidence-city-action {
+    justify-self: start;
+  }
+  .evidence-actions,
+  .evidence-columns {
+    grid-template-columns: 1fr;
   }
   .era-panel {
     top: 80px;

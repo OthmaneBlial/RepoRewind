@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { rendererQualityForPathCount } from './renderer-quality'
+import { rendererDprForExport, rendererQualityForPathCount } from './renderer-quality'
 
 describe('adaptive renderer quality', () => {
   it('keeps ordinary cities cinematic', () => {
@@ -21,5 +21,11 @@ describe('adaptive renderer quality', () => {
       shadows: false,
       shadowMapSize: 1024,
     })
+  })
+
+  it('renders exports near their selected width instead of forcing the interactive DPR floor', () => {
+    expect(rendererDprForExport(640, 1280)).toBe(0.5)
+    expect(rendererDprForExport(1920, 1280)).toBe(1.5)
+    expect(rendererDprForExport(3840, 390)).toBe(4)
   })
 })

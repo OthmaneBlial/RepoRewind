@@ -17,3 +17,7 @@ export function rendererQualityForPathCount(pathCount: number): RendererQuality 
   }
   return { tier: 'cinematic', maximumDpr: 1.65, antialias: true, shadows: true, shadowMapSize: 2048 }
 }
+
+export function rendererDprForExport(renderWidth: number, viewportWidth: number): number {
+  return Math.max(0.5, Math.min(4, renderWidth / Math.max(1, viewportWidth)))
+}

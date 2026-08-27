@@ -1,10 +1,10 @@
 import { Canvas, type ThreeEvent, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls as ThreeOrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { CityLayout } from '../core/layout'
 import type { ComparisonKind } from '../core/compare'
-import { rendererQualityForPathCount } from '../core/renderer-quality'
+import { rendererDprForExport, rendererQualityForPathCount } from '../core/renderer-quality'
 import type { Contributor, HistorySnapshot } from '../core/types'
 
 const languageColors: Record<string, string> = {
@@ -41,6 +41,7 @@ interface CitySceneProps {
   renderWidth?: number
   comparison?: Map<string, ComparisonKind>
   onCanvas: (canvas: HTMLCanvasElement) => void
+  onUnavailable: (reason: string) => void
 }
 
 function DistrictLabel({ name, width }: { name: string; width: number }) {
@@ -446,7 +447,7 @@ function CameraControls({
   return null
 }
 
-function SceneContents(props: Omit<CitySceneProps, 'onCanvas'> & { shadowMapSize: 1024 | 2048 }) {
+function SceneContents(props: Omit<CitySceneProps, 'onCanvas' | 'onUnavailable'> & { shadowMapSize: 1024 | 2048 }) {
   return (
     <>
       <fog attach="fog" args={['#d8d3c7', props.layout.span * 0.82, props.layout.span * 2.35]} />
@@ -501,11 +502,28 @@ function SceneContents(props: Omit<CitySceneProps, 'onCanvas'> & { shadowMapSize
   )
 }
 
-export function CityScene({ onCanvas, ...props }: CitySceneProps) {
+export function CityScene({ onCanvas, onUnavailable, ...props }: CitySceneProps) {
   const quality = rendererQualityForPathCount(props.layout.buildings.size)
   const renderDpr = props.renderWidth
-    ? Math.max(1.65, Math.min(4, props.renderWidth / Math.max(1, window.innerWidth)))
+    ? rendererDprForExport(props.renderWidth, window.innerWidth)
     : ([1, quality.maximumDpr] as [number, number])
+  const createRenderer = useCallback(
+    async (defaults: THREE.WebGLRendererParameters): Promise<THREE.WebGLRenderer> => {
+      try {
+        return new THREE.WebGLRenderer({
+          ...defaults,
+          antialias: quality.antialias,
+          alpha: false,
+          powerPreference: 'high-performance',
+          preserveDrawingBuffer: true,
+        })
+      } catch {
+        window.setTimeout(() => onUnavailable('WebGL is unavailable in this browser or hardware configuration.'), 0)
+        return new Promise<THREE.WebGLRenderer>(() => undefined)
+      }
+    },
+    [onUnavailable, quality.antialias],
+  )
   return (
     <Canvas
       key={quality.tier}
@@ -524,12 +542,7 @@ export function CityScene({ onCanvas, ...props }: CitySceneProps) {
           <span>Enable hardware acceleration or try a current browser to render the repository city.</span>
         </div>
       }
-      gl={{
-        antialias: quality.antialias,
-        alpha: false,
-        powerPreference: 'high-performance',
-        preserveDrawingBuffer: true,
-      }}
+      gl={createRenderer}
       onCreated={({ gl }) => {
         gl.setClearColor('#d8d3c7')
         gl.toneMapping = THREE.ACESFilmicToneMapping

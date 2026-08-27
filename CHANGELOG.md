@@ -4,6 +4,15 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Added
+
+- Added an automatic non-WebGL evidence mode over the same archive engine, with search, Insights, timeline comparison, Story Director navigation, keyboard-readable file evidence, a compact mobile layout, and a public-safe 1200×630 PNG poster plus privacy report.
+
+### Changed
+
+- Added a fast 640×360 Preview film resolution and corrected export DPR selection so the live renderer no longer draws more pixels than the selected proof output requires.
+- Made benchmark export selection explicit, cleanup failure-safe, and the forced-no-WebGL record verify real search, comparison, story, responsive, poster-dimension, and page-error outcomes.
+
 ## [0.2.0] - 2026-08-27
 
 ### Added

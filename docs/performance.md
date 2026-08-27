@@ -43,9 +43,9 @@ Recorded on 2026-08-27 with macOS 25.6, Apple M2 (8 cores), 16 GB memory, Node.j
 
 | Fixture |     Archive | Analyzer | Peak Node heap delta | Validation |    Index |  Layout | First snapshot |
 | ------- | ----------: | -------: | -------------------: | ---------: | -------: | ------: | -------------: |
-| Small   |    81,410 B |   343 ms |              2.0 MiB |     2.5 ms |   2.8 ms |  2.1 ms |         0.3 ms |
-| Medium  | 1,060,956 B |   705 ms |             16.5 MiB |     8.7 ms |  34.0 ms |  7.1 ms |         0.6 ms |
-| Large   | 7,261,436 B | 6,356 ms |             54.9 MiB |    71.4 ms | 492.1 ms | 52.6 ms |         8.4 ms |
+| Small   |    81,410 B |   276 ms |              2.1 MiB |     2.2 ms |   2.7 ms |  1.6 ms |         0.4 ms |
+| Medium  | 1,060,956 B |   701 ms |             15.8 MiB |     9.1 ms |  36.4 ms |  7.3 ms |         1.0 ms |
+| Large   | 7,261,436 B | 3,011 ms |             53.9 MiB |    35.2 ms | 155.0 ms | 49.8 ms |        27.4 ms |
 
 Peak memory is sampled from the RepoRewind Node process and excludes transient memory inside Git subprocesses and Chromium. Analyzer times are single local observations, not universal latency claims.
 
@@ -53,9 +53,9 @@ Peak memory is sampled from the RepoRewind Node process and excludes transient m
 
 | Fixture | Renderer tier | Canvas pixels | First interactive | Two-second playback band | Longest observed main-thread task |
 | ------- | ------------- | ------------: | ----------------: | -----------------------: | --------------------------------: |
-| Small   | Cinematic     |     2112×1059 |            1.34 s |                   56 FPS |                            175 ms |
-| Medium  | Balanced      |      1600×802 |            1.41 s |                   54 FPS |                            152 ms |
-| Large   | Dense         |      1280×642 |            3.55 s |                   60 FPS |                            947 ms |
+| Small   | Cinematic     |     2112×1059 |            0.80 s |                   58 FPS |                            120 ms |
+| Medium  | Balanced      |      1600×802 |            1.05 s |                   60 FPS |                            124 ms |
+| Large   | Dense         |      1280×642 |            2.74 s |                   60 FPS |                            763 ms |
 
 The first-interactive timer begins before navigation and ends only after the correct repository name, expected renderer tier, visible canvas, and two animation frames. FPS counts browser animation frames while the real timeline and Three.js scene play; headless software/virtualized WebGL is not equivalent to a discrete GPU.
 
@@ -69,9 +69,9 @@ Film export temporarily requests the selected output resolution independently fr
 
 ### Fallback and export observations
 
-- The large no-worker fallback reached its first interactive frame in 1.45 s and played at 61 FPS in this run. It did not outperform the worker consistently during harness development, so the project makes no general worker-speed claim; the fallback exists for compatibility and is measured separately.
-- With WebGL forcibly disabled, the text-based Insights desk remained usable, but Three.js emitted `Error creating WebGL context` and the intended fallback message was not visible. This is a recorded product gap, not a passing fallback claim, and is the acceptance target for P1.7.
-- The small fixture's 12-second 1080p WebM film encoded in 30.31 s. Four PNGs, Markdown, privacy report, hashes, and the stable ZIP took another 2.49 s. Total story-pack delivery was 33.15 s and 28,128,560 bytes.
+- The large no-worker fallback reached its first interactive frame in 1.09 s and played at 60 FPS in this run. It did not outperform the worker consistently during harness development, so the project makes no general worker-speed claim; the fallback exists for compatibility and is measured separately.
+- With WebGL forcibly disabled, RepoRewind switched to the [evidence mode](./non-webgl.md) without an uncaught page error. Search, Insights, timeline comparison, Story Director navigation, the 390 px layout, and a 564,833-byte 1200×630 public-safe PNG export all completed successfully.
+- The small fixture's 12-second 640×360 Preview WebM encoded in 13.38 s. Four PNGs, Markdown, privacy report, hashes, and the stable ZIP took another 0.94 s. Total story-pack delivery was 14.47 s and 11,537,830 bytes. Preview is the reproducible smoke path; 1080p and 4K remain available product outputs and are device-dependent.
 
 ## Advisory budgets
 

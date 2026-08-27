@@ -74,6 +74,8 @@ interface BrowserExportMeasurement {
   fixture: string
   format: 'webm'
   durationSeconds: 12
+  width: 640
+  height: 360
   filmMs: number
   storyPackMs: number
   totalMs: number
@@ -82,7 +84,15 @@ interface BrowserExportMeasurement {
 
 interface NoWebglMeasurement {
   fallbackVisible: boolean
+  searchUsable: boolean
   insightsUsable: boolean
+  comparisonUsable: boolean
+  storyNavigationUsable: boolean
+  compactLayoutUsable: boolean
+  posterFilename: string
+  posterBytes: number
+  posterWidth: number
+  posterHeight: number
   pageError?: string
 }
 
@@ -393,9 +403,11 @@ async function measureBrowserFixture(
 
 async function measureExport(page: Page): Promise<BrowserExportMeasurement> {
   await page.getByRole('button', { name: 'Export film', exact: true }).click()
+  await page.getByRole('button', { name: 'Preview', exact: true }).click()
+  await page.getByRole('button', { name: '12s', exact: true }).click()
   await page.getByRole('button', { name: 'WebM', exact: true }).click()
   const started = performance.now()
-  const downloadPromise = page.waitForEvent('download', { timeout: 180_000 })
+  const downloadPromise = page.waitForEvent('download', { timeout: 300_000 })
   await page.getByRole('button', { name: 'Build story pack', exact: true }).click()
   const download = await downloadPromise
   const temporary = resolve(tmpdir(), `reporewind-benchmark-${process.pid}-${Date.now()}.zip`)
@@ -409,6 +421,8 @@ async function measureExport(page: Page): Promise<BrowserExportMeasurement> {
     fixture: 'small',
     format: 'webm',
     durationSeconds: 12,
+    width: 640,
+    height: 360,
     filmMs: round(Number(measures['reporewind:film-export'] ?? 0)),
     storyPackMs: round(Number(measures['reporewind:story-pack'] ?? 0)),
     totalMs: round(performance.now() - started),
@@ -436,16 +450,70 @@ async function measureNoWebgl(history: RepositoryHistory): Promise<NoWebglMeasur
       .getByText('WebGL is unavailable.')
       .isVisible()
       .catch(() => false)
-    const insights = page.getByRole('button', { name: 'Insights', exact: true })
-    const insightsUsable = await insights
-      .isVisible()
-      .then(async (visible) => {
-        if (!visible) return false
-        await insights.click()
-        return page.getByRole('dialog', { name: 'What changed, where, and when?' }).isVisible()
-      })
-      .catch(() => false)
-    return { fallbackVisible, insightsUsable, ...(pageError ? { pageError } : {}) }
+    const evidence = page.getByRole('region', { name: 'Repository evidence view' })
+
+    await evidence.getByRole('button', { name: /Search archive/ }).click()
+    const search = page.getByRole('combobox', { name: 'Search repository history' })
+    const searchPath = [...history.commits]
+      .reverse()
+      .flatMap((commit) => commit.files)
+      .find((change) => change.status !== 'deleted')?.path
+    if (!searchPath) throw new Error('The no-WebGL fixture has no searchable file path.')
+    await search.fill(`file: ${searchPath}`)
+    await page.getByRole('option').first().waitFor({ state: 'visible' })
+    await search.press('Enter')
+    const searchUsable = await page.getByRole('region', { name: 'Selected building' }).isVisible()
+
+    await evidence.getByRole('button', { name: /Open Insights/ }).click()
+    const insightsDialog = page.getByRole('dialog', { name: 'What changed, where, and when?' })
+    const insightsUsable = await insightsDialog.isVisible()
+    await page.keyboard.press('Escape')
+
+    const slider = page.getByRole('slider', { name: 'History position' })
+    const initialFrame = await slider.inputValue()
+    await evidence.locator('.evidence-story-list button').nth(1).click()
+    const storyNavigationUsable = (await slider.inputValue()) !== initialFrame
+
+    await evidence.getByRole('button', { name: /Pin or compare era/ }).click()
+    await slider.fill(String(history.commits.length - 1))
+    await evidence.getByRole('button', { name: /Pin or compare era/ }).click()
+    const comparisonUsable = await page.getByRole('dialog', { name: 'Two eras. Every structural change.' }).isVisible()
+    await page.keyboard.press('Escape')
+
+    const posterDownloadPromise = page.waitForEvent('download')
+    await evidence.getByRole('button', { name: /Export evidence poster/ }).click()
+    const posterDownload = await posterDownloadPromise
+    const posterFilename = posterDownload.suggestedFilename()
+    const temporaryPoster = resolve(tmpdir(), `reporewind-evidence-${process.pid}-${Date.now()}.png`)
+    await posterDownload.saveAs(temporaryPoster)
+    const poster = readFileSync(temporaryPoster)
+    const posterBytes = poster.length
+    const isPng = poster.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    const posterWidth = isPng ? poster.readUInt32BE(16) : 0
+    const posterHeight = isPng ? poster.readUInt32BE(20) : 0
+    rmSync(temporaryPoster, { force: true })
+
+    await page.setViewportSize({ width: 390, height: 844 })
+    const compactLayoutUsable = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <= window.innerWidth &&
+        Boolean(document.querySelector('.evidence-workspace')) &&
+        Boolean(document.querySelector('#timeline')),
+    )
+
+    return {
+      fallbackVisible,
+      searchUsable,
+      insightsUsable,
+      comparisonUsable,
+      storyNavigationUsable,
+      compactLayoutUsable,
+      posterFilename,
+      posterBytes,
+      posterWidth,
+      posterHeight,
+      ...(pageError ? { pageError } : {}),
+    }
   } finally {
     await context.close()
     await browser.close()
@@ -485,13 +553,16 @@ async function main(): Promise<void> {
     for (const fixture of manifest.fixtures) {
       process.stdout.write(`Measuring ${fixture.id} in Chromium with a worker…\n`)
       const run = await measureBrowserFixture(browser, histories.get(fixture.id)!, fixture, true)
-      workerMeasurements.push(run.measurement)
-      if (fixture.id === 'small') {
-        process.stdout.write('Measuring deterministic 12-second WebM story-pack export…\n')
-        exportMeasurement = await measureExport(run.page)
+      try {
+        workerMeasurements.push(run.measurement)
+        if (fixture.id === 'small') {
+          process.stdout.write('Measuring deterministic 12-second WebM preview story-pack export…\n')
+          exportMeasurement = await measureExport(run.page)
+        }
+      } finally {
+        await run.context.close()
+        await run.session.close()
       }
-      await run.context.close()
-      await run.session.close()
     }
     if (!exportMeasurement) throw new Error('The small browser export fixture did not run.')
 
@@ -500,6 +571,7 @@ async function main(): Promise<void> {
     const noWorkerRun = await measureBrowserFixture(browser, histories.get('large')!, largeFixture, false)
     await noWorkerRun.context.close()
     await noWorkerRun.session.close()
+    process.stdout.write('Measuring the useful non-WebGL evidence mode…\n')
     const noWebgl = await measureNoWebgl(histories.get('small')!)
 
     const browserVersion = await browser.version()
