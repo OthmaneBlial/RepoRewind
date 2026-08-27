@@ -154,6 +154,33 @@ describe('RepoRewind application', () => {
     expect(renderButton).toBeEnabled()
   })
 
+  it('lets operators reorder, exclude, retitle, and inspect deterministic story chapters', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: 'Export film' }))
+    const dialog = screen.getByRole('dialog', { name: 'Direct your time-lapse.' })
+    await user.click(within(dialog).getByText('Review chapter plan and Git evidence', { exact: true }))
+
+    const buildButton = within(dialog).getByRole('button', { name: 'Build story pack' })
+    const originTitle = within(dialog).getByRole('textbox', { name: 'Title for Origins' })
+    const growthTitle = within(dialog).getByRole('textbox', { name: 'Title for Growth spurt' })
+    expect(originTitle).toHaveValue('Origins')
+    await user.click(within(dialog).getByRole('button', { name: 'Move Origins later' }))
+    expect(within(dialog).getAllByRole('textbox').slice(0, 2)).toEqual([growthTitle, originTitle])
+
+    await user.clear(originTitle)
+    await user.type(originTitle, 'Foundations')
+    expect(buildButton).toBeDisabled()
+    await user.click(within(dialog).getByRole('checkbox', { name: /reviewed the custom story chapter titles/i }))
+    expect(buildButton).toBeEnabled()
+
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Include Growth spurt' }))
+    expect(within(dialog).getByText(/included$/)).toBeVisible()
+    await user.click(within(dialog).getByRole('button', { name: 'View Git evidence · commit 1' }))
+    expect(screen.getByRole('slider', { name: 'History position' })).toHaveValue('0')
+  })
+
   it('reports unavailable fullscreen support without breaking the city', async () => {
     const user = userEvent.setup()
     render(<App />)

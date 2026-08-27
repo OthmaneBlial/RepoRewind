@@ -255,6 +255,8 @@ Effort: **M**. Dependency: P1.1.
 
 ### P1.3 — Add a deterministic Story Director
 
+**Implemented and verified locally 2026-08-27.** Export now proposes seven deterministic, scored chapter types with human-readable definitions and commit-index/hash evidence. Users can reorder, exclude, retitle, and jump to evidence; the chosen order drives film frames and the story-pack README/manifest. Public custom titles require a separate Share Safety confirmation. Tests cover ties, renames, merges, truncation, missing tags, reordered frame plans, and three versioned fixtures of different sizes; desktop browser QA confirms all seven controls, the evidence jump, review gate, and overflow-free modal.
+
 Turn the replay engine into opinionated, evidence-backed chapters:
 
 - **Origins:** first commit to first stable release;

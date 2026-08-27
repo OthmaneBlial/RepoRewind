@@ -7,6 +7,7 @@ import {
   type SharePrivacySettings,
 } from '../core/privacy'
 import type { HistorySnapshot, RepositoryHistory } from '../core/types'
+import type { StoryChapterSelection } from '../core/story-director'
 import { buildTimelapseOverlayCopy, type TimelapseFormat } from './timelapse'
 
 export const STORY_PACK_FILENAMES = {
@@ -60,6 +61,7 @@ export interface StoryPackManifest {
   omittedFields: string[]
   links: { project: string; liveDemo: string }
   artifacts: StoryPackArtifactRecord[]
+  story?: StoryChapterSelection[]
 }
 
 export interface StoryPackResult {
@@ -78,6 +80,8 @@ export interface BuildStoryPackOptions {
   signal?: AbortSignal
   projectUrl?: string
   liveDemoUrl?: string
+  story?: StoryChapterSelection[]
+  storyCustomTitles?: boolean
 }
 
 const DEFAULT_PROJECT_URL = 'https://github.com/OthmaneBlial/RepoRewind'
@@ -207,12 +211,24 @@ export function buildStoryPackMarkdown(
   trailerFormat: TimelapseFormat,
   projectUrl = DEFAULT_PROJECT_URL,
   liveDemoUrl = DEFAULT_LIVE_URL,
+  story: StoryChapterSelection[] = [],
 ): string {
   const alt = storyPackAltText(history, privacy).replaceAll('"', '&quot;')
   const attribution = privacy.attribution
     ? `\n_Made locally with [RepoRewind](${projectUrl}); repository data was not uploaded._\n`
     : ''
-  return `<a href="${liveDemoUrl}"><img src="./${STORY_PACK_FILENAMES.socialCard}" alt="${alt}" width="1200"></a>\n\n[Watch the RepoRewind trailer](./repo-rewind-trailer.${trailerFormat}) · [Explore the live demo](${liveDemoUrl})\n${attribution}`
+  const storyList = story.length
+    ? `\n### Story chapters\n\n${story
+        .map((chapter, index) => {
+          const title = chapter.title
+            .replace(/[\r\n]+/g, ' ')
+            .replace(/[^\p{L}\p{N} .,!?'&+-]/gu, '')
+            .slice(0, 80)
+          return `${index + 1}. ${title}`
+        })
+        .join('\n')}\n`
+    : ''
+  return `<a href="${liveDemoUrl}"><img src="./${STORY_PACK_FILENAMES.socialCard}" alt="${alt}" width="1200"></a>\n\n[Watch the RepoRewind trailer](./repo-rewind-trailer.${trailerFormat}) · [Explore the live demo](${liveDemoUrl})\n${storyList}${attribution}`
 }
 
 export async function buildStoryPackManifest(
@@ -222,8 +238,13 @@ export async function buildStoryPackManifest(
   artifacts: StoryPackArtifact[],
   projectUrl = DEFAULT_PROJECT_URL,
   liveDemoUrl = DEFAULT_LIVE_URL,
+  story: StoryChapterSelection[] = [],
+  storyCustomTitles = false,
 ): Promise<StoryPackManifest> {
-  const report = buildPrivacyReport(history, privacy)
+  const report = buildPrivacyReport(history, privacy, {
+    storyChapterCount: story.length,
+    customStoryTitles: storyCustomTitles,
+  })
   const records = await Promise.all(
     artifacts.map(async (artifact) => ({
       filename: artifact.filename,
@@ -253,6 +274,7 @@ export async function buildStoryPackManifest(
     omittedFields: report.omittedFields,
     links: { project: projectUrl, liveDemo: liveDemoUrl },
     artifacts: records,
+    ...(story.length ? { story: story.map((chapter) => ({ ...chapter })) } : {}),
   }
 }
 
@@ -400,13 +422,25 @@ export async function buildStoryPack(options: BuildStoryPackOptions): Promise<St
       filename: STORY_PACK_FILENAMES.markdown,
       mediaType: 'text/markdown',
       bytes: encoder.encode(
-        buildStoryPackMarkdown(options.history, options.privacy, options.trailerFormat, projectUrl, liveDemoUrl),
+        buildStoryPackMarkdown(
+          options.history,
+          options.privacy,
+          options.trailerFormat,
+          projectUrl,
+          liveDemoUrl,
+          options.story,
+        ),
       ),
     },
     {
       filename: STORY_PACK_FILENAMES.privacyReport,
       mediaType: 'application/json',
-      bytes: encoder.encode(privacyReportJson(options.history, options.privacy)),
+      bytes: encoder.encode(
+        privacyReportJson(options.history, options.privacy, {
+          storyChapterCount: options.story?.length,
+          customStoryTitles: options.storyCustomTitles,
+        }),
+      ),
     },
   ]
   ensureNotAborted(options.signal)
@@ -417,6 +451,8 @@ export async function buildStoryPack(options: BuildStoryPackOptions): Promise<St
     artifacts,
     projectUrl,
     liveDemoUrl,
+    options.story,
+    options.storyCustomTitles,
   )
   const manifestBytes = encoder.encode(`${JSON.stringify(manifest, null, 2)}\n`)
   const blob = createStoredZip([

@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { publicShareSettings, privateShareSettings } from '../core/privacy'
 import { HistoryEngine } from '../core/history'
+import { buildStoryPlan } from '../core/story-director'
 import { sampleHistory } from '../data/sample-history'
-import { buildTimelapseFramePlan, buildTimelapseOverlayCopy, historyFilmFilename } from './timelapse'
+import {
+  buildDirectedTimelapseFramePlan,
+  buildTimelapseFramePlan,
+  buildTimelapseOverlayCopy,
+  historyFilmFilename,
+} from './timelapse'
 
 describe('buildTimelapseFramePlan', () => {
   it('creates an exact fixed-rate activity timeline including both archive endpoints', () => {
@@ -31,6 +37,34 @@ describe('buildTimelapseFramePlan', () => {
   it('rejects invalid film settings', () => {
     expect(() => buildTimelapseFramePlan(sampleHistory, 0, 1, 30, 'activity')).toThrow('does not contain any frames')
     expect(() => buildTimelapseFramePlan(sampleHistory, 1, 0, 30, 'activity')).toThrow('must be positive')
+  })
+
+  it('renders included Story Director chapters in the user-selected order', () => {
+    const plan = buildStoryPlan(sampleHistory)
+    const origins = plan.chapters.find((chapter) => chapter.kind === 'origins')!
+    const lastYear = plan.chapters.find((chapter) => chapter.kind === 'last-year')!
+    const story = [lastYear, origins].map(({ id, kind, title, startIndex, endIndex }) => ({
+      id,
+      kind,
+      title,
+      startIndex,
+      endIndex,
+    }))
+
+    const frames = buildDirectedTimelapseFramePlan(sampleHistory, sampleHistory.commits.length, 1, 6, 'activity', story)
+    expect(frames.map((frame) => frame.chapterId)).toEqual([
+      lastYear.id,
+      lastYear.id,
+      lastYear.id,
+      origins.id,
+      origins.id,
+      origins.id,
+    ])
+    expect(frames[0]).toMatchObject({ snapshotIndex: lastYear.startIndex, chapterTitle: 'The last year' })
+    expect(frames.at(-1)).toMatchObject({ snapshotIndex: origins.endIndex, chapterTitle: 'Origins' })
+    expect(
+      buildDirectedTimelapseFramePlan(sampleHistory, sampleHistory.commits.length, 1, 6, 'activity', story),
+    ).toEqual(frames)
   })
 
   it('creates safe, bounded download names from imported repository metadata', () => {

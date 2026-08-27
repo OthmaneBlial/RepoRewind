@@ -1,4 +1,5 @@
 import { displayCommitMessage, displayDate, displayRepositoryName, type SharePrivacySettings } from '../core/privacy'
+import type { StoryChapterSelection } from '../core/story-director'
 import type { HistorySnapshot, RepositoryHistory } from '../core/types'
 
 export interface ExportOptions {
@@ -16,6 +17,7 @@ export interface ExportOptions {
   history: RepositoryHistory
   snapshotCount: number
   getSnapshot: (index: number) => HistorySnapshot
+  story?: StoryChapterSelection[]
 }
 
 export type TimelapseFormat = 'mp4' | 'webm'
@@ -31,6 +33,8 @@ export interface TimelapseFrame {
   snapshotIndex: number
   timestamp: number
   duration: number
+  chapterId?: string
+  chapterTitle?: string
 }
 
 export interface TimelapseOverlayCopy {
@@ -108,6 +112,7 @@ function drawTitle(
   snapshot: HistorySnapshot,
   progress: number,
   privacy: SharePrivacySettings,
+  chapterTitle?: string,
 ) {
   const copy = buildTimelapseOverlayCopy(history, snapshot, privacy)
   const fade = Math.min(1, progress * 10, (1 - progress) * 10)
@@ -154,6 +159,14 @@ function drawTitle(
   ctx.fillRect(margin, lineY, width - margin * 2, 2)
   ctx.fillStyle = '#ffb45c'
   ctx.fillRect(margin, lineY, (width - margin * 2) * progress, 3)
+
+  if (chapterTitle) {
+    ctx.textAlign = 'left'
+    ctx.fillStyle = '#ffbe6f'
+    ctx.font = `600 ${Math.round(width * 0.009)}px ui-monospace, monospace`
+    const title = chapterTitle.length > 54 ? `${chapterTitle.slice(0, 52)}…` : chapterTitle
+    ctx.fillText(`CHAPTER  ${title.toUpperCase()}`, margin, height * 0.085)
+  }
 
   if (snapshot.isRelease || snapshot.isMerge || snapshot.isRefactor) {
     ctx.textAlign = 'right'
@@ -238,6 +251,60 @@ export function buildTimelapseFramePlan(
   }))
 }
 
+export function buildDirectedTimelapseFramePlan(
+  history: RepositoryHistory,
+  snapshotCount: number,
+  duration: number,
+  fps: number,
+  pacing: ExportOptions['pacing'],
+  story: StoryChapterSelection[],
+): TimelapseFrame[] {
+  if (story.length === 0) return buildTimelapseFramePlan(history, snapshotCount, duration, fps, pacing)
+  if (snapshotCount < 1) throw new Error('The archive does not contain any frames.')
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(fps) || fps <= 0) {
+    throw new Error('The film duration and frame rate must be positive.')
+  }
+  const chapters = story.map((chapter) => ({
+    ...chapter,
+    startIndex: Math.max(0, Math.min(snapshotCount - 1, Math.min(chapter.startIndex, chapter.endIndex))),
+    endIndex: Math.max(0, Math.min(snapshotCount - 1, Math.max(chapter.startIndex, chapter.endIndex))),
+  }))
+  const totalFrames = Math.max(2, Math.round(duration * fps))
+  return Array.from({ length: totalFrames }, (_, frame) => {
+    const progress = frame / (totalFrames - 1)
+    const chapterPosition = progress === 1 ? chapters.length - 1 : progress * chapters.length
+    const chapterIndex = Math.min(chapters.length - 1, Math.floor(chapterPosition))
+    const chapter = chapters[chapterIndex]
+    const localProgress = progress === 1 ? 1 : chapterPosition - chapterIndex
+    let snapshotIndex: number
+    if (pacing === 'activity') {
+      snapshotIndex = Math.min(
+        chapter.endIndex,
+        chapter.startIndex + Math.floor(localProgress * (chapter.endIndex - chapter.startIndex + 1)),
+      )
+    } else {
+      const times = history.commits
+        .slice(chapter.startIndex, chapter.endIndex + 1)
+        .map((commit) => new Date(commit.authoredAt).getTime())
+      const firstTime = times[0] ?? 0
+      const lastTime = times.at(-1) ?? firstTime
+      const target = firstTime + (lastTime - firstTime) * localProgress
+      let localIndex = 0
+      while (localIndex + 1 < times.length && times[localIndex + 1] <= target) localIndex += 1
+      snapshotIndex = chapter.startIndex + localIndex
+    }
+    return {
+      frame,
+      progress,
+      snapshotIndex,
+      timestamp: frame / fps,
+      duration: 1 / fps,
+      chapterId: chapter.id,
+      chapterTitle: chapter.title,
+    }
+  })
+}
+
 function createComposite(options: ExportOptions) {
   const canvas = document.createElement('canvas')
   canvas.width = options.width
@@ -265,6 +332,7 @@ async function renderCompositeFrame(options: ExportOptions, context: CanvasRende
     options.getSnapshot(frame.snapshotIndex),
     frame.progress,
     options.privacy,
+    frame.chapterTitle,
   )
 }
 
@@ -375,13 +443,16 @@ async function exportMp4Timelapse(options: ExportOptions, plan: TimelapseFrame[]
 
 export async function exportTimelapse(options: ExportOptions): Promise<Blob> {
   ensureNotAborted(options.signal)
-  const plan = buildTimelapseFramePlan(
-    options.history,
-    options.snapshotCount,
-    options.duration,
-    options.fps,
-    options.pacing,
-  )
+  const plan = options.story?.length
+    ? buildDirectedTimelapseFramePlan(
+        options.history,
+        options.snapshotCount,
+        options.duration,
+        options.fps,
+        options.pacing,
+        options.story,
+      )
+    : buildTimelapseFramePlan(options.history, options.snapshotCount, options.duration, options.fps, options.pacing)
   return options.format === 'mp4' ? exportMp4Timelapse(options, plan) : exportWebmTimelapse(options, plan)
 }
 

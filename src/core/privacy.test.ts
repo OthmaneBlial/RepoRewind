@@ -88,4 +88,16 @@ describe('share-safety projection', () => {
       }),
     ).toEqual(['repository name', 'commit messages', 'file basenames'])
   })
+
+  it('records reviewed Story Director fields without embedding chapter content', () => {
+    const report = buildPrivacyReport(sampleHistory, publicShareSettings, {
+      storyChapterCount: 4,
+      customStoryTitles: true,
+    })
+
+    expect(report.story).toEqual({ chapterCount: 4, customTitles: true })
+    expect(report.includedFields).toEqual(expect.arrayContaining(['story.chapterTitles', 'story.commitRanges']))
+    expect(report.warnings).toContain('Public presentation includes reviewed custom story chapter titles.')
+    expect(JSON.stringify(report)).not.toContain('My private chapter title')
+  })
 })

@@ -124,7 +124,7 @@ Choose **Pin this era**, travel elsewhere, and open the temporal diff. RepoRewin
 
 Choose **Export film** for a fixed-timeline 1080p or 4K MP4/WebM time-lapse with dates, commit titles, statistics, merge/release cards, and a cinematic grade. Before rendering, the Share Safety review shows exactly which identifying fields will appear. The default **Public share** projection replaces the repository name and commit titles with generic labels, hides names, hashes, paths, refs, remotes, and emails, rounds dates to the month, and keeps only aggregate counts.
 
-The default output is a [history story pack](./docs/story-pack.md): four fixed-size PNGs, the trailer, a ready-to-paste README snippet with useful alt text, a privacy report, and a SHA-256 manifest in one ZIP. Choose **Film only** for the original video-plus-report download. Visual frame selection, timestamps, event pacing, keyframe scheduling, and redaction copy are deterministic. Hardware encoders may produce different final bytes. Exports remain cancelable and entirely in the current browser tab.
+The default output is a [history story pack](./docs/story-pack.md): four fixed-size PNGs, the trailer, a ready-to-paste README snippet with useful alt text, a privacy report, and a SHA-256 manifest in one ZIP. The [deterministic Story Director](./docs/story-director.md) proposes scored chapters for origins, growth, rebuilds, releases, ownership handoffs, ruins, and the final year; every chapter explains its selection and links back to Git evidence. Choose **Film only** for the original video-plus-report download. Visual frame selection, timestamps, event pacing, keyframe scheduling, and redaction copy are deterministic. Hardware encoders may produce different final bytes. Exports remain cancelable and entirely in the current browser tab.
 
 ## Privacy and security
 
@@ -132,7 +132,7 @@ RepoRewind has no hosted backend, analytics, telemetry, cookies, user accounts, 
 
 History archives can still contain sensitive names, paths, messages, and remotes. Review them before sharing. Share Safety changes only the exported presentation; it never mutates the canonical archive. Public overrides for sensitive fields and archives containing contributor emails require explicit confirmation. Runtime validation enforces a 256 MB file limit, bounded record counts and strings, valid relationships, and known change statuses before indexing untrusted input.
 
-See [Privacy and trust boundaries](./docs/privacy.md), the [story-pack contract](./docs/story-pack.md), and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
+See [Privacy and trust boundaries](./docs/privacy.md), the [story-pack contract](./docs/story-pack.md), [Story Director scoring](./docs/story-director.md), and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
 
 ## Architecture
 

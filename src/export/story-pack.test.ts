@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { HistoryEngine } from '../core/history'
 import { publicShareSettings } from '../core/privacy'
+import { buildStoryPlan } from '../core/story-director'
 import { sampleHistory } from '../data/sample-history'
 import {
   buildStoryPackManifest,
@@ -47,12 +48,50 @@ describe('history story pack', () => {
     expect(storyPackAltText(sampleHistory, publicShareSettings)).not.toContain(sampleHistory.repository.branch)
   })
 
+  it('writes selected chapter order and strips active Markdown punctuation from custom titles', () => {
+    const chapters = buildStoryPlan(sampleHistory)
+      .chapters.slice(0, 2)
+      .map((chapter, index) => ({
+        id: chapter.id,
+        kind: chapter.kind,
+        title: index === 0 ? 'Foundations [private](https://example.test)' : chapter.title,
+        startIndex: chapter.startIndex,
+        endIndex: chapter.endIndex,
+      }))
+    const markdown = buildStoryPackMarkdown(
+      sampleHistory,
+      publicShareSettings,
+      'webm',
+      'https://github.com/OthmaneBlial/RepoRewind',
+      'https://othmaneblial.github.io/RepoRewind/play/',
+      chapters,
+    )
+
+    expect(markdown).toContain('### Story chapters')
+    expect(markdown).toContain('1. Foundations privatehttpsexample.test')
+    expect(markdown).toContain(`2. ${chapters[1].title}`)
+    expect(markdown).not.toContain('[private]')
+  })
+
   it('records privacy-projected selection and SHA-256 for every artifact', async () => {
+    const story = buildStoryPlan(sampleHistory)
+      .chapters.slice(0, 2)
+      .map(({ id, kind, title, startIndex, endIndex }) => ({
+        id,
+        kind,
+        title,
+        startIndex,
+        endIndex,
+      }))
     const manifest = await buildStoryPackManifest(
       sampleHistory,
       new HistoryEngine(sampleHistory).snapshotAt(12),
       publicShareSettings,
       [{ filename: 'proof.txt', mediaType: 'text/plain', bytes: new TextEncoder().encode('hello') }],
+      'https://github.com/OthmaneBlial/RepoRewind',
+      'https://othmaneblial.github.io/RepoRewind/play/',
+      story,
+      true,
     )
 
     expect(manifest).toMatchObject({
@@ -69,7 +108,9 @@ describe('history story pack', () => {
       },
     })
     expect(manifest.includedFields).toContain('product.attribution')
+    expect(manifest.includedFields).toEqual(expect.arrayContaining(['story.chapterTitles', 'story.commitRanges']))
     expect(manifest.omittedFields).toEqual(expect.arrayContaining(['repository.name', 'files.path', 'commits.hash']))
+    expect(manifest.story).toEqual(story)
     expect(manifest.artifacts).toEqual([
       {
         filename: 'proof.txt',

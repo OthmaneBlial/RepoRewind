@@ -4,22 +4,22 @@ The story pack turns one reviewed replay into a single portable ZIP for a README
 
 ## Stable contents
 
-| File                                 | Purpose                                                                                                 | Dimensions                      |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `repo-rewind-social-card.png`        | GitHub/Open Graph-style card                                                                            | 1200×630                        |
-| `repo-rewind-square-poster.png`      | Square social poster                                                                                    | 1080×1080                       |
-| `repo-rewind-widescreen-poster.png`  | Presentation and video poster                                                                           | 1920×1080                       |
-| `repo-rewind-current-frame.png`      | Reviewed current-era still                                                                              | 1600×900                        |
-| `repo-rewind-trailer.mp4` or `.webm` | 12, 16, or 24 second replay                                                                             | selected 1080p or 4K resolution |
-| `README-snippet.md`                  | Ready-to-paste linked image, useful alt text, trailer link, and live-demo link                          | —                               |
-| `privacy-report.json`                | Disclosure settings, scope, size, completeness, versions, and omissions                                 | —                               |
-| `manifest.json`                      | Pack version, projected ref/range, links, dimensions, byte sizes, media types, and SHA-256 per artifact | —                               |
+| File                                 | Purpose                                                                                                | Dimensions                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| `repo-rewind-social-card.png`        | GitHub/Open Graph-style card                                                                           | 1200×630                        |
+| `repo-rewind-square-poster.png`      | Square social poster                                                                                   | 1080×1080                       |
+| `repo-rewind-widescreen-poster.png`  | Presentation and video poster                                                                          | 1920×1080                       |
+| `repo-rewind-current-frame.png`      | Reviewed current-era still                                                                             | 1600×900                        |
+| `repo-rewind-trailer.mp4` or `.webm` | 12, 16, or 24 second replay                                                                            | selected 1080p or 4K resolution |
+| `README-snippet.md`                  | Ready-to-paste linked image, useful alt text, trailer/live-demo links, and selected story chapters     | —                               |
+| `privacy-report.json`                | Disclosure settings, scope, size, completeness, versions, and omissions                                | —                               |
+| `manifest.json`                      | Pack version, projected ref/range, chapter order/ranges, dimensions, media types, and artifact SHA-256 | —                               |
 
 The ZIP itself is always named `repo-rewind-story-pack.zip`. Stable generic names avoid leaking a repository or local filesystem path through the bundle structure.
 
 ## Privacy contract
 
-Every poster and the trailer use the exact Share Safety settings confirmed before rendering. The public preset shows generic repository and commit labels, month-level dates, aggregate counts, and the default **Made with RepoRewind** attribution. It omits names, emails, hashes, paths, remotes, and branch/tag names. Attribution is removable without payment.
+Every poster and the trailer use the exact Share Safety settings confirmed before rendering. The public preset shows generic repository and commit labels, reviewed Story Director titles, month-level dates, aggregate counts, and the default **Made with RepoRewind** attribution. It omits names, emails, hashes, paths, remotes, and branch/tag names. Attribution is removable without payment.
 
 The bundle contains no raw history archive. PNGs are created from the city canvas and reviewed overlay copy; the browser encoder creates the trailer; neither path adds repository or local-path text metadata. `manifest.json` records only projected selection values and field names. See the [privacy boundary](./privacy.md) for the canonical archive and override rules.
 

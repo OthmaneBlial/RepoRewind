@@ -31,6 +31,12 @@ export interface PrivacyReport {
   includedFields: string[]
   omittedFields: string[]
   warnings: string[]
+  story?: { chapterCount: number; customTitles: boolean }
+}
+
+export interface PrivacyReportContext {
+  storyChapterCount?: number
+  customStoryTitles?: boolean
 }
 
 export const publicShareSettings: SharePrivacySettings = {
@@ -132,7 +138,12 @@ export function displayDate(date: string, settings: SharePrivacySettings): strin
   return new Intl.DateTimeFormat('en', { ...options, timeZone: 'UTC' }).format(new Date(date))
 }
 
-export function buildPrivacyReport(history: RepositoryHistory, settings: SharePrivacySettings): PrivacyReport {
+export function buildPrivacyReport(
+  history: RepositoryHistory,
+  settings: SharePrivacySettings,
+  context: PrivacyReportContext = {},
+): PrivacyReport {
+  const hasStory = Boolean(context.storyChapterCount)
   const includedFields = [
     settings.repositoryName ? 'repository.name' : 'repository.genericLabel',
     settings.contributorNames ? 'contributors.name' : 'contributors.pseudonym',
@@ -144,6 +155,7 @@ export function buildPrivacyReport(history: RepositoryHistory, settings: SharePr
     `dates:${settings.dateDisclosure}`,
     ...(settings.aggregates ? ['aggregates'] : []),
     ...(settings.attribution ? ['product.attribution', 'product.link'] : []),
+    ...(hasStory ? ['story.chapterTitles', 'story.commitRanges'] : []),
   ]
   const omittedFields = [
     ...(!settings.repositoryName ? ['repository.name', 'repository.remote'] : ['repository.remote']),
@@ -166,6 +178,9 @@ export function buildPrivacyReport(history: RepositoryHistory, settings: SharePr
         ]
       : []),
     ...sensitivePublicFields(settings).map((field) => `Public presentation includes ${field}.`),
+    ...(settings.preset === 'public' && context.customStoryTitles
+      ? ['Public presentation includes reviewed custom story chapter titles.']
+      : []),
   ]
   return {
     reportVersion: 1,
@@ -179,9 +194,21 @@ export function buildPrivacyReport(history: RepositoryHistory, settings: SharePr
     includedFields,
     omittedFields,
     warnings,
+    ...(hasStory
+      ? {
+          story: {
+            chapterCount: context.storyChapterCount!,
+            customTitles: Boolean(context.customStoryTitles),
+          },
+        }
+      : {}),
   }
 }
 
-export function privacyReportJson(history: RepositoryHistory, settings: SharePrivacySettings): string {
-  return `${JSON.stringify(buildPrivacyReport(history, settings), null, 2)}\n`
+export function privacyReportJson(
+  history: RepositoryHistory,
+  settings: SharePrivacySettings,
+  context: PrivacyReportContext = {},
+): string {
+  return `${JSON.stringify(buildPrivacyReport(history, settings, context), null, 2)}\n`
 }

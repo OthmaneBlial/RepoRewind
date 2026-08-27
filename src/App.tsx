@@ -37,6 +37,7 @@ import {
   type SharePrivacySettings,
 } from './core/privacy'
 import { searchArchive, type ArchiveSearchKind, type ArchiveSearchResult } from './core/search'
+import { buildStoryPlan, type StoryChapter, type StoryChapterSelection } from './core/story-director'
 import { sampleEvenly } from './core/timeline'
 import type { FileSnapshot, HistoryIndex, RepositoryHistory } from './core/types'
 import { sampleHistory } from './data/sample-history'
@@ -341,6 +342,8 @@ interface ExportSettings {
   pacing: 'activity' | 'chronological'
   privacy: SharePrivacySettings
   delivery: 'story-pack' | 'film'
+  story: StoryChapterSelection[]
+  storyCustomTitles: boolean
 }
 
 function ExportModal({
@@ -350,6 +353,7 @@ function ExportModal({
   progress,
   exporting,
   history,
+  onInspectEvidence,
 }: {
   onClose: () => void
   onCancel: () => void
@@ -357,6 +361,7 @@ function ExportModal({
   progress: number
   exporting: boolean
   history: RepositoryHistory
+  onInspectEvidence: (index: number) => void
 }) {
   const [duration, setDuration] = useState(16)
   const [resolution, setResolution] = useState('1080')
@@ -367,15 +372,66 @@ function ExportModal({
   const [privacy, setPrivacy] = useState<SharePrivacySettings>(() => shareSettingsForPreset('public'))
   const [sensitiveReviewed, setSensitiveReviewed] = useState(false)
   const [emailReviewed, setEmailReviewed] = useState(false)
+  const [storyTitlesReviewed, setStoryTitlesReviewed] = useState(false)
+  const storyPlan = useMemo(() => buildStoryPlan(history), [history])
+  const [storyChapters, setStoryChapters] = useState<Array<StoryChapter & { included: boolean; defaultTitle: string }>>(
+    () => storyPlan.chapters.map((chapter) => ({ ...chapter, included: true, defaultTitle: chapter.title })),
+  )
   const dimensions = resolution === '4k' ? { width: 3840, height: 2160 } : { width: 1920, height: 1080 }
-  const settings = { format, duration, fps: 30, ...dimensions, pacing, privacy, delivery }
-  const privacyReport = useMemo(() => buildPrivacyReport(history, privacy), [history, privacy])
+  const story = useMemo<StoryChapterSelection[]>(
+    () =>
+      storyChapters
+        .filter((chapter) => chapter.included)
+        .map(({ id, kind, title, defaultTitle, startIndex, endIndex }) => ({
+          id,
+          kind,
+          title: title.trim() || defaultTitle,
+          startIndex,
+          endIndex,
+        })),
+    [storyChapters],
+  )
+  const storyCustomTitles = storyChapters.some(
+    (chapter) => chapter.included && chapter.title.trim() !== chapter.defaultTitle,
+  )
+  const settings = {
+    format,
+    duration,
+    fps: 30,
+    ...dimensions,
+    pacing,
+    privacy,
+    delivery,
+    story,
+    storyCustomTitles,
+  }
+  const privacyReport = useMemo(
+    () =>
+      buildPrivacyReport(history, privacy, {
+        storyChapterCount: story.length,
+        customStoryTitles: storyCustomTitles,
+      }),
+    [history, privacy, story.length, storyCustomTitles],
+  )
   const sensitiveFields = sensitivePublicFields(privacy)
   const emailReviewRequired = privacy.preset === 'public' && historyContainsEmails(history)
-  const privacyReady = (sensitiveFields.length === 0 || sensitiveReviewed) && (!emailReviewRequired || emailReviewed)
+  const storyTitleReviewRequired = privacy.preset === 'public' && storyCustomTitles
+  const privacyReady =
+    (sensitiveFields.length === 0 || sensitiveReviewed) &&
+    (!emailReviewRequired || emailReviewed) &&
+    (!storyTitleReviewRequired || storyTitlesReviewed)
   const updatePrivacy = <Key extends keyof SharePrivacySettings>(key: Key, value: SharePrivacySettings[Key]) => {
     setPrivacy((current) => ({ ...current, [key]: value }))
     setSensitiveReviewed(false)
+  }
+  const moveStoryChapter = (index: number, direction: -1 | 1) => {
+    setStoryChapters((current) => {
+      const target = index + direction
+      if (target < 0 || target >= current.length) return current
+      const next = [...current]
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
   }
   useEffect(() => {
     let current = true
@@ -427,6 +483,7 @@ function ExportModal({
                   setPrivacy(shareSettingsForPreset(preset))
                   setSensitiveReviewed(false)
                   setEmailReviewed(false)
+                  setStoryTitlesReviewed(false)
                 }}
               >
                 {preset === 'public' ? 'Public share' : 'Private review'}
@@ -534,11 +591,101 @@ function ExportModal({
             <span>The canonical archive contains emails. Keep them omitted from this public presentation.</span>
           </label>
         )}
+        {storyTitleReviewRequired && (
+          <label className="privacy-confirmation">
+            <input
+              type="checkbox"
+              checked={storyTitlesReviewed}
+              onChange={(event) => setStoryTitlesReviewed(event.currentTarget.checked)}
+            />
+            <span>I reviewed the custom story chapter titles included in this public presentation.</span>
+          </label>
+        )}
         <p className="privacy-report-note">
           A machine-readable privacy report is included in the story pack, or downloaded beside a film-only export. It
           records scope, completeness, archive size, schema, version, included fields, and omissions—never the omitted
           values.
         </p>
+      </section>
+      <section className="story-director" aria-labelledby="story-director-title">
+        <div className="story-director-heading">
+          <div>
+            <span className="eyebrow">Deterministic director</span>
+            <h3 id="story-director-title">Shape the evidence into chapters.</h3>
+          </div>
+          <strong>
+            {story.length}/{storyChapters.length} included
+          </strong>
+        </div>
+        <p>
+          RepoRewind scores only Git metadata in this archive. Reorder, exclude, or retitle the proposed chapters; the
+          same archive produces the same initial plan.
+        </p>
+        <details className="story-chapter-details">
+          <summary>Review chapter plan and Git evidence</summary>
+          {storyPlan.warnings.map((warning) => (
+            <p className="story-warning" key={warning}>
+              {warning}
+            </p>
+          ))}
+          <div className="story-chapter-list">
+            {storyChapters.map((chapter, index) => (
+              <article className={chapter.included ? '' : 'excluded'} key={chapter.id}>
+                <div className="story-chapter-control">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={chapter.included}
+                      aria-label={`Include ${chapter.defaultTitle}`}
+                      onChange={(event) => {
+                        const included = event.currentTarget.checked
+                        setStoryChapters((current) =>
+                          current.map((candidate) =>
+                            candidate.id === chapter.id ? { ...candidate, included } : candidate,
+                          ),
+                        )
+                      }}
+                    />
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                  </label>
+                  <input
+                    aria-label={`Title for ${chapter.defaultTitle}`}
+                    value={chapter.title}
+                    maxLength={80}
+                    onChange={(event) => {
+                      const title = event.currentTarget.value
+                      setStoryTitlesReviewed(false)
+                      setStoryChapters((current) =>
+                        current.map((candidate) => (candidate.id === chapter.id ? { ...candidate, title } : candidate)),
+                      )
+                    }}
+                  />
+                  <div className="story-order-actions">
+                    <button
+                      aria-label={`Move ${chapter.defaultTitle} earlier`}
+                      disabled={index === 0}
+                      onClick={() => moveStoryChapter(index, -1)}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      aria-label={`Move ${chapter.defaultTitle} later`}
+                      disabled={index === storyChapters.length - 1}
+                      onClick={() => moveStoryChapter(index, 1)}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+                <p>{chapter.summary}</p>
+                <small>{chapter.reason}</small>
+                <button className="story-evidence" onClick={() => onInspectEvidence(chapter.evidence[0].index)}>
+                  View Git evidence · commit {chapter.evidence[0].index + 1}
+                </button>
+              </article>
+            ))}
+          </div>
+        </details>
       </section>
       <div className="option-grid">
         <fieldset>
@@ -1164,12 +1311,22 @@ export default function App() {
             trailer: blob,
             trailerFormat: settings.format,
             signal: controller.signal,
+            story: settings.story,
+            storyCustomTitles: settings.storyCustomTitles,
           })
           downloadBlob(pack.blob, pack.filename)
         } else {
           downloadBlob(blob, historyFilmFilename(history.repository.name, settings.format))
           downloadBlob(
-            new Blob([privacyReportJson(history, settings.privacy)], { type: 'application/json' }),
+            new Blob(
+              [
+                privacyReportJson(history, settings.privacy, {
+                  storyChapterCount: settings.story.length,
+                  customStoryTitles: settings.storyCustomTitles,
+                }),
+              ],
+              { type: 'application/json' },
+            ),
             'reporewind-privacy-report.json',
           )
         }
@@ -1631,6 +1788,10 @@ export default function App() {
           progress={exportProgress}
           exporting={exporting}
           history={history}
+          onInspectEvidence={(evidenceIndex) => {
+            setPlaying(false)
+            setFrame(evidenceIndex)
+          }}
         />
       )}
     </main>
