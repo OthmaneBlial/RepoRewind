@@ -108,6 +108,49 @@ describe('RepoRewind application', () => {
     expect(within(dialog).getByRole('button', { name: 'Render WEBM film' })).toBeEnabled()
   })
 
+  it('starts with a public-safe film projection and gates sensitive overrides', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: 'Export film' }))
+    const dialog = screen.getByRole('dialog', { name: 'Direct your time-lapse.' })
+    expect(within(dialog).getByRole('button', { name: 'Public share' })).toHaveClass('active')
+    expect(within(dialog).getByLabelText('Current export field preview')).toHaveTextContent('Repository history')
+    expect(within(dialog).getByText(/repository\.genericLabel/)).toBeVisible()
+
+    const renderButton = await within(dialog).findByRole('button', { name: /Render (MP4|WEBM) film/ })
+    expect(renderButton).toBeEnabled()
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Repository name' }))
+    expect(renderButton).toBeDisabled()
+    await user.click(within(dialog).getByRole('checkbox', { name: /I reviewed these public fields/ }))
+    expect(renderButton).toBeEnabled()
+  })
+
+  it('requires an explicit public-export review when the canonical archive contains emails', async () => {
+    vi.stubGlobal('Worker', undefined)
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /^Import$/ }))
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')
+    const historyWithEmail = structuredClone(sampleHistory)
+    historyWithEmail.contributors[0].email = 'private@example.test'
+    await user.upload(
+      input!,
+      new File([JSON.stringify(historyWithEmail)], 'history-with-email.json', { type: 'application/json' }),
+    )
+    await screen.findByText('Local archive')
+    await user.click(screen.getByRole('button', { name: 'Export film' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'Direct your time-lapse.' })
+    const renderButton = await within(dialog).findByRole('button', { name: /Render (MP4|WEBM) film/ })
+    const emailReview = within(dialog).getByRole('checkbox', { name: /canonical archive contains emails/i })
+    expect(renderButton).toBeDisabled()
+    expect(within(dialog).getByText(/contributors\.email/)).toBeVisible()
+    await user.click(emailReview)
+    expect(renderButton).toBeEnabled()
+  })
+
   it('reports unavailable fullscreen support without breaking the city', async () => {
     const user = userEvent.setup()
     render(<App />)

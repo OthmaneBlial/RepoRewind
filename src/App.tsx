@@ -24,6 +24,18 @@ import { compareHistoryFrames, type HistoryComparison } from './core/compare'
 import { buildHistoryIndex, HistoryEngine } from './core/history'
 import { buildCityLayout } from './core/layout'
 import { prepareHistoryFile } from './core/prepare-history'
+import {
+  buildPrivacyReport,
+  displayDate as displayPrivacyDate,
+  displayRepositoryName,
+  historyContainsEmails,
+  privacyReportJson,
+  sensitivePublicFields,
+  shareSettingsForPreset,
+  type DateDisclosure,
+  type PathDisclosure,
+  type SharePrivacySettings,
+} from './core/privacy'
 import { searchArchive, type ArchiveSearchKind, type ArchiveSearchResult } from './core/search'
 import { sampleEvenly } from './core/timeline'
 import type { FileSnapshot, HistoryIndex, RepositoryHistory } from './core/types'
@@ -326,6 +338,7 @@ interface ExportSettings {
   width: number
   height: number
   pacing: 'activity' | 'chronological'
+  privacy: SharePrivacySettings
 }
 
 function ExportModal({
@@ -334,20 +347,33 @@ function ExportModal({
   onExport,
   progress,
   exporting,
+  history,
 }: {
   onClose: () => void
   onCancel: () => void
   onExport: (settings: ExportSettings) => void
   progress: number
   exporting: boolean
+  history: RepositoryHistory
 }) {
   const [duration, setDuration] = useState(16)
   const [resolution, setResolution] = useState('1080')
   const [pacing, setPacing] = useState<'activity' | 'chronological'>('activity')
   const [format, setFormat] = useState<TimelapseFormat>('mp4')
   const [mp4Support, setMp4Support] = useState<Mp4ExportSupport>()
+  const [privacy, setPrivacy] = useState<SharePrivacySettings>(() => shareSettingsForPreset('public'))
+  const [sensitiveReviewed, setSensitiveReviewed] = useState(false)
+  const [emailReviewed, setEmailReviewed] = useState(false)
   const dimensions = resolution === '4k' ? { width: 3840, height: 2160 } : { width: 1920, height: 1080 }
-  const settings = { format, duration, fps: 30, ...dimensions, pacing }
+  const settings = { format, duration, fps: 30, ...dimensions, pacing, privacy }
+  const privacyReport = useMemo(() => buildPrivacyReport(history, privacy), [history, privacy])
+  const sensitiveFields = sensitivePublicFields(privacy)
+  const emailReviewRequired = privacy.preset === 'public' && historyContainsEmails(history)
+  const privacyReady = (sensitiveFields.length === 0 || sensitiveReviewed) && (!emailReviewRequired || emailReviewed)
+  const updatePrivacy = <Key extends keyof SharePrivacySettings>(key: Key, value: SharePrivacySettings[Key]) => {
+    setPrivacy((current) => ({ ...current, [key]: value }))
+    setSensitiveReviewed(false)
+  }
   useEffect(() => {
     let current = true
     void probeMp4Export(dimensions.width, dimensions.height).then((support) => {
@@ -361,6 +387,7 @@ function ExportModal({
   }, [dimensions.height, dimensions.width])
   return (
     <Modal
+      className="export-modal"
       eyebrow="Archive cinema"
       title="Direct your time-lapse."
       onClose={exporting ? onCancel : onClose}
@@ -382,6 +409,132 @@ function ExportModal({
         </div>
         <div className="preview-frame">16:9</div>
       </div>
+      <section className="share-safety" aria-labelledby="share-safety-title">
+        <div className="share-safety-heading">
+          <div>
+            <span className="eyebrow">Share safety</span>
+            <h3 id="share-safety-title">Review every field before it leaves the tab.</h3>
+          </div>
+          <div className="segmented privacy-presets" aria-label="Export audience">
+            {(['public', 'private'] as const).map((preset) => (
+              <button
+                key={preset}
+                className={privacy.preset === preset ? 'active' : ''}
+                onClick={() => {
+                  setPrivacy(shareSettingsForPreset(preset))
+                  setSensitiveReviewed(false)
+                  setEmailReviewed(false)
+                }}
+              >
+                {preset === 'public' ? 'Public share' : 'Private review'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="share-safety-copy">
+          The canonical archive stays untouched. These controls change only the presentation rendered into exported
+          artifacts.
+        </p>
+        <div className="privacy-preview" aria-label="Current export field preview">
+          <div>
+            <small>Title</small>
+            <strong>{displayRepositoryName(history, privacy)}</strong>
+          </div>
+          <div>
+            <small>Date</small>
+            <strong>{displayPrivacyDate(history.repository.lastCommitAt, privacy)}</strong>
+          </div>
+          <div>
+            <small>Counts</small>
+            <strong>{privacy.aggregates ? `${history.commits.length.toLocaleString()} commits` : 'Hidden'}</strong>
+          </div>
+          <div>
+            <small>History</small>
+            <strong>{history.repository.truncated ? 'Partial' : 'Complete'}</strong>
+          </div>
+        </div>
+        <details className="privacy-fields">
+          <summary>Review and adjust included fields</summary>
+          <div className="privacy-toggle-grid">
+            {[
+              ['repositoryName', 'Repository name'],
+              ['contributorNames', 'Contributor names'],
+              ['commitMessages', 'Commit titles'],
+              ['commitHashes', 'Commit hashes'],
+              ['refNames', 'Branch and release names'],
+              ['aggregates', 'Aggregate counts'],
+            ].map(([key, label]) => (
+              <label key={key}>
+                <input
+                  type="checkbox"
+                  checked={privacy[key as keyof SharePrivacySettings] === true}
+                  onChange={(event) =>
+                    updatePrivacy(key as keyof SharePrivacySettings, event.currentTarget.checked as never)
+                  }
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+            <label>
+              <span>Paths</span>
+              <select
+                aria-label="Path disclosure"
+                value={privacy.pathDisclosure}
+                onChange={(event) => updatePrivacy('pathDisclosure', event.currentTarget.value as PathDisclosure)}
+              >
+                <option value="hidden">Hidden</option>
+                <option value="extension">Extensions only</option>
+                <option value="basename">Basenames</option>
+                <option value="full">Full paths</option>
+              </select>
+            </label>
+            <label>
+              <span>Dates</span>
+              <select
+                aria-label="Date disclosure"
+                value={privacy.dateDisclosure}
+                onChange={(event) => updatePrivacy('dateDisclosure', event.currentTarget.value as DateDisclosure)}
+              >
+                <option value="year">Year only</option>
+                <option value="month">Month and year</option>
+                <option value="exact">Exact date</option>
+              </select>
+            </label>
+          </div>
+        </details>
+        <div className="privacy-ledger">
+          <p>
+            <b>Included</b> {privacyReport.includedFields.join(' · ')}
+          </p>
+          <p>
+            <b>Omitted</b> {privacyReport.omittedFields.join(' · ')}
+          </p>
+        </div>
+        {sensitiveFields.length > 0 && (
+          <label className="privacy-confirmation">
+            <input
+              type="checkbox"
+              checked={sensitiveReviewed}
+              onChange={(event) => setSensitiveReviewed(event.currentTarget.checked)}
+            />
+            <span>I reviewed these public fields: {sensitiveFields.join(', ')}.</span>
+          </label>
+        )}
+        {emailReviewRequired && (
+          <label className="privacy-confirmation email-warning">
+            <input
+              type="checkbox"
+              checked={emailReviewed}
+              onChange={(event) => setEmailReviewed(event.currentTarget.checked)}
+            />
+            <span>The canonical archive contains emails. Keep them omitted from this public presentation.</span>
+          </label>
+        )}
+        <p className="privacy-report-note">
+          A machine-readable privacy report downloads with the film. It records scope, completeness, archive size,
+          schema, version, included fields, and omissions—never the omitted values.
+        </p>
+      </section>
       <div className="option-grid">
         <fieldset>
           <legend>Resolution</legend>
@@ -462,7 +615,7 @@ function ExportModal({
           </button>
         </div>
       ) : (
-        <button className="primary-action" onClick={() => onExport(settings)}>
+        <button className="primary-action" disabled={!privacyReady} onClick={() => onExport(settings)}>
           <FilmIcon /> Render {format.toUpperCase()} film
         </button>
       )}
@@ -981,8 +1134,12 @@ export default function App() {
           signal: controller.signal,
         })
         downloadBlob(blob, historyFilmFilename(history.repository.name, settings.format))
+        downloadBlob(
+          new Blob([privacyReportJson(history, settings.privacy)], { type: 'application/json' }),
+          'reporewind-privacy-report.json',
+        )
         setExportOpen(false)
-        showNotice('Your time-lapse film has been rendered.')
+        showNotice('Your time-lapse film and privacy report have been rendered.')
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === 'AbortError') {
           showNotice('Film export canceled.')
@@ -1434,6 +1591,7 @@ export default function App() {
           onExport={(settings) => void renderExport(settings)}
           progress={exportProgress}
           exporting={exporting}
+          history={history}
         />
       )}
     </main>

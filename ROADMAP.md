@@ -198,6 +198,8 @@ Goal: turn private analysis into an explicit review → export → discovery loo
 
 ### P1.1 — Add a share-safety review
 
+**Implemented and verified locally 2026-08-27.** Film export now opens with a public-safe projection, a field-level disclosure ledger, explicit gates for sensitive public overrides and email-bearing archives, partial-history labeling, and a versioned JSON privacy report. The canonical archive is never mutated. Unit, UI, and exact export-copy snapshots cover the defaults and gates; browser QA confirms the scrollable modal and disabled/enabled review states without horizontal overflow.
+
 “No source code” does not mean “safe to publish.” The current archive can contain names, paths, commit messages, hashes, refs, dates, and a remote.
 
 Before any public preset, show a field-level preview and offer deterministic redaction for:

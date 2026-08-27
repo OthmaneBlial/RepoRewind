@@ -1,3 +1,4 @@
+import { displayCommitMessage, displayDate, displayRepositoryName, type SharePrivacySettings } from '../core/privacy'
 import type { HistorySnapshot, RepositoryHistory } from '../core/types'
 
 export interface ExportOptions {
@@ -7,6 +8,7 @@ export interface ExportOptions {
   width: number
   height: number
   pacing: 'activity' | 'chronological'
+  privacy: SharePrivacySettings
   signal?: AbortSignal
   onProgress: (progress: number) => void
   setFrame: (index: number) => void
@@ -29,6 +31,46 @@ export interface TimelapseFrame {
   snapshotIndex: number
   timestamp: number
   duration: number
+}
+
+export interface TimelapseOverlayCopy {
+  repository: string
+  date: string
+  commit: string
+  statistics: string
+  event?: string
+  intro: string
+}
+
+export function buildTimelapseOverlayCopy(
+  history: RepositoryHistory,
+  snapshot: HistorySnapshot,
+  privacy: SharePrivacySettings,
+): TimelapseOverlayCopy {
+  const firstDate = displayDate(history.repository.firstCommitAt, privacy).toUpperCase()
+  const lastDate = displayDate(history.repository.lastCommitAt, privacy).toUpperCase()
+  const event = snapshot.release?.tag
+    ? privacy.refNames
+      ? `RELEASE  ${snapshot.release.tag}`
+      : 'RELEASE LANDMARK'
+    : snapshot.isMerge
+      ? `CONFLUENCE  ${snapshot.commit.parents.length} HISTORIES`
+      : snapshot.isRefactor
+        ? 'NEIGHBORHOOD REBUILT'
+        : undefined
+
+  return {
+    repository: displayRepositoryName(history, privacy),
+    date: displayDate(snapshot.date, privacy).toUpperCase(),
+    commit: displayCommitMessage(snapshot.commit, snapshot.index, privacy),
+    statistics: privacy.aggregates
+      ? `${snapshot.activeFiles.toLocaleString()} FILES   ${snapshot.totalLines.toLocaleString()} LINES   ${history.contributors.length} TRAVELERS`
+      : 'STRUCTURAL REPLAY',
+    event,
+    intro: privacy.aggregates
+      ? `${firstDate} — ${lastDate}   ·   ${history.commits.length.toLocaleString()} COMMITS`
+      : `${firstDate} — ${lastDate}`,
+  }
 }
 
 function abortError(): DOMException {
@@ -65,7 +107,9 @@ function drawTitle(
   history: RepositoryHistory,
   snapshot: HistorySnapshot,
   progress: number,
+  privacy: SharePrivacySettings,
 ) {
+  const copy = buildTimelapseOverlayCopy(history, snapshot, privacy)
   const fade = Math.min(1, progress * 10, (1 - progress) * 10)
   const bottomGradient = ctx.createLinearGradient(0, height * 0.58, 0, height)
   bottomGradient.addColorStop(0, 'rgba(5, 8, 7, 0)')
@@ -90,28 +134,20 @@ function drawTitle(
   const margin = width * 0.055
   ctx.fillStyle = '#f3e8d0'
   ctx.font = `600 ${Math.round(width * 0.034)}px Georgia, serif`
-  ctx.fillText(history.repository.name, margin, height - height * 0.14)
+  ctx.fillText(copy.repository, margin, height - height * 0.14)
   ctx.fillStyle = '#ffbe6f'
   ctx.font = `600 ${Math.round(width * 0.011)}px ui-monospace, monospace`
   ctx.letterSpacing = `${Math.round(width * 0.002)}px`
-  const date = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-    .format(new Date(snapshot.date))
-    .toUpperCase()
-  ctx.fillText(date, margin, height - height * 0.2)
+  ctx.fillText(copy.date, margin, height - height * 0.2)
 
   ctx.textAlign = 'right'
   ctx.fillStyle = '#d6d0c3'
   ctx.font = `400 ${Math.round(width * 0.013)}px ui-monospace, monospace`
-  const shortMessage =
-    snapshot.commit.message.length > 68 ? `${snapshot.commit.message.slice(0, 66)}…` : snapshot.commit.message
+  const shortMessage = copy.commit.length > 68 ? `${copy.commit.slice(0, 66)}…` : copy.commit
   ctx.fillText(shortMessage, width - margin, height - height * 0.14)
   ctx.fillStyle = '#8fa198'
   ctx.font = `500 ${Math.round(width * 0.009)}px ui-monospace, monospace`
-  ctx.fillText(
-    `${snapshot.activeFiles.toLocaleString()} FILES   ${snapshot.totalLines.toLocaleString()} LINES   ${history.contributors.length} TRAVELERS`,
-    width - margin,
-    height - height * 0.095,
-  )
+  ctx.fillText(copy.statistics, width - margin, height - height * 0.095)
 
   const lineY = height - height * 0.052
   ctx.fillStyle = 'rgba(255,255,255,.16)'
@@ -123,12 +159,7 @@ function drawTitle(
     ctx.textAlign = 'right'
     ctx.fillStyle = snapshot.isRelease ? '#ffbe6f' : snapshot.isMerge ? '#9ebdff' : '#80d8c3'
     ctx.font = `600 ${Math.round(width * 0.009)}px ui-monospace, monospace`
-    const eventName = snapshot.release?.tag
-      ? `RELEASE  ${snapshot.release.tag}`
-      : snapshot.isMerge
-        ? `CONFLUENCE  ${snapshot.commit.parents.length} HISTORIES`
-        : 'NEIGHBORHOOD REBUILT'
-    ctx.fillText(eventName, width - margin, height * 0.085)
+    ctx.fillText(copy.event ?? 'HISTORY LANDMARK', width - margin, height * 0.085)
   }
 
   if (progress < 0.085) {
@@ -143,16 +174,10 @@ function drawTitle(
     ctx.fillText('A VISUAL HISTORY', width / 2, height * 0.43)
     ctx.fillStyle = '#f1e7d3'
     ctx.font = `500 ${Math.round(width * 0.052)}px Georgia, serif`
-    ctx.fillText(history.repository.name, width / 2, height * 0.52)
+    ctx.fillText(copy.repository, width / 2, height * 0.52)
     ctx.fillStyle = '#839087'
     ctx.font = `500 ${Math.round(width * 0.01)}px ui-monospace, monospace`
-    const firstYear = new Date(history.repository.firstCommitAt).getUTCFullYear()
-    const lastYear = new Date(history.repository.lastCommitAt).getUTCFullYear()
-    ctx.fillText(
-      `${firstYear} — ${lastYear}   ·   ${history.commits.length.toLocaleString()} COMMITS`,
-      width / 2,
-      height * 0.59,
-    )
+    ctx.fillText(copy.intro, width / 2, height * 0.59)
   }
 
   if (progress > 0.965) {
@@ -239,6 +264,7 @@ async function renderCompositeFrame(options: ExportOptions, context: CanvasRende
     options.history,
     options.getSnapshot(frame.snapshotIndex),
     frame.progress,
+    options.privacy,
   )
 }
 

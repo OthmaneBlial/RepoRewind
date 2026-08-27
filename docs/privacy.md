@@ -22,7 +22,25 @@ Commit messages, names, file paths, and remotes can still be sensitive. Treat a 
 
 The explicit `analyze` command writes one JSON file to the path selected by the operator. The one-command viewer keeps the generated archive in process memory and exposes it only through its tokenized loopback session; it creates no temporary archive file. The browser builds in-memory indexes and does not write history to local storage, IndexedDB, or cookies. Reloading a hosted import or closing its tab deletes that browser copy. Delete an explicitly generated JSON file using normal operating-system controls to remove the durable copy.
 
-Downloaded films are normal local files controlled by the browser and operating system.
+Downloaded films and privacy reports are normal local files controlled by the browser and operating system.
+
+## Share Safety and presentation projections
+
+Film export starts with a **Public share** projection. It preserves month-level dates and aggregate counts while replacing the repository name and commit titles with generic labels and omitting contributor names, emails, commit hashes, paths, branch/tag names, and the remote. A **Private review** preset exposes identifying presentation fields except emails. Either preset can be adjusted field by field before rendering.
+
+The review is a presentation projection only. It never rewrites or deletes values in the canonical in-memory archive. Switching presets, canceling an export, closing the dialog, or closing the tab creates no durable browser state.
+
+Enabling an identifying field in a public projection disables rendering until the operator confirms the exact sensitive fields. If the canonical archive contains contributor emails, every public export also requires a separate acknowledgement even though emails remain omitted. RepoRewind never silently fetches missing history; a shallow archive is labeled as partial in the review and report.
+
+Every completed film is accompanied by `reporewind-privacy-report.json`. The report records:
+
+- the selected disclosure settings and public/private preset;
+- included and omitted field names, but never omitted field values;
+- analyzed ref scope, archive byte size, and complete/partial history status;
+- RepoRewind, archive schema, and report versions;
+- warnings for email-bearing archives, partial history, and sensitive public overrides.
+
+The film overlay and privacy report use the same immutable disclosure settings. Export tests snapshot both public-safe and private overlay copy so a redaction regression fails the verification gate.
 
 ## Network behavior
 

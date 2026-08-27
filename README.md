@@ -122,15 +122,15 @@ Choose **Pin this era**, travel elsewhere, and open the temporal diff. RepoRewin
 
 ### Export a history film
 
-Choose **Export film** for a fixed-timeline 1080p or 4K MP4/WebM time-lapse with dates, commit titles, statistics, merge/release cards, and a cinematic grade. H.264/MP4 is enabled only when the exact browser/hardware configuration passes a runtime WebCodecs probe. WebM remains visible as the compatibility path.
+Choose **Export film** for a fixed-timeline 1080p or 4K MP4/WebM time-lapse with dates, commit titles, statistics, merge/release cards, and a cinematic grade. Before rendering, the Share Safety review shows exactly which identifying fields will appear. The default **Public share** projection replaces the repository name and commit titles with generic labels, hides names, hashes, paths, refs, remotes, and emails, rounds dates to the month, and keeps only aggregate counts.
 
-Visual frame selection, timestamps, event pacing, and keyframe scheduling are deterministic. Hardware encoders may produce different final bytes. Exports are cancelable and rendered entirely in the current browser tab.
+Visual frame selection, timestamps, event pacing, keyframe scheduling, and redaction copy are deterministic. Hardware encoders may produce different final bytes. Exports are cancelable and rendered entirely in the current browser tab. Each completed film downloads with a machine-readable privacy report containing the reviewed disclosure settings, included and omitted field names, archive scope and size, completeness, and schema/product versions—never omitted values.
 
 ## Privacy and security
 
 RepoRewind has no hosted backend, analytics, telemetry, cookies, user accounts, or remote ingestion. The CLI is the only component that reads Git. The one-command viewer keeps its archive in process memory and serves it only through a tokenized loopback session; it writes no temporary history file. An explicit `reporewind analyze` command writes JSON only to the operator-selected path.
 
-History archives can still contain sensitive names, paths, messages, and remotes. Review them before sharing. Runtime validation enforces a 256 MB file limit, bounded record counts and strings, valid relationships, and known change statuses before indexing untrusted input.
+History archives can still contain sensitive names, paths, messages, and remotes. Review them before sharing. Share Safety changes only the exported presentation; it never mutates the canonical archive. Public overrides for sensitive fields and archives containing contributor emails require explicit confirmation. Runtime validation enforces a 256 MB file limit, bounded record counts and strings, valid relationships, and known change statuses before indexing untrusted input.
 
 See [Privacy and trust boundaries](./docs/privacy.md) and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
 

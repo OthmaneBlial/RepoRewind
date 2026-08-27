@@ -13,10 +13,12 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Added the one-command `reporewind [repository]` workflow: it analyzes Git, starts a tokenized read-only loopback viewer, loads the validated history automatically, and opens the browser without a temporary archive.
 - Added public npm metadata, a narrow package allowlist, clean-tarball inspection, and an exact-package smoke test for version output, portable analysis, viewer loading, and shutdown across the CI operating-system matrix.
 - Added a real 12-second moving product proof plus a reproducible 1280×640 social preview built from the actual RepoRewind interface.
+- Added a field-level Share Safety review with public/private projections, explicit sensitive-data gates, deterministic film redaction, and a versioned machine-readable privacy report.
 
 ### Changed
 
 - Rebuilt the README around the first real-repository success, one canonical command, explicit expected output, the local-first contract, and repeatable onboarding, investigation, and presentation jobs.
+- Made the public film preset generic by default while preserving the canonical archive and allowing reviewed per-field disclosure overrides.
 
 ### Security
 

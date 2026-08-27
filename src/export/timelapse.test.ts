@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { publicShareSettings, privateShareSettings } from '../core/privacy'
+import { HistoryEngine } from '../core/history'
 import { sampleHistory } from '../data/sample-history'
-import { buildTimelapseFramePlan, historyFilmFilename } from './timelapse'
+import { buildTimelapseFramePlan, buildTimelapseOverlayCopy, historyFilmFilename } from './timelapse'
 
 describe('buildTimelapseFramePlan', () => {
   it('creates an exact fixed-rate activity timeline including both archive endpoints', () => {
@@ -35,5 +37,30 @@ describe('buildTimelapseFramePlan', () => {
     expect(historyFilmFilename('../../private:repo', 'mp4')).toBe('private-repo-history.mp4')
     expect(historyFilmFilename('   ', 'webm')).toBe('repository-history.webm')
     expect(historyFilmFilename('a'.repeat(200), 'mp4')).toBe(`${'a'.repeat(120)}-history.mp4`)
+  })
+
+  it('snapshots the exact public and private copy projected into exported frames', () => {
+    const snapshot = new HistoryEngine(sampleHistory).snapshotAt(12)
+
+    expect(buildTimelapseOverlayCopy(sampleHistory, snapshot, publicShareSettings)).toMatchInlineSnapshot(`
+      {
+        "commit": "Repository change 13",
+        "date": "OCT 2021",
+        "event": undefined,
+        "intro": "APR 2016 — MAY 2026   ·   25 COMMITS",
+        "repository": "Repository history",
+        "statistics": "21 FILES   3,694 LINES   5 TRAVELERS",
+      }
+    `)
+    expect(buildTimelapseOverlayCopy(sampleHistory, snapshot, privateShareSettings)).toMatchInlineSnapshot(`
+      {
+        "commit": "Cinematic atmosphere pass",
+        "date": "OCT 08, 2021",
+        "event": undefined,
+        "intro": "APR 18, 2016 — MAY 09, 2026   ·   25 COMMITS",
+        "repository": "repo-rewind",
+        "statistics": "21 FILES   3,694 LINES   5 TRAVELERS",
+      }
+    `)
   })
 })
