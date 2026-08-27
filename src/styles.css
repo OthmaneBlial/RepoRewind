@@ -1304,6 +1304,138 @@ summary:focus-visible {
 .comparison-modal {
   width: min(760px, 100%);
 }
+.archaeology-modal {
+  width: min(1040px, 100%);
+}
+.archaeology-warnings {
+  display: grid;
+  gap: 5px;
+  margin: -8px 0 18px;
+  padding: 10px 12px;
+  color: #dca464;
+  border-left: 2px solid #bc6c31;
+  background: rgba(188, 108, 49, 0.08);
+  font:
+    550 8px/1.5 ui-monospace,
+    monospace;
+}
+.archaeology-warnings p {
+  margin: 0;
+}
+.archaeology-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.archaeology-grid > section {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 5px;
+  background: linear-gradient(135deg, rgba(255, 185, 105, 0.045), transparent 38%), rgba(255, 255, 255, 0.018);
+}
+.archaeology-grid header {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.archaeology-grid header span {
+  color: #bd6b31;
+  font:
+    700 8px ui-monospace,
+    monospace;
+}
+.archaeology-grid h3 {
+  margin: 0;
+  color: #e9dfcf;
+  font:
+    600 17px/1.15 'Bodoni 72',
+    Didot,
+    Georgia,
+    serif;
+}
+.archaeology-definition {
+  min-height: 39px;
+  margin: 0;
+  color: #8d9992;
+  font-size: 8px;
+  line-height: 1.55;
+}
+.archaeology-results {
+  display: grid;
+  gap: 5px;
+}
+.archaeology-results > button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.13);
+  text-align: left;
+  cursor: pointer;
+}
+.archaeology-results > button:hover,
+.archaeology-results > button:focus-visible {
+  border-color: rgba(255, 187, 107, 0.33);
+  background: rgba(255, 185, 105, 0.06);
+}
+.archaeology-results > button > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.archaeology-results > button > span:last-child {
+  justify-items: end;
+  text-align: right;
+}
+.archaeology-results strong,
+.archaeology-results b,
+.archaeology-results small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.archaeology-results strong {
+  color: #d6d0c3;
+  font-size: 9px;
+}
+.archaeology-results b {
+  color: #e4a45d;
+  font:
+    650 8px ui-monospace,
+    monospace;
+}
+.archaeology-results small {
+  color: #69766f;
+  font:
+    500 7px ui-monospace,
+    monospace;
+}
+.archaeology-grid footer {
+  padding-top: 3px;
+  color: #626e67;
+  font:
+    500 7px/1.55 ui-monospace,
+    monospace;
+}
+.archaeology-empty {
+  margin: 0;
+  padding: 15px 10px;
+  color: #6e7a73;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font:
+    500 8px ui-monospace,
+    monospace;
+}
 .modal-lead {
   margin: 0 0 22px;
   color: #89938d;
@@ -2753,6 +2885,62 @@ summary:focus-visible {
     inset 0 1px rgba(255, 255, 255, 0.9);
 }
 
+.archaeology-warnings {
+  color: #8f491f;
+  border-left-color: #a85625;
+  background: rgba(168, 86, 37, 0.08);
+}
+
+.archaeology-grid > section {
+  border-color: rgba(47, 61, 53, 0.14);
+  background: linear-gradient(135deg, rgba(184, 91, 35, 0.055), transparent 38%), rgba(255, 255, 255, 0.34);
+}
+
+.archaeology-grid h3 {
+  color: #29362f;
+}
+
+.archaeology-definition {
+  color: #53635a;
+  font-size: 9.5px;
+}
+
+.archaeology-results > button {
+  border-color: rgba(47, 61, 53, 0.14);
+  background: rgba(255, 255, 255, 0.47);
+}
+
+.archaeology-results > button:hover,
+.archaeology-results > button:focus-visible {
+  border-color: rgba(155, 77, 28, 0.48);
+  background: rgba(189, 100, 39, 0.09);
+}
+
+.archaeology-results strong {
+  color: #26342d;
+  font-size: 10px;
+}
+
+.archaeology-results b {
+  color: #984719;
+  font-size: 8.5px;
+}
+
+.archaeology-results small {
+  color: #596860;
+  font-size: 7.5px;
+}
+
+.archaeology-grid footer {
+  color: #536159;
+  font-size: 7.5px;
+}
+
+.archaeology-empty {
+  color: #58675f;
+  border-color: rgba(47, 61, 53, 0.18);
+}
+
 .drop-zone {
   color: #354139;
   border-color: rgba(155, 77, 28, 0.34);
@@ -3092,6 +3280,9 @@ summary:focus-visible {
     font-size: 31px;
   }
   .option-grid {
+    grid-template-columns: 1fr;
+  }
+  .archaeology-grid {
     grid-template-columns: 1fr;
   }
   .share-safety-heading {

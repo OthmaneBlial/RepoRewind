@@ -97,6 +97,27 @@ describe('RepoRewind application', () => {
     expect(screen.getByText('Most consequential sites')).toBeVisible()
   })
 
+  it('opens the evidence desk without WebGL and navigates every ranked result to its commit', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: 'Insights' }))
+    const dialog = screen.getByRole('dialog', { name: 'What changed, where, and when?' })
+    expect(within(dialog).getByRole('heading', { name: 'Frequently changed paths' })).toBeVisible()
+    expect(within(dialog).getByRole('heading', { name: 'Activity distribution over time' })).toBeVisible()
+    expect(within(dialog).getByText(/not time spent or code quality/i)).toBeVisible()
+    expect(within(dialog).getByText(/stays useful without the 3D city/i)).toBeVisible()
+
+    const evidenceButton = within(dialog).getAllByRole('button', { name: /Evidence · commit/ })[0]
+    const evidenceCommit = Number(evidenceButton.textContent?.match(/Evidence · commit (\d+)/)?.[1])
+    expect(evidenceCommit).toBeGreaterThan(0)
+    await user.click(evidenceButton)
+
+    expect(screen.queryByRole('dialog', { name: 'What changed, where, and when?' })).not.toBeInTheDocument()
+    expect(screen.getByRole('slider', { name: 'History position' })).toHaveValue(String(evidenceCommit - 1))
+    expect(screen.getByRole('status')).toHaveTextContent(`Evidence opened at commit ${evidenceCommit}`)
+  })
+
   it('keeps WebM available when the runtime cannot encode MP4', async () => {
     const user = userEvent.setup()
     render(<App />)

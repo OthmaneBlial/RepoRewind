@@ -313,6 +313,8 @@ Goal: help maintainers answer real questions and return to RepoRewind.
 
 ### P1.5 — Add an evidence-backed archaeology desk
 
+**Implementation complete 2026-08-27; release verification pending.** The viewer now exposes eight deterministic, bounded text views with visible definitions and limits, archive-specific warnings, and direct timeline/path evidence navigation. Single-author, no-tag, truncated monorepo-like, and rename-heavy fixtures are covered. The exact [metric contract](./docs/archaeology.md) is versioned with the source.
+
 Introduce a focused insights panel derived only from existing metadata:
 
 - most frequently changed paths;

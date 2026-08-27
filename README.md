@@ -120,6 +120,10 @@ Press <kbd>⌘K</kbd>, <kbd>Ctrl K</kbd>, or <kbd>/</kbd> to search files, commi
 
 Choose **Pin this era**, travel elsewhere, and open the temporal diff. RepoRewind follows rename chains, reports line/building deltas, ranks consequential sites, and recolors the live city: mint for construction, amber for rebuilding, blue for renames, and red for demolition.
 
+### Investigate repository archaeology
+
+Choose **Insights** for eight bounded, deterministic views of frequently changed paths, churn, contributor concentration, handoffs, dormant or deleted paths, release deltas, migrations, and activity over time. Every result defines what it measures, states its limits, and jumps to supporting commit or path evidence. The [metric contract](./docs/archaeology.md) explains the exact calculations and edge cases.
+
 ### Export a history film
 
 Choose **Export film** for a fixed-timeline 1080p or 4K MP4/WebM time-lapse with dates, commit titles, statistics, merge/release cards, and a cinematic grade. Before rendering, the Share Safety review shows exactly which identifying fields will appear. The default **Public share** projection replaces the repository name and commit titles with generic labels, hides names, hashes, paths, refs, remotes, and emails, rounds dates to the month, and keeps only aggregate counts.
@@ -132,7 +136,7 @@ RepoRewind has no hosted backend, analytics, telemetry, cookies, user accounts, 
 
 History archives can still contain sensitive names, paths, messages, and remotes. Review them before sharing. Share Safety changes only the exported presentation; it never mutates the canonical archive. Public overrides for sensitive fields and archives containing contributor emails require explicit confirmation. Runtime validation enforces a 256 MB file limit, bounded record counts and strings, valid relationships, and known change statuses before indexing untrusted input.
 
-See [Privacy and trust boundaries](./docs/privacy.md), the [story-pack contract](./docs/story-pack.md), [Story Director scoring](./docs/story-director.md), and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
+See [Privacy and trust boundaries](./docs/privacy.md), the [archaeology metric contract](./docs/archaeology.md), the [story-pack contract](./docs/story-pack.md), [Story Director scoring](./docs/story-director.md), and the [Security policy](./SECURITY.md) for the full data inventory and reporting process.
 
 ## Architecture
 

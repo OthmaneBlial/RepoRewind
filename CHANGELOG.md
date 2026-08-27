@@ -16,6 +16,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Added a field-level Share Safety review with public/private projections, explicit sensitive-data gates, deterministic film redaction, and a versioned machine-readable privacy report.
 - Added a one-click history story pack with four fixed-size PNG variants, the selected trailer, GitHub-ready Markdown, a privacy report, and a SHA-256 manifest in one stable ZIP.
 - Added a deterministic Story Director with seven scored narrative modes, Git evidence jumps, chapter inclusion/order/title controls, privacy review for public custom titles, and directed trailer pacing.
+- Added an evidence-backed archaeology desk with eight deterministic, documented metrics, visible interpretation limits, text-only operation, and direct navigation to supporting commits and paths.
 
 ### Changed
 

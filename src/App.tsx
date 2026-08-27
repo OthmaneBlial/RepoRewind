@@ -21,6 +21,7 @@ import {
   UploadIcon,
 } from './components/icons'
 import { compareHistoryFrames, type HistoryComparison } from './core/compare'
+import { buildArchaeologyDesk, type ArchaeologyEvidenceItem } from './core/archaeology'
 import { buildHistoryIndex, HistoryEngine } from './core/history'
 import { buildCityLayout } from './core/layout'
 import { prepareHistoryFile } from './core/prepare-history'
@@ -1021,6 +1022,76 @@ function ComparisonModal({ comparison, onClose }: { comparison: HistoryCompariso
   )
 }
 
+function ArchaeologyModal({
+  history,
+  onClose,
+  onNavigate,
+}: {
+  history: RepositoryHistory
+  onClose: () => void
+  onNavigate: (item: ArchaeologyEvidenceItem) => void
+}) {
+  const desk = useMemo(() => buildArchaeologyDesk(history), [history])
+  return (
+    <Modal
+      className="archaeology-modal"
+      eyebrow="Evidence desk"
+      title="What changed, where, and when?"
+      onClose={onClose}
+    >
+      <p className="modal-lead">
+        Eight bounded views derived only from this Git archive. Each result states what it measures, what it cannot
+        prove, and where to inspect the supporting commit.
+      </p>
+      {desk.warnings.length > 0 && (
+        <div className="archaeology-warnings" aria-label="Archive evidence limits">
+          {desk.warnings.map((warning) => (
+            <p key={warning}>{warning}</p>
+          ))}
+        </div>
+      )}
+      <div className="archaeology-grid">
+        {desk.sections.map((section) => (
+          <section key={section.id} aria-labelledby={`archaeology-${section.id}`}>
+            <header>
+              <span>{String(desk.sections.indexOf(section) + 1).padStart(2, '0')}</span>
+              <h3 id={`archaeology-${section.id}`}>{section.title}</h3>
+            </header>
+            <p className="archaeology-definition">{section.definition}</p>
+            <div className="archaeology-results">
+              {section.items.length > 0 ? (
+                section.items.map((item) => (
+                  <button
+                    key={item.id}
+                    aria-label={`${item.label}: ${item.value}. Evidence · commit ${item.evidenceIndex + 1}`}
+                    onClick={() => onNavigate(item)}
+                  >
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.detail}</small>
+                    </span>
+                    <span>
+                      <b>{item.value}</b>
+                      <small>Evidence · commit {item.evidenceIndex + 1}</small>
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <p className="archaeology-empty">No matching evidence exists in this archive.</p>
+              )}
+            </div>
+            <footer>{section.limits}</footer>
+          </section>
+        ))}
+      </div>
+      <p className="privacy-note">
+        This desk stays useful without the 3D city: every result is text, keyboard reachable, and linked to the same
+        timeline engine.
+      </p>
+    </Modal>
+  )
+}
+
 function FileInspector({
   file,
   contributorName,
@@ -1073,6 +1144,7 @@ export default function App() {
   const [selectedPath, setSelectedPath] = useState<string>()
   const [importOpen, setImportOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [archaeologyOpen, setArchaeologyOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [comparisonBase, setComparisonBase] = useState<number>()
   const [comparisonOpen, setComparisonOpen] = useState(false)
@@ -1215,12 +1287,12 @@ export default function App() {
       const target = event.target as HTMLElement
       if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === 'k') {
         event.preventDefault()
-        if (!importOpen && !exportOpen && !comparisonOpen) setSearchOpen(true)
+        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen) setSearchOpen(true)
         return
       }
       if (event.key === '/' && !target?.matches('input, textarea, select')) {
         event.preventDefault()
-        if (!importOpen && !exportOpen && !comparisonOpen) setSearchOpen(true)
+        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen) setSearchOpen(true)
         return
       }
       if (target?.matches('input, button, textarea, select')) return
@@ -1233,7 +1305,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [comparisonOpen, exportOpen, historyLength, importOpen])
+  }, [archaeologyOpen, comparisonOpen, exportOpen, historyLength, importOpen])
 
   const togglePlayback = () => {
     if (frame >= historyLength - 1) setFrame(0)
@@ -1250,6 +1322,7 @@ export default function App() {
     setSelectedPath(undefined)
     setComparisonBase(undefined)
     setComparisonOpen(false)
+    setArchaeologyOpen(false)
     showNotice(`${prepared.history.repository.name} is ready to explore.`)
   }
 
@@ -1262,6 +1335,7 @@ export default function App() {
     setSelectedPath(undefined)
     setComparisonBase(undefined)
     setComparisonOpen(false)
+    setArchaeologyOpen(false)
     showNotice('The fictional ten-year demo archive has been restored.')
   }
 
@@ -1273,6 +1347,14 @@ export default function App() {
       const traveler = engine.snapshotAt(result.index).travelers.find((entry) => entry.authorId === result.authorId)
       setSelectedPath(traveler?.path)
     } else setSelectedPath(undefined)
+  }
+
+  const navigateToArchaeologyEvidence = (item: ArchaeologyEvidenceItem) => {
+    setPlaying(false)
+    setFrame(item.evidenceIndex)
+    setSelectedPath(item.path)
+    setArchaeologyOpen(false)
+    showNotice(`Evidence opened at commit ${item.evidenceIndex + 1}.`)
   }
 
   const renderExport = useCallback(
@@ -1419,6 +1501,9 @@ export default function App() {
           </button>
           <button className="icon-button" onClick={() => void enterFullscreen()} aria-label="Toggle fullscreen">
             <ExpandIcon />
+          </button>
+          <button className="text-button insights-button" onClick={() => setArchaeologyOpen(true)}>
+            <LayersIcon /> Insights
           </button>
           <button className="text-button" onClick={() => setImportOpen(true)}>
             <UploadIcon /> Import
@@ -1775,6 +1860,13 @@ export default function App() {
           index={historyIndex}
           onClose={() => setSearchOpen(false)}
           onNavigate={navigateToSearchResult}
+        />
+      )}
+      {archaeologyOpen && (
+        <ArchaeologyModal
+          history={history}
+          onClose={() => setArchaeologyOpen(false)}
+          onNavigate={navigateToArchaeologyEvidence}
         />
       )}
       {comparisonOpen && comparison && comparison.fromIndex !== comparison.toIndex && (
