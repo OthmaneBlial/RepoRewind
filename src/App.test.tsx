@@ -21,6 +21,7 @@ describe('RepoRewind application', () => {
     const dialog = screen.getByRole('dialog', { name: 'Bring your repository’s past to life.' })
     expect(dialog).toBeVisible()
     expect(within(dialog).getByRole('button', { name: 'Demo active' })).toBeDisabled()
+    expect(within(dialog).getByText(/processed in this tab and never uploaded/i)).toBeVisible()
 
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

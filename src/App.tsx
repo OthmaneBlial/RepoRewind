@@ -301,7 +301,8 @@ function ImportModal({
         </code>
       </div>
       <p className="privacy-note">
-        Contributor emails are omitted by default. Binary contents and source code are never included.
+        Selected archives are processed in this tab and never uploaded. Contributor emails are omitted by default;
+        binary contents and source code are never included.
       </p>
     </Modal>
   )

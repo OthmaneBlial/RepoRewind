@@ -28,6 +28,10 @@ Downloaded films are normal local files controlled by the browser and operating 
 
 The application makes no repository-data requests. Browser dependencies and fonts are bundled locally. A sanitized HTTPS repository remote (or loopback HTTP URL for local development) may be shown as a user-activated source link; RepoRewind never fetches that URL.
 
+The public playground downloads the same static application assets from GitHub Pages. A history archive selected there is parsed and retained in the current browser tab; it is not submitted to GitHub Pages or another application service. Browser developer tools can be used to verify that no repository-data request occurs.
+
+GitHub Pages does not apply the Netlify-style rules in `public/_headers`. The hosted HTML therefore carries a restrictive Content Security Policy as a `<meta>` policy, while transport and other response headers remain controlled by GitHub Pages. Directives that require an HTTP response header, such as `frame-ancestors`, must not be claimed for that deployment. Hosts that support custom response headers should apply the complete policy from `public/_headers`.
+
 ## Untrusted input
 
 History archives are untrusted input. The browser enforces a 256 MB file cap, maximum record counts, bounded strings, valid dates and integers, unique identities, known contributor references, supported statuses, and rename invariants. Rendering uses React text nodes rather than injecting archive HTML.
