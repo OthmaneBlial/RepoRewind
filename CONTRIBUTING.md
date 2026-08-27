@@ -2,12 +2,15 @@
 
 RepoRewind welcomes focused fixes and improvements to the local analyze → import → explore → compare/export workflow. Please open an issue before a broad architectural change so the project stays coherent.
 
+Start with one of the maintained [`good first issue`](https://github.com/OthmaneBlial/RepoRewind/labels/good%20first%20issue) or [`help wanted`](https://github.com/OthmaneBlial/RepoRewind/labels/help%20wanted) tasks. The [community contract](./docs/community.md) defines the seven contribution lanes, public-story rules, 48-hour maintainer response target, and first-time contributor credit.
+
 ## Development setup
 
 Install Git and Node.js 24 (the version in `.nvmrc`), then run:
 
 ```bash
 npm ci
+npm run community:check
 npm run dev
 ```
 

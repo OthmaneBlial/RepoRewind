@@ -282,7 +282,7 @@ Effort: **L**. Dependency: P1.1; can ship after the basic story pack.
 
 Start with a deterministic poster, not CI video.
 
-**Implemented and verified locally 2026-08-27; hosted run pending.** A manual read-only workflow now renders the fixed public-safe evidence poster twice, rejects pixel drift, and uploads only a private 1/3/7-day artifact containing the poster, privacy report, non-publication manifest, and SHA-256 checksums. Third-party Actions are immutable-SHA pinned, complete history is explicit, caller and GitHub values enter the generator only through environment variables, and contract tests reject automatic triggers, write permissions, or publication commands. Private/internal visibility changes only the manifest label and never enables publishing.
+**Implemented and verified 2026-08-27.** A manual read-only workflow now renders the fixed public-safe evidence poster twice, rejects pixel drift, and uploads only a private 1/3/7-day artifact containing the poster, privacy report, non-publication manifest, and SHA-256 checksums. Third-party Actions are immutable-SHA pinned, complete history is explicit, caller and GitHub values enter the generator only through environment variables, and contract tests reject automatic triggers, write permissions, or publication commands. A [real hosted run](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33095678418) completed on pinned Node 24 + Chromium; its downloaded four-file artifact passed all checksums, measured 1200×630, recorded `published: false` with one-day retention, and matched the same local private-visibility dry run. Private/internal visibility changes only the manifest label and never enables publishing.
 
 Safe rollout:
 

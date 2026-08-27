@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: RepoRewind Q&A
+    url: https://github.com/OthmaneBlial/RepoRewind/discussions/categories/q-a
+    about: Ask a reproducible usage question without attaching private repository data.
+  - name: Security report
+    url: https://github.com/OthmaneBlial/RepoRewind/security/policy
+    about: Report vulnerabilities privately through the security policy.
