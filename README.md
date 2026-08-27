@@ -179,7 +179,7 @@ For common failures and recovery steps, see [Troubleshooting](./docs/troubleshoo
 
 ## Roadmap
 
-The production scope stays centered on one exceptional workflow. Potential post-1.0 extensions are a streaming file target for longer films, a versioned additive archive schema for richer ref metadata, and measured renderer quality tiers for lower-power devices.
+The product stays centered on one exceptional local-first workflow: analyze → explore → understand → review → export. See the [product and adoption roadmap](./ROADMAP.md) for the evidence-backed path from the current `v0.1.0` foundation to a live playground, one-command real-repository replay, privacy-safe story packs, and repeatable archaeology workflows.
 
 ## Project information
 
