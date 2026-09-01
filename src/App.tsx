@@ -55,6 +55,17 @@ import { buildStoryPack, cloneCanvas } from './export/story-pack'
 
 const CityScene = lazy(() => import('./components/CityScene').then((module) => ({ default: module.CityScene })))
 const MAX_TIMELINE_MARKERS_PER_KIND = 96
+const SOURCE_RUN_COMMAND = `git clone https://github.com/OthmaneBlial/RepoRewind.git
+cd RepoRewind
+npm ci
+npm run reporewind -- /path/to/your/repository`
+const DEMO_CASE = {
+  beforeIndex: 16,
+  rebuildIndex: 19,
+  afterIndex: 22,
+} as const
+
+type DemoCaseStep = 'intro' | 'pin' | 'find' | 'jump' | 'compare' | 'complete'
 
 const formatDate = (date: string, options: Intl.DateTimeFormatOptions = {}) =>
   new Intl.DateTimeFormat('en', {
@@ -256,13 +267,14 @@ function ImportModal({
   }
   return (
     <Modal
-      eyebrow="Open a city"
-      title="Bring your repository’s past to life."
+      eyebrow="Open a local archive"
+      title="Bring a repository’s past into this tab."
       onClose={close}
-      closeLabel={preparing ? 'Cancel import' : 'Close dialog'}
+      closeLabel={preparing ? 'Cancel archive opening' : 'Close dialog'}
     >
       <p className="modal-lead">
-        Analyze locally—your source code never leaves your machine. RepoRewind only exports structural Git history.
+        Opens in this tab. Nothing is uploaded. Refreshing clears the archive. RepoRewind reads structural Git history,
+        never source contents.
       </p>
       <button
         className={`drop-zone ${preparing ? 'preparing' : ''}`}
@@ -322,14 +334,14 @@ function ImportModal({
           <span>Terminal</span>
         </div>
         <code>
-          <b>$</b> npx reporewind analyze /path/to/repository --output ./reporewind-history.json
+          <b>$</b> npm run reporewind -- analyze /path/to/repository --output ./reporewind-history.json
           <br />
-          <b>→</b> Select Import and choose the generated JSON
+          <b>→</b> Select Open archive and choose the generated JSON
         </code>
       </div>
       <p className="privacy-note">
-        Selected archives are processed in this tab and never uploaded. Contributor emails are omitted by default;
-        binary contents and source code are never included.
+        Archives can still contain sensitive names, paths, commit messages, refs, and remotes. Contributor emails are
+        omitted by default; binary contents and source code are never included.
       </p>
     </Modal>
   )
@@ -817,15 +829,17 @@ function SearchResultIcon({ kind }: { kind: ArchiveSearchKind }) {
 function ArchiveSearchModal({
   history,
   index,
+  initialQuery = '',
   onClose,
   onNavigate,
 }: {
   history: RepositoryHistory
   index: HistoryIndex
+  initialQuery?: string
   onClose: () => void
   onNavigate: (result: ArchiveSearchResult) => void
 }) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
   const [selected, setSelected] = useState(0)
   const deferredQuery = useDeferredValue(query)
   const results = useMemo(() => searchArchive(history, index, deferredQuery), [history, index, deferredQuery])
@@ -948,6 +962,147 @@ function ArchiveSearchModal({
         )}
       </div>
     </Modal>
+  )
+}
+
+function RunLocalModal({ onClose }: { onClose: () => void }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const copyCommand = async () => {
+    try {
+      await navigator.clipboard.writeText(SOURCE_RUN_COMMAND)
+      setCopyState('copied')
+    } catch {
+      setCopyState('error')
+    }
+  }
+  return (
+    <Modal eyebrow="Run your own history" title="Use the current build from source." onClose={onClose}>
+      <p className="modal-lead">
+        The public npm package is not published yet. This source path is the verified way to open a real repository
+        today.
+      </p>
+      <div className="run-local-command">
+        <pre>
+          <code>{SOURCE_RUN_COMMAND}</code>
+        </pre>
+        <button onClick={() => void copyCommand()}>
+          {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Select command' : 'Copy command'}
+        </button>
+      </div>
+      <dl className="run-local-ledger">
+        <div>
+          <dt>Reads</dt>
+          <dd>Git metadata, paths, refs, and numeric diffs—not source contents</dd>
+        </div>
+        <div>
+          <dt>Serves</dt>
+          <dd>A tokenized session on a random 127.0.0.1 port</dd>
+        </div>
+        <div>
+          <dt>Sends</dt>
+          <dd>No repository data, telemetry, or analytics</dd>
+        </div>
+      </dl>
+      <p className="privacy-note">
+        Press <kbd>Ctrl C</kbd> to stop the viewer. The future <code>npx reporewind .</code> path will return only after
+        the public package passes a clean-install release gate.
+      </p>
+    </Modal>
+  )
+}
+
+function DemoCaseCoach({
+  step,
+  onDismiss,
+  onStart,
+  onFind,
+  onJump,
+  onRunLocal,
+  onRestart,
+}: {
+  step: DemoCaseStep
+  onDismiss: () => void
+  onStart: () => void
+  onFind: () => void
+  onJump: () => void
+  onRunLocal: () => void
+  onRestart: () => void
+}) {
+  const stepIndex = ['intro', 'pin', 'find', 'jump', 'compare', 'complete'].indexOf(step)
+  return (
+    <aside className={`case-coach glass-panel step-${step}`} aria-label="Guided rebuild case" aria-live="polite">
+      <button className="case-close" onClick={onDismiss} aria-label="Dismiss guided case">
+        <CloseIcon />
+      </button>
+      <p className="eyebrow">
+        Case file 01 <span>{stepIndex + 1}/6</span>
+      </p>
+      {step === 'intro' && (
+        <>
+          <h2>Find the rebuild.</h2>
+          <p>
+            In one minute, trace how a timeline engine moved into a streaming core—and keep the Git evidence attached.
+          </p>
+          <button className="case-primary" onClick={onStart}>
+            Start at v2.0.0 <ArrowIcon />
+          </button>
+        </>
+      )}
+      {step === 'pin' && (
+        <>
+          <h2>Anchor the before.</h2>
+          <p>
+            You are at v2.0.0. Use <strong>Pin this era</strong> in the chapter card to preserve this city.
+          </p>
+          <small>RepoRewind will advance when the real control is used.</small>
+        </>
+      )}
+      {step === 'find' && (
+        <>
+          <h2>Find the structural move.</h2>
+          <p>Search commit evidence for the change that rebuilt the archive around a streaming core.</p>
+          <button className="case-primary" onClick={onFind}>
+            Search the rebuild <SearchIcon />
+          </button>
+        </>
+      )}
+      {step === 'jump' && (
+        <>
+          <h2>The move stays visible.</h2>
+          <p>
+            <code>src/history/timeline.ts</code> became <code>src/core/timeline.ts</code>; the old import layer became a
+            ruin.
+          </p>
+          <button className="case-primary" onClick={onJump}>
+            Jump to v3.0.0 <ArrowIcon />
+          </button>
+        </>
+      )}
+      {step === 'compare' && (
+        <>
+          <h2>Open the difference.</h2>
+          <p>
+            v2.0.0 is still pinned. Use <strong>Compare eras</strong> to inspect the release-to-release evidence.
+          </p>
+          <small>The comparison follows rename chains instead of treating the move as delete + add.</small>
+        </>
+      )}
+      {step === 'complete' && (
+        <>
+          <h2>You found the rebuild.</h2>
+          <p>
+            The fictional timeline moved into <code>src/core/</code>, while RepoRewind preserved the rename, deleted
+            layer, and before/after city.
+          </p>
+          <div className="case-actions">
+            <button className="case-primary" onClick={onRunLocal}>
+              Run on my repository <ArrowIcon />
+            </button>
+            <button onClick={onRestart}>Replay case</button>
+          </div>
+        </>
+      )}
+    </aside>
   )
 }
 
@@ -1294,8 +1449,11 @@ export default function App() {
   const [selectedPath, setSelectedPath] = useState<string>()
   const [importOpen, setImportOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [searchInitialQuery, setSearchInitialQuery] = useState('')
   const [archaeologyOpen, setArchaeologyOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [runLocalOpen, setRunLocalOpen] = useState(false)
+  const [demoCaseStep, setDemoCaseStep] = useState<DemoCaseStep | null>(() => (sessionArchiveUrl ? null : 'intro'))
   const [comparisonBase, setComparisonBase] = useState<number>()
   const [comparisonOpen, setComparisonOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -1396,6 +1554,7 @@ export default function App() {
         setHistory(prepared.history)
         setHistoryIndex(prepared.index)
         setArchiveSource('imported')
+        setDemoCaseStep(null)
         setFrame(0)
         setPlaying(false)
         setSelectedPath(undefined)
@@ -1447,12 +1606,18 @@ export default function App() {
       const target = event.target as HTMLElement
       if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === 'k') {
         event.preventDefault()
-        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen) setSearchOpen(true)
+        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen && !runLocalOpen) {
+          setSearchInitialQuery('')
+          setSearchOpen(true)
+        }
         return
       }
       if (event.key === '/' && !target?.matches('input, textarea, select')) {
         event.preventDefault()
-        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen) setSearchOpen(true)
+        if (!importOpen && !exportOpen && !comparisonOpen && !archaeologyOpen && !runLocalOpen) {
+          setSearchInitialQuery('')
+          setSearchOpen(true)
+        }
         return
       }
       if (target?.matches('input, button, textarea, select')) return
@@ -1465,7 +1630,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [archaeologyOpen, comparisonOpen, exportOpen, historyLength, importOpen])
+  }, [archaeologyOpen, comparisonOpen, exportOpen, historyLength, importOpen, runLocalOpen])
 
   const togglePlayback = () => {
     if (frame >= historyLength - 1) setFrame(0)
@@ -1483,6 +1648,7 @@ export default function App() {
     setComparisonBase(undefined)
     setComparisonOpen(false)
     setArchaeologyOpen(false)
+    setDemoCaseStep(null)
     showNotice(`${prepared.history.repository.name} is ready to explore.`)
   }
 
@@ -1496,6 +1662,7 @@ export default function App() {
     setComparisonBase(undefined)
     setComparisonOpen(false)
     setArchaeologyOpen(false)
+    setDemoCaseStep('intro')
     showNotice('The fictional ten-year demo archive has been restored.')
   }
 
@@ -1507,6 +1674,10 @@ export default function App() {
       const traveler = engine.snapshotAt(result.index).travelers.find((entry) => entry.authorId === result.authorId)
       setSelectedPath(traveler?.path)
     } else setSelectedPath(undefined)
+    if (archiveSource === 'demo' && demoCaseStep === 'find' && result.index === DEMO_CASE.rebuildIndex) {
+      setSelectedPath(undefined)
+      setDemoCaseStep('jump')
+    }
   }
 
   const navigateToArchaeologyEvidence = (item: ArchaeologyEvidenceItem) => {
@@ -1528,8 +1699,30 @@ export default function App() {
   const pinOrCompareEra = () => {
     if (comparisonBase === undefined) {
       setComparisonBase(frame)
+      if (archiveSource === 'demo' && demoCaseStep === 'pin' && frame === DEMO_CASE.beforeIndex) {
+        setDemoCaseStep('find')
+      }
       showNotice('Era pinned. Travel elsewhere on the timeline to compare.')
-    } else if (comparisonBase !== frame) setComparisonOpen(true)
+    } else if (comparisonBase !== frame) {
+      setComparisonOpen(true)
+      if (
+        archiveSource === 'demo' &&
+        demoCaseStep === 'compare' &&
+        comparisonBase === DEMO_CASE.beforeIndex &&
+        frame === DEMO_CASE.afterIndex
+      ) {
+        setDemoCaseStep('complete')
+      }
+    }
+  }
+
+  const startDemoCase = () => {
+    setPlaying(false)
+    setFrame(DEMO_CASE.beforeIndex)
+    setSelectedPath(undefined)
+    setComparisonBase(undefined)
+    setComparisonOpen(false)
+    setDemoCaseStep('pin')
   }
 
   const renderEvidencePoster = async () => {
@@ -1705,7 +1898,14 @@ export default function App() {
           <ChevronIcon />
         </button>
         <div className="top-actions">
-          <button className="archive-search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search archive">
+          <button
+            className="archive-search-trigger"
+            onClick={() => {
+              setSearchInitialQuery('')
+              setSearchOpen(true)
+            }}
+            aria-label="Search archive"
+          >
             <SearchIcon />
             <span>Search archive</span>
             <kbd>⌘K</kbd>
@@ -1731,7 +1931,10 @@ export default function App() {
             <LayersIcon /> Insights
           </button>
           <button className="text-button" onClick={() => setImportOpen(true)}>
-            <UploadIcon /> Import
+            <UploadIcon /> Open archive
+          </button>
+          <button className="text-button run-local-button" onClick={() => setRunLocalOpen(true)}>
+            <ArrowIcon /> Run local
           </button>
           <button
             className="export-button"
@@ -1783,6 +1986,26 @@ export default function App() {
           />
         )}
       </section>
+
+      {archiveSource === 'demo' && demoCaseStep && (
+        <DemoCaseCoach
+          step={demoCaseStep}
+          onDismiss={() => setDemoCaseStep(null)}
+          onStart={startDemoCase}
+          onFind={() => {
+            setSearchInitialQuery('commit: streaming core')
+            setSearchOpen(true)
+          }}
+          onJump={() => {
+            setPlaying(false)
+            setFrame(DEMO_CASE.afterIndex)
+            setSelectedPath(undefined)
+            setDemoCaseStep('compare')
+          }}
+          onRunLocal={() => setRunLocalOpen(true)}
+          onRestart={startDemoCase}
+        />
+      )}
 
       <aside className="era-panel glass-panel">
         <div className="panel-index">
@@ -2100,6 +2323,7 @@ export default function App() {
         <ArchiveSearchModal
           history={history}
           index={historyIndex}
+          initialQuery={searchInitialQuery}
           onClose={() => setSearchOpen(false)}
           onNavigate={navigateToSearchResult}
         />
@@ -2128,6 +2352,7 @@ export default function App() {
           }}
         />
       )}
+      {runLocalOpen && <RunLocalModal onClose={() => setRunLocalOpen(false)} />}
     </main>
   )
 }

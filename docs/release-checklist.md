@@ -9,7 +9,7 @@ Use this checklist for a public tag or hosted demo. It records evidence; it is n
 - [ ] License, third-party notices, security policy, privacy model, and contributor docs are current.
 - [ ] No secrets, personal archives, local absolute paths, debug output, or generated build directories are tracked.
 - [ ] The archive TypeScript types, runtime validation, JSON Schema, and fixtures agree.
-- [ ] GitHub Actions pass from a clean `npm ci` install.
+- [ ] GitHub Actions are deliberately re-enabled for the release gate, or equivalent clean Linux/macOS/Windows evidence is recorded while repository Actions remain disabled.
 
 ## Automated validation
 
@@ -31,7 +31,7 @@ Use this checklist for a public tag or hosted demo. It records evidence; it is n
 - [ ] Fictional demo loads and is clearly labeled.
 - [ ] Play, pause, timeline, speed, release, merge, and branch controls work.
 - [ ] Search opens by mouse and keyboard, navigates results, and selects files.
-- [ ] Import accepts a real generated archive and rejects malformed/oversized input safely.
+- [ ] Open archive accepts a real generated archive and rejects malformed/oversized input safely.
 - [ ] Pin → travel → temporal diff works.
 - [ ] Fullscreen failure degrades to a readable alert.
 - [ ] MP4 capability messaging is accurate; WebM remains available.

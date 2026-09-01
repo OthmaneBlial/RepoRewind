@@ -6,8 +6,8 @@
   role="img"
   aria-labelledby="title description"
 >
-  <title id="title">RepoRewind — your codebase has a past</title>
-  <desc id="description">A product preview of RepoRewind turning real Git history into a replayable city.</desc>
+  <title id="title">RepoRewind — the evidence-backed documentary of your codebase</title>
+  <desc id="description">A product preview of RepoRewind replaying, investigating, comparing, and presenting real Git history.</desc>
   <defs>
     <clipPath id="city-frame">
       <rect x="596" y="42" width="642" height="556" rx="28" />
@@ -104,10 +104,11 @@
       y="463"
       fill="#80d8c3"
       font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-      font-size="19"
+      font-size="16"
       font-weight="600"
+      letter-spacing="1"
     >
-      $ npx reporewind .
+      REPLAY · INVESTIGATE · COMPARE · PRESENT
     </text>
 
     <text

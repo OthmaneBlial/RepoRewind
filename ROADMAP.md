@@ -2,7 +2,7 @@
 
 > **Positioning:** the private documentary of your codebase.
 
-Status: active delivery plan based on a repository, product, distribution, and competitive audit completed on **2026-08-27**.
+Status: active delivery plan, refreshed from a repository, public-state, competitor, GitHub-conversion, and live-demo audit on **2026-09-01**. See the [research plan](./research_reporewind_relaunch/research_plan.md), [competitive findings](./research_reporewind_relaunch/findings_competitive_landscape.md), [GitHub conversion findings](./research_reporewind_relaunch/findings_github_conversion.md), and [demo activation findings](./research_reporewind_relaunch/findings_demo_activation.md).
 
 RepoRewind already has a coherent product: it turns truthful Git history into a stable city that can be replayed, searched, compared, inspected, and filmed. The next milestone is not “more 3D.” It is making that value immediate, useful, safe to share, and easy for other people to extend.
 
@@ -41,35 +41,35 @@ These foundations should be preserved. Replacing them with a generic Git graph, 
 
 ## Audit: what blocks adoption today
 
-Snapshot on 2026-08-27:
+Snapshot on 2026-09-01 before the relaunch changes:
 
-| Blocker                              | Current evidence                                                                                                      | Consequence                                                                             |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| No instant product trial             | The public showcase is static and `/RepoRewind/play/` returns `404`                                                   | Visitors see screenshots but cannot feel the replay                                     |
-| No supported one-command install     | `package.json` is private and the public npm package is absent                                                        | A real repository requires clone, install, dev server, analysis, and manual JSON import |
-| Motion is hidden                     | The README starts with four still screenshots                                                                         | The most distinctive behavior is invisible above the fold                               |
-| Weak share loop                      | Film export exists, but there is no reviewed poster/card, Markdown snippet, public showcase bundle, or release Action | An output does not reliably create the next discovery                                   |
-| Limited repeat utility               | Search and comparison are powerful but the app does not yet surface opinionated repository stories                    | The product risks being experienced once and forgotten                                  |
-| No community surface                 | No public issues, Discussions are disabled, and there are no ready `good first issue` tasks                           | Interested visitors have no obvious low-friction next step                              |
-| Default social preview               | GitHub reports no custom Open Graph image                                                                             | Shared repository links do not show RepoRewind's strongest visual proof                 |
-| Unproven large-repository experience | Safety ceilings exist, but there is no versioned benchmark suite or published performance envelope                    | Maintainers cannot predict whether their repository will work well                      |
+| Blocker                            | Current evidence                                                                                                       | Consequence                                                                                  |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Broken primary acquisition promise | `npm view reporewind` returns `E404`, while README and website lead with `npx reporewind .`                            | The first high-intent action fails and undermines the privacy/trust story                    |
+| Unguided expert demo               | `/play/` is real and capable but opens on a dense workspace with no first question to answer                           | Visitors can see the city without understanding why search + compare + evidence is different |
+| City metaphor is no longer unique  | Git City now offers a Three.js repository city, stable layout, first-parent replay, local processing, and no telemetry | RepoRewind must lead with its read-only evidence-documentary workflow, not “Git as a city”   |
+| Contradictory release presentation | `package.json` is `0.2.0`, the latest release is `v0.1.0`, npm is absent, and the changelog presented `0.2.0` as dated | Visitors cannot tell what is actually released or runnable                                   |
+| Proof-to-local distance            | The showcase puts the real local path after multiple long sections and repeats a broken npm command                    | Curiosity decays before a credible next action                                               |
+| No demonstrated audience yet       | GitHub reports **0 stars, 0 forks, and 0 watchers**; traffic contains automation-heavy clone spikes                    | Product substance is not yet evidence of external interest or repeat use                     |
 
-The repository had **0 stars and 0 forks** at the audit snapshot. That does not mean the product lacks substance; it means discovery and activation have not started working yet.
+GitHub Actions is intentionally disabled at repository level during the relaunch. Workflows remain versioned for later release verification, while `npm run verify` is the current local source of quality evidence.
 
 ## The market position to own
 
 RepoRewind should not introduce itself as “another Git visualizer.”
 
-| Existing category                                                | What it already does well                              | RepoRewind's defensible difference                                                                    |
-| ---------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| [Gource](https://github.com/acaudwell/Gource)                    | Immediate, recognizable repository-evolution spectacle | Searchable, evidence-backed history with stable geography, era comparison, and a directed documentary |
-| [GitLens](https://github.com/gitkraken/vscode-gitlens)           | Daily in-editor Git inspection and operations          | Retrospective onboarding, archaeology, and presentation outside the IDE                               |
-| [git-sim](https://github.com/initialcommit-com/git-sim)          | Educational simulations and direct image/video output  | The actual multi-year history of a repository, not a simulated Git command                            |
-| [Repo Visualizer](https://github.com/githubocto/repo-visualizer) | A CI-generated static repository map                   | A maintained history card/trailer that leads to a rich local-first replay                             |
+| Existing category                                                | What it already does well                                     | RepoRewind's defensible difference                                                                    |
+| ---------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [Gource](https://github.com/acaudwell/Gource)                    | Immediate, recognizable repository-evolution spectacle        | Searchable, evidence-backed history with stable geography, era comparison, and a directed documentary |
+| [GitLens](https://github.com/gitkraken/vscode-gitlens)           | Daily in-editor Git inspection and operations                 | Retrospective onboarding, archaeology, and presentation outside the IDE                               |
+| [git-sim](https://github.com/initialcommit-com/git-sim)          | Educational simulations and direct image/video output         | The actual multi-year history of a repository, not a simulated Git command                            |
+| [Repo Visualizer](https://github.com/githubocto/repo-visualizer) | A CI-generated static repository map                          | A maintained history card/trailer that leads to a rich local-first replay                             |
+| [Git Truck](https://github.com/git-truck/git-truck)              | Local repository metrics and ownership exploration            | A directed temporal documentary with rename-aware era comparison and reviewed story output            |
+| [Git City](https://github.com/maximalcode/git-city)              | A 3D city Git client for inspecting and changing a repository | A read-only evidence trail for historical onboarding, archaeology, and communication                  |
 
 The short promise should remain understandable without mentioning implementation details:
 
-> **Replay how your codebase became what it is—privately, from real Git evidence.**
+> **Turn a local Git history into a private, evidence-backed documentary.**
 
 ## Product principles
 
@@ -88,7 +88,7 @@ Goal: remove every unnecessary step between curiosity and the first truthful cit
 
 ### P0.1 — Deploy the real interactive playground
 
-**Shipped 2026-08-27.** The production app is live at [othmaneblial.github.io/RepoRewind/play/](https://othmaneblial.github.io/RepoRewind/play/). Source commit: [`d3e2896`](https://github.com/OthmaneBlial/RepoRewind/commit/d3e2896). Pages commit: [`96454fb`](https://github.com/OthmaneBlial/OthmaneBlial.github.io/commit/96454fb).
+**Base playground shipped 2026-08-27; guided relaunch implemented locally 2026-09-01 and awaiting publication.** The production app is live at [othmaneblial.github.io/RepoRewind/play/](https://othmaneblial.github.io/RepoRewind/play/). The relaunch adds a reactive rebuild case, clearer local-file language, and a truthful source-run handoff without pretending the npm package exists.
 
 Publish the production web app at a stable route such as `/RepoRewind/play/` and make **Try the live demo** the primary showcase and README call to action.
 
@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Implemented, published, and verified 2026-08-27.** The README now leads with a real 12-second 640×360 product replay (4.6 MB), a reduced-motion/static fallback, the canonical command and expected result, the local-first contract, and three repeat workflows. GitHub serves the custom 1280×640 social preview from `repository-images.githubusercontent.com`; the downloaded public image is byte-for-byte identical to `docs/social-preview.png` (SHA-256 `da160f8b03a0aa7f36a795a2226fa2da5811a0c003ee9a4f129fc483b52a9bf7`). Clean-directory command proof remains part of P0.2's public npm release gate.
+**Rebuilt again locally 2026-09-01; publication pending.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, a verified source-run path, the local data boundary, and three repeat jobs. The broken npm command was removed from the active path until P0.2 is complete. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command.
 
 The README should sell one result before cataloguing the architecture.
 

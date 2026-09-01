@@ -51,6 +51,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "reporewind": "tsx cli/index.ts",
     "build": "npm run typecheck && npm run build:web && npm run build:cli",
     "build:web": "vite build && node scripts/copy-distribution-notices.mjs",
     "build:cli": "tsup cli/index.ts --format esm --out-dir dist-cli --clean",

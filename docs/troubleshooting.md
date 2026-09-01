@@ -5,7 +5,7 @@
 Print the exact loopback URL instead of launching a browser:
 
 ```bash
-npx reporewind /path/to/repository --no-open
+npm run reporewind -- /path/to/repository --no-open
 ```
 
 Open the printed `http://127.0.0.1:<port>/<session>/` URL on the same machine. Keep the terminal process running and press <kbd>Ctrl C</kbd> when finished. RepoRewind never binds the viewer to `0.0.0.0` by default.
@@ -30,7 +30,7 @@ Confirm the path is a Git working tree and that the selected ref exists:
 ```bash
 git -C /path/to/repository status
 git -C /path/to/repository rev-parse --verify main
-npx reporewind /path/to/repository --branch main
+npm run reporewind -- /path/to/repository --branch main
 ```
 
 RepoRewind reports Git's failure without retrying a different ref or reading the working tree. Repositories with no commits cannot produce a city.
@@ -40,7 +40,7 @@ RepoRewind reports Git's failure without retrying a different ref or reading the
 Start with a bounded history:
 
 ```bash
-npx reporewind /path/to/repository --max-commits 5000
+npm run reporewind -- /path/to/repository --max-commits 5000
 ```
 
 The browser rejects files over 256 MB, more than 250,000 commits, or more than 2,000,000 file-change entries. These are safety limits, not target capacities. The earliest retained commit is reconstructed against Git's empty tree so the truncated baseline remains complete.
@@ -55,7 +55,7 @@ MP4 requires a secure context and a browser/hardware combination that passes the
 
 ## Reset the demo
 
-Select the repository switcher or **Import**, then choose **Open demo**. Imported archives are memory-only; reloading the page also restores the fictional demo.
+Select the repository switcher or **Open archive**, then choose **Open demo**. Opened archives are memory-only; reloading the page also restores the fictional demo.
 
 ## Run the complete diagnostic gate
 

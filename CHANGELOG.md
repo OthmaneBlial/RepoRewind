@@ -2,7 +2,7 @@
 
 All notable changes to RepoRewind are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses semantic versioning once releases are published.
 
-## [Unreleased]
+## [Unreleased] — 0.2.0 release candidate
 
 ### Added
 
@@ -16,9 +16,7 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Added a fast 640×360 Preview film resolution and corrected export DPR selection so the live renderer no longer draws more pixels than the selected proof output requires.
 - Made benchmark export selection explicit, cleanup failure-safe, and the forced-no-WebGL record verify real search, comparison, story, responsive, poster-dimension, and page-error outcomes.
 
-## [0.2.0] - 2026-08-27
-
-### Added
+### Earlier candidate additions
 
 - Published the real interactive application at `https://othmaneblial.github.io/RepoRewind/play/` and linked it from the showcase, documentation, and README.
 - Added a reproducible Pages bundle that combines the static showcase with the production app, verifies subpath-safe assets, blocks source maps, and participates in the full verification gate.
@@ -73,6 +71,5 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Contributor grouping uses archive-local sequential identifiers instead of an email-derived hash, preventing cross-archive correlation through contributor IDs.
 - Production-host examples include restrictive security headers and no telemetry.
 
-[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...v0.2.0
+[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.1.0

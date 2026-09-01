@@ -57,8 +57,14 @@ for (const file of htmlFiles) documents.set(file, await checkDocument(file))
 const landing = documents.get(join(pagesRoot, 'index.html')) ?? ''
 const gallery = documents.get(join(pagesRoot, 'gallery.html')) ?? ''
 const playground = documents.get(join(pagesRoot, 'play', 'index.html')) ?? ''
-if (!landing.includes('href="./play/"')) failures.push('index.html: missing canonical ./play/ link')
+if (!landing.includes('href="./play/?case=rebuild"')) {
+  failures.push('index.html: missing canonical guided rebuild link')
+}
 if (!landing.includes('href="./gallery.html"')) failures.push('index.html: missing canonical gallery link')
+if (!landing.includes('npm run reporewind -- /path/to/your/repository')) {
+  failures.push('index.html: missing truthful source-run path')
+}
+if (landing.includes('npx reporewind')) failures.push('index.html: advertises the unpublished npm command')
 for (const storyId of ['reporewind-productization', 'lightclaw-module-extraction', 'pdf-editor-offline-rename']) {
   if (!gallery.includes(`id="${storyId}"`)) failures.push(`gallery.html: missing reviewed story ${storyId}`)
 }

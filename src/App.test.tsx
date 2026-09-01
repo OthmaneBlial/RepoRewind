@@ -31,13 +31,13 @@ describe('RepoRewind application', () => {
 
     expect((await screen.findAllByText('Fictional demo'))[0]).toBeVisible()
     expect(screen.getByRole('button', { name: 'Search archive' })).toHaveAttribute('aria-label', 'Search archive')
-    const importButton = screen.getByRole('button', { name: /^Import$/ })
+    const importButton = screen.getByRole('button', { name: /^Open archive$/ })
     await user.click(importButton)
 
-    const dialog = screen.getByRole('dialog', { name: 'Bring your repository’s past to life.' })
+    const dialog = screen.getByRole('dialog', { name: 'Bring a repository’s past into this tab.' })
     expect(dialog).toBeVisible()
     expect(within(dialog).getByRole('button', { name: 'Demo active' })).toBeDisabled()
-    expect(within(dialog).getByText(/processed in this tab and never uploaded/i)).toBeVisible()
+    expect(within(dialog).getByText(/opens in this tab\. nothing is uploaded/i)).toBeVisible()
 
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -91,6 +91,37 @@ describe('RepoRewind application', () => {
     const inspector = screen.getByRole('region', { name: 'Selected building' })
     expect(within(inspector).getByRole('heading', { name: 'history.ts' })).toBeVisible()
     expect(within(inspector).getByText('src/core/history.ts')).toBeVisible()
+  })
+
+  it('guides a visitor through a real rebuild comparison and into the truthful local path', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const caseFile = screen.getByRole('complementary', { name: 'Guided rebuild case' })
+    expect(within(caseFile).getByRole('heading', { name: 'Find the rebuild.' })).toBeVisible()
+    await user.click(within(caseFile).getByRole('button', { name: /Start at v2\.0\.0/ }))
+    expect(screen.getByRole('slider', { name: 'History position' })).toHaveValue('16')
+
+    await user.click(screen.getByRole('button', { name: 'Pin this era' }))
+    expect(within(caseFile).getByRole('heading', { name: 'Find the structural move.' })).toBeVisible()
+    await user.click(within(caseFile).getByRole('button', { name: /Search the rebuild/ }))
+
+    const search = screen.getByRole('combobox', { name: 'Search repository history' })
+    expect(search).toHaveValue('commit: streaming core')
+    await user.keyboard('{Enter}')
+    expect(within(caseFile).getByRole('heading', { name: 'The move stays visible.' })).toBeVisible()
+
+    await user.click(within(caseFile).getByRole('button', { name: /Jump to v3\.0\.0/ }))
+    expect(screen.getByRole('slider', { name: 'History position' })).toHaveValue('22')
+    await user.click(screen.getByRole('button', { name: 'Compare eras' }))
+    expect(screen.getByRole('dialog', { name: 'Two eras. Every structural change.' })).toBeVisible()
+    await user.keyboard('{Escape}')
+
+    expect(within(caseFile).getByRole('heading', { name: 'You found the rebuild.' })).toBeVisible()
+    await user.click(within(caseFile).getByRole('button', { name: /Run on my repository/ }))
+    const runDialog = screen.getByRole('dialog', { name: 'Use the current build from source.' })
+    expect(within(runDialog).getByText(/public npm package is not published yet/i)).toBeVisible()
+    expect(within(runDialog).getByText(/npm run reporewind -- \/path\/to\/your\/repository/)).toBeVisible()
   })
 
   it('pins an era, travels through history, and opens the temporal diff', async () => {
@@ -191,7 +222,7 @@ describe('RepoRewind application', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(await screen.findByRole('button', { name: /^Import$/ }))
+    await user.click(await screen.findByRole('button', { name: /^Open archive$/ }))
     const input = document.querySelector<HTMLInputElement>('input[type="file"]')
     const historyWithEmail = structuredClone(sampleHistory)
     historyWithEmail.contributors[0].email = 'private@example.test'
@@ -252,7 +283,7 @@ describe('RepoRewind application', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(await screen.findByRole('button', { name: /^Import$/ }))
+    await user.click(await screen.findByRole('button', { name: /^Open archive$/ }))
     const input = document.querySelector<HTMLInputElement>('input[type="file"]')
     expect(input).not.toBeNull()
     const importedHistory = {
@@ -279,12 +310,12 @@ describe('RepoRewind application', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(await screen.findByRole('button', { name: /^Import$/ }))
+    await user.click(await screen.findByRole('button', { name: /^Open archive$/ }))
     const input = document.querySelector<HTMLInputElement>('input[type="file"]')
     await user.upload(input!, new File(['not json'], 'broken-history.json', { type: 'application/json' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('not valid JSON')
-    expect(screen.getByRole('dialog', { name: 'Bring your repository’s past to life.' })).toBeVisible()
+    expect(screen.getByRole('dialog', { name: 'Bring a repository’s past into this tab.' })).toBeVisible()
     expect(screen.getByRole('button', { name: /Choose a history file/ })).toBeEnabled()
   })
 })
