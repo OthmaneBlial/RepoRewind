@@ -1,6 +1,6 @@
 # Release checklist
 
-Use this checklist for a public tag or hosted demo. It records evidence; it is not a substitute for running the checks.
+Use this blank checklist for a public tag or hosted demo. It is intentionally reset after each release and is not a substitute for running the checks. Completed `v0.2.0` evidence is recorded in the [versioned release notes](./releases/v0.2.0.md).
 
 ## Repository
 
