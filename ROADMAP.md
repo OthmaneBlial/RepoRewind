@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The social-preview source was synchronized with the same evidence-first message. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests. GitHub still serves the earlier custom preview; its `npx reporewind .` command is now valid, while replacing it with the committed evidence-led card remains an explicit browser-side publication action.
+**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests. The new 1280×640 evidence-led social preview is live on GitHub, and the repository image served through the public `og:image` URL is byte-identical to [`docs/social-preview.png`](./docs/social-preview.png).
 
 The README should sell one result before cataloguing the architecture.
 
