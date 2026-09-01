@@ -113,7 +113,7 @@ Effort: **S**. Dependency: none.
 
 ### P0.2 — Publish a real npm/npx CLI
 
-**Release gate prepared 2026-09-01.** The npm owner credential is now available from the macOS Keychain, the exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests, and the tag workflow publishes from GitHub-hosted Node 24 with a provenance statement. Final registry, clean-install, and provenance evidence is recorded after the immutable artifact is public.
+**Published and verified 2026-09-01.** [`reporewind@0.2.0`](https://www.npmjs.com/package/reporewind/v/0.2.0) is public with `latest` pointing to `0.2.0`. The exact tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests on [Node 22/Linux and Node 24/macOS/Windows](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33499308967). A fresh anonymous install repeated version, five-commit analysis, viewer, and shutdown locally. `npm audit signatures` verified one registry signature and one provenance attestation from the [GitHub-hosted release run](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33499446949).
 
 Turn the existing executable foundation into two supported public workflows:
 
@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests.
+**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The social-preview source was synchronized with the same evidence-first message. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests. GitHub still serves the earlier custom preview; its `npx reporewind .` command is now valid, while replacing it with the committed evidence-led card remains an explicit browser-side publication action.
 
 The README should sell one result before cataloguing the architecture.
 
@@ -180,7 +180,7 @@ Effort: **S**. Dependency: use the final P0.2 command, not a placeholder.
 
 ### P0.4 — Ship `v0.2.0` as the activation release
 
-**Release gate prepared 2026-09-01.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC-capable release workflow are present. The first public artifact uses a short-lived GitHub Actions secret backed by the owner’s bypass-2FA granular token so the GitHub-hosted run can attach provenance; that repository secret is deleted immediately after publication while the reusable credential remains only in the macOS Keychain. Trusted publishing can replace the token for later releases after npm package settings are configured with interactive account verification.
+**Released and verified 2026-09-01.** The annotated [`v0.2.0`](https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.2.0) tag resolves to `4e29ad0`, the exact source commit that passed the cross-platform gate. The GitHub-hosted publish run created the npm artifact with provenance, the matching GitHub Release is public, and Pages commit `729b8cb` serves the same `npx reporewind .` path. The temporary GitHub Actions token secret was deleted immediately after publication, repository Actions was disabled again, and the reusable credential remains only in the macOS Keychain. Trusted publishing can replace the token for later releases after npm package settings are configured with interactive account verification.
 
 Release theme: **“Your repository, one command away.”**
 
@@ -315,7 +315,7 @@ Goal: help maintainers answer real questions and return to RepoRewind.
 
 ### P1.5 — Add an evidence-backed archaeology desk
 
-**Implementation complete 2026-08-27; release verification pending the npm gate.** The viewer now exposes eight deterministic, bounded text views with visible definitions and limits, archive-specific warnings, and direct timeline/path evidence navigation. Single-author, no-tag, truncated monorepo-like, and rename-heavy fixtures are covered. The exact [metric contract](./docs/archaeology.md) is versioned with the source; the implementation itself is locally verified, while the release-level command proof waits for the public package.
+**Released and verified in `v0.2.0` on 2026-09-01.** The viewer exposes eight deterministic, bounded text views with visible definitions and limits, archive-specific warnings, and direct timeline/path evidence navigation. Single-author, no-tag, truncated monorepo-like, and rename-heavy fixtures are covered. The exact [metric contract](./docs/archaeology.md) is versioned with the source, and the public package passed the release-level install and viewer gate.
 
 Introduce a focused insights panel derived only from existing metadata:
 
