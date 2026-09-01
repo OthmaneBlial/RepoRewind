@@ -9,13 +9,6 @@
 
 **[Explore a fictional rebuild →](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild)** · **[Run it on your repository](#run-it-on-your-repository)** · [Inspect the privacy boundary](./docs/privacy.md)
 
-<picture>
-  <source media="(prefers-reduced-motion: reduce)" srcset="./docs/screenshots/city-timeline.png">
-  <img src="./docs/assets/repo-rewind-replay.gif" width="960" alt="A twelve-second RepoRewind replay in which a fictional repository grows across releases, a timeline subsystem is rebuilt, and deleted files remain visible as ruins.">
-</picture>
-
-_A real RepoRewind export from the deterministic fictional archive. [Control the same history](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild) or [open the static frame](./docs/screenshots/city-timeline.png)._
-
 RepoRewind reconstructs how a repository became what it is. Files become buildings, folders become districts, releases become landmarks, contributors become travelers, refactors rebuild neighborhoods, and deleted paths remain visible as ruins. Search any trace, compare two real eras, inspect bounded archaeology findings, then export a privacy-reviewed story.
 
 > **Public release:** `reporewind@0.2.0` is distributed through npm with a provenance statement linked to this repository. The first `npx` run downloads RepoRewind from npm; repository analysis and viewing then stay on your machine.
@@ -73,15 +66,14 @@ RepoRewind is not a Git client, a source-code explainer, or a quality score. It 
 
 Every finding links back to commit or path evidence. RepoRewind never labels code as good, bad, risky, or low quality.
 
-## Product tour
+## What you can do
 
-| Replay the living city                                                                            | Find any trace                                                                                         |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| ![RepoRewind city timeline at the fictional v2.0.0 release](./docs/screenshots/city-timeline.png) | ![Archive search finding a film-export commit and file history](./docs/screenshots/search-archive.png) |
-
-| Compare two eras                                                                                  | Export a reviewed history film                                                               |
-| ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| ![Temporal diff comparing fictional v2.0.0 and v3.0.0 eras](./docs/screenshots/temporal-diff.png) | ![Film export with story direction and privacy controls](./docs/screenshots/film-export.png) |
+| Job         | Result                                                                               |
+| ----------- | ------------------------------------------------------------------------------------ |
+| Replay      | Travel through repository states that actually existed.                              |
+| Investigate | Search commits, paths, contributors, releases, and reachable branch tips.            |
+| Compare     | Pin two eras and follow construction, deletion, line deltas, and rename chains.      |
+| Present     | Export a privacy-reviewed film or story pack with a disclosure report and checksums. |
 
 ## Git evidence becomes a city grammar
 
@@ -137,18 +129,18 @@ Archives can still contain sensitive names, paths, messages, dates, refs, and re
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  Git[Local Git repository] --> CLI[Streaming analyzer]
-  CLI --> Session[Tokenized loopback session]
-  CLI --> JSON[Optional schema v1 archive]
-  Session --> Validate[Bounded validation]
-  JSON --> Validate
-  Validate --> Worker[Checkpoints and indexes]
-  Worker --> Explore[Search, replay, compare]
-  Explore --> City[Lazy WebGL city]
-  Explore --> Evidence[Text-first evidence mode]
-  Explore --> Story[Privacy-reviewed story pack]
+```text
+Local Git repository
+        ↓
+Streaming analyzer
+        ↓
+Tokenized local viewer  or  portable JSON archive
+        ↓
+Validation + indexed checkpoints
+        ↓
+Search · replay · compare
+        ↓
+3D city  ·  text evidence  ·  reviewed story pack
 ```
 
 See [architecture](./docs/architecture.md), [performance methodology](./docs/performance.md), [non-WebGL behavior](./docs/non-webgl.md), and [troubleshooting](./docs/troubleshooting.md).

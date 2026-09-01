@@ -12,7 +12,7 @@ Stars are a downstream signal, not a deliverable. This roadmap optimizes the thi
 
 A developer should be able to:
 
-1. understand RepoRewind in 15 seconds from a moving example;
+1. understand RepoRewind in 15 seconds from a crisp product proof;
 2. try the real interactive demo in one click;
 3. run one command inside a local repository and reach its first city in under two minutes;
 4. turn a Git-backed finding into a reviewed, privacy-safe artifact in under one additional minute;
@@ -147,14 +147,14 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests. The new 1280×640 evidence-led social preview is live on GitHub, and the repository image served through the public `og:image` URL is byte-identical to [`docs/social-preview.png`](./docs/social-preview.png).
+**Rebuilt, published, and verified 2026-09-01; simplified after rendered review.** The README now leads with the evidence-documentary outcome, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs without embedding a GIF, screenshot wall, or oversized Mermaid diagram. The public landing page uses a responsive code-native history schematic and text evidence instead of replay and poster media, and keeps its copy control usable on desktop and narrow mobile without third-party requests. The new 1280×640 evidence-led social preview is live on GitHub, and the repository image served through the public `og:image` URL is byte-identical to [`docs/social-preview.png`](./docs/social-preview.png).
 
 The README should sell one result before cataloguing the architecture.
 
 Recommended order:
 
 1. one-sentence promise;
-2. a lightweight 12–20 second replay showing growth, a release, a rebuild, and a ruin;
+2. a compact code-native proof that identifies a release, rebuild, trace, and ruin, with the real guided case one click away;
 3. **Try live** and **Run on my repository** actions;
 4. one canonical command with the expected result beside it;
 5. the local-first data contract;
@@ -173,7 +173,7 @@ Acceptance:
 
 - a new visitor can answer “what is it?”, “why use it?”, “is my code uploaded?”, and “what command do I run?” without scrolling past the first product proof;
 - every command is tested from a clean directory against the exact public release;
-- the animated asset is readable on GitHub, has a static fallback and alt text, and does not make the README unreasonably heavy;
+- the README stays text-first and lightweight, while the real interactive proof remains one click away;
 - repository links render the custom social preview.
 
 Effort: **S**. Dependency: use the final P0.2 command, not a placeholder.
@@ -459,7 +459,7 @@ Required assets:
 
 - live playground;
 - exact `npx reporewind .` command;
-- 12–20 second replay of RepoRewind's own history;
+- code-native landing proof plus a direct path to the real guided history;
 - custom social preview;
 - clean-install proof for all supported operating systems;
 - concise article explaining the local-first architecture and why no source leaves the machine.
@@ -533,7 +533,7 @@ An item is complete only when all applicable layers are evidenced:
 |     1 | Deploy `/play/` and link it as the primary demo                   | P0       | S      | —                      |
 |     2 | Package and clean-install-test `reporewind` on npm                | P0       | M      | —                      |
 |     3 | Add loopback `npx reporewind .` viewer orchestration              | P0       | M      | npm package            |
-|     4 | Replace README still-first hero with moving proof and one command | P0       | S      | final CLI contract     |
+|     4 | Replace README media-heavy hero with direct proof and one command | P0       | S      | final CLI contract     |
 |     5 | Add custom social preview and focused topics                      | P0       | S      | final positioning      |
 |     6 | Release and verify `v0.2.0` across npm/GitHub/Pages               | P0       | M      | 1–5                    |
 |     7 | Build field-level privacy report and redaction projection         | P1       | M      | stable archive/package |
@@ -579,7 +579,7 @@ If only five things are built, build these in order:
 
 1. live interactive demo;
 2. `npx reporewind .`;
-3. moving README proof plus custom social preview;
+3. lightweight README proof plus custom social preview;
 4. privacy-reviewed poster/film/Markdown story pack;
 5. deterministic, evidence-backed story chapters.
 

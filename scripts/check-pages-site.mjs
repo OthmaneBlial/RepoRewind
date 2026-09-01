@@ -63,6 +63,9 @@ if (!landing.includes('href="./play/?case=rebuild"')) {
 if (!landing.includes('href="./gallery.html"')) failures.push('index.html: missing canonical gallery link')
 if (!landing.includes('npx reporewind .')) failures.push('index.html: missing public npm run path')
 if (landing.includes('public npm package pending')) failures.push('index.html: still presents npm as pending')
+if (/<(?:img|picture|video)\b/i.test(landing)) {
+  failures.push('index.html: landing proof must remain code-native instead of relying on raster media')
+}
 for (const storyId of ['reporewind-productization', 'lightclaw-module-extraction', 'pdf-editor-offline-rename']) {
   if (!gallery.includes(`id="${storyId}"`)) failures.push(`gallery.html: missing reviewed story ${storyId}`)
 }

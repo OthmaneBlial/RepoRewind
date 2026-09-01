@@ -44,7 +44,7 @@ Use this blank checklist for a public tag or hosted demo. It is intentionally re
 
 - [ ] README commands and local links are re-run and accurate.
 - [ ] Real main, workflow, detailed, and responsive screenshots match the current release and contain no private data.
-- [ ] The moving README proof has a useful alt description, static/reduced-motion fallback, and reviewed file-size budget.
+- [ ] The README proof stays lightweight and text-first, and its guided-case link reaches the real interactive product.
 - [ ] The repository Open Graph image resolves to the reviewed 1280×640 social preview and not GitHub's default card.
 - [ ] Hosted deployments reproduce the security headers in `public/_headers` or documented equivalents.
 - [ ] The final tag is created only after all applicable evidence is recorded.
