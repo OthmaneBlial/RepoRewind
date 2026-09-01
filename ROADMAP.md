@@ -88,7 +88,7 @@ Goal: remove every unnecessary step between curiosity and the first truthful cit
 
 ### P0.1 — Deploy the real interactive playground
 
-**Base playground shipped 2026-08-27; guided relaunch implemented locally 2026-09-01 and awaiting publication.** The production app is live at [othmaneblial.github.io/RepoRewind/play/](https://othmaneblial.github.io/RepoRewind/play/). The relaunch adds a reactive rebuild case, clearer local-file language, and a truthful source-run handoff without pretending the npm package exists.
+**Guided relaunch published and verified 2026-09-01.** The production app is live at the [guided rebuild case](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild). The relaunch adds a reactive six-step investigation, clearer local-file language, and a truthful source-run handoff without pretending the npm package exists. Desktop and 390 px mobile browser runs completed the case with zero console errors, failed requests, or horizontal overflow; the only network host was the project’s GitHub Pages origin. Source commit: `b451d90`. Pages commit: `274802d`.
 
 Publish the production web app at a stable route such as `/RepoRewind/play/` and make **Try the live demo** the primary showcase and README call to action.
 
@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Rebuilt again locally 2026-09-01; publication pending.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, a verified source-run path, the local data boundary, and three repeat jobs. The broken npm command was removed from the active path until P0.2 is complete. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command.
+**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, a verified source-run path, the local data boundary, and three repeat jobs. The broken npm command was removed from the active path until P0.2 is complete. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests.
 
 The README should sell one result before cataloguing the architecture.
 
