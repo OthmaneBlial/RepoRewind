@@ -88,7 +88,7 @@ Goal: remove every unnecessary step between curiosity and the first truthful cit
 
 ### P0.1 — Deploy the real interactive playground
 
-**Guided relaunch published and verified 2026-09-01.** The production app is live at the [guided rebuild case](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild). The relaunch adds a reactive six-step investigation, clearer local-file language, and a truthful source-run handoff without pretending the npm package exists. Desktop and 390 px mobile browser runs completed the case with zero console errors, failed requests, or horizontal overflow; the only network host was the project’s GitHub Pages origin. Source commit: `b451d90`. Pages commit: `274802d`.
+**Guided relaunch published and verified 2026-09-01.** The production app is live at the [guided rebuild case](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild). The relaunch adds a reactive six-step investigation, clearer local-file language, and a truthful one-command handoff. Desktop and 390 px mobile browser runs completed the case with zero console errors, failed requests, or horizontal overflow; the only network host was the project’s GitHub Pages origin. Source commit: `b451d90`. Pages commit: `274802d`.
 
 Publish the production web app at a stable route such as `/RepoRewind/play/` and make **Try the live demo** the primary showcase and README call to action.
 
@@ -113,7 +113,7 @@ Effort: **S**. Dependency: none.
 
 ### P0.2 — Publish a real npm/npx CLI
 
-**Implementation complete 2026-08-27; registry publication pending `v0.2.0`.** The exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests. [CI run `33082632368`](https://github.com/OthmaneBlial/RepoRewind/actions/runs/33082632368) proves that tarball contract on Node 22/Linux and Node 24/macOS/Windows. The final audit on 2026-08-27 confirmed `npm whoami` returns `E401 Unauthorized` and `npm view reporewind` returns `E404 Not Found`; an authenticated npm owner must create/publish the package before public install and provenance can be verified.
+**Release gate prepared 2026-09-01.** The npm owner credential is now available from the macOS Keychain, the exact packed tarball passes version, archive, tokenized loopback viewer, and clean-shutdown smoke tests, and the tag workflow publishes from GitHub-hosted Node 24 with a provenance statement. Final registry, clean-install, and provenance evidence is recorded after the immutable artifact is public.
 
 Turn the existing executable foundation into two supported public workflows:
 
@@ -147,7 +147,7 @@ Effort: **M**. Dependency: P0.1 can ship independently, but both form the activa
 
 ### P0.3 — Rebuild the README around the first success
 
-**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, a verified source-run path, the local data boundary, and three repeat jobs. The broken npm command was removed from the active path until P0.2 is complete. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests.
+**Rebuilt, published, and verified 2026-09-01.** The README now leads with the evidence-documentary outcome, a real 12-second replay and static fallback, the guided fictional rebuild, the verified public npm path, the local data boundary, and three repeat jobs. The social-preview source was synchronized with the same evidence-first message and no longer advertises an unavailable command. The public landing page exposes the same path, serves the replay asset, and keeps its copy control usable on desktop and 390 px mobile without third-party requests.
 
 The README should sell one result before cataloguing the architecture.
 
@@ -180,7 +180,7 @@ Effort: **S**. Dependency: use the final P0.2 command, not a placeholder.
 
 ### P0.4 — Ship `v0.2.0` as the activation release
 
-**Release candidate prepared 2026-08-27; external publication pending.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC release workflow are present. The package name must first be created by an authenticated npm publisher before npm can attach the trusted GitHub workflow and issue provenance for the stable release. The handoff is deliberately manual: run `npm login`, publish the first package, configure npm trusted publishing for `OthmaneBlial/RepoRewind`, then resume the tag/release verification here.
+**Release gate prepared 2026-09-01.** Package/changelog versioning, release notes, migration and rollback guidance, a tag/version guard, and an OIDC-capable release workflow are present. The first public artifact uses a short-lived GitHub Actions secret backed by the owner’s bypass-2FA granular token so the GitHub-hosted run can attach provenance; that repository secret is deleted immediately after publication while the reusable credential remains only in the macOS Keychain. Trusted publishing can replace the token for later releases after npm package settings are configured with interactive account verification.
 
 Release theme: **“Your repository, one command away.”**
 

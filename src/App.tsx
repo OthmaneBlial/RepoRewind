@@ -55,10 +55,8 @@ import { buildStoryPack, cloneCanvas } from './export/story-pack'
 
 const CityScene = lazy(() => import('./components/CityScene').then((module) => ({ default: module.CityScene })))
 const MAX_TIMELINE_MARKERS_PER_KIND = 96
-const SOURCE_RUN_COMMAND = `git clone https://github.com/OthmaneBlial/RepoRewind.git
-cd RepoRewind
-npm ci
-npm run reporewind -- /path/to/your/repository`
+const PUBLIC_RUN_COMMAND = `cd /path/to/your/repository
+npx reporewind .`
 const DEMO_CASE = {
   beforeIndex: 16,
   rebuildIndex: 19,
@@ -334,7 +332,7 @@ function ImportModal({
           <span>Terminal</span>
         </div>
         <code>
-          <b>$</b> npm run reporewind -- analyze /path/to/repository --output ./reporewind-history.json
+          <b>$</b> npx reporewind analyze /path/to/repository --output ./reporewind-history.json
           <br />
           <b>→</b> Select Open archive and choose the generated JSON
         </code>
@@ -969,21 +967,20 @@ function RunLocalModal({ onClose }: { onClose: () => void }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText(SOURCE_RUN_COMMAND)
+      await navigator.clipboard.writeText(PUBLIC_RUN_COMMAND)
       setCopyState('copied')
     } catch {
       setCopyState('error')
     }
   }
   return (
-    <Modal eyebrow="Run your own history" title="Use the current build from source." onClose={onClose}>
+    <Modal eyebrow="Run your own history" title="Open your repository with one command." onClose={onClose}>
       <p className="modal-lead">
-        The public npm package is not published yet. This source path is the verified way to open a real repository
-        today.
+        The first run downloads RepoRewind from npm. The viewer and repository analysis then remain on this machine.
       </p>
       <div className="run-local-command">
         <pre>
-          <code>{SOURCE_RUN_COMMAND}</code>
+          <code>{PUBLIC_RUN_COMMAND}</code>
         </pre>
         <button onClick={() => void copyCommand()}>
           {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Select command' : 'Copy command'}
@@ -1004,8 +1001,7 @@ function RunLocalModal({ onClose }: { onClose: () => void }) {
         </div>
       </dl>
       <p className="privacy-note">
-        Press <kbd>Ctrl C</kbd> to stop the viewer. The future <code>npx reporewind .</code> path will return only after
-        the public package passes a clean-install release gate.
+        Press <kbd>Ctrl C</kbd> to stop the viewer. Use <code>--no-open</code> when you only want the private local URL.
       </p>
     </Modal>
   )

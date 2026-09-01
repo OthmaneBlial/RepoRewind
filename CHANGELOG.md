@@ -2,7 +2,9 @@
 
 All notable changes to RepoRewind are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses semantic versioning once releases are published.
 
-## [Unreleased] — 0.2.0 release candidate
+## [Unreleased]
+
+## [0.2.0] - 2026-09-01
 
 ### Added
 
@@ -71,5 +73,6 @@ All notable changes to RepoRewind are documented here. The format follows [Keep 
 - Contributor grouping uses archive-local sequential identifiers instead of an email-derived hash, preventing cross-archive correlation through contributor IDs.
 - Production-host examples include restrictive security headers and no telemetry.
 
-[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/OthmaneBlial/RepoRewind/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.1.0

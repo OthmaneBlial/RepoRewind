@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 24.19.0
+          registry-url: https://registry.npmjs.org
           package-manager-cache: false
       - name: Install the locked toolchain
         run: npm ci
@@ -32,5 +33,7 @@ jobs:
         run: npm run verify
       - name: Exercise the exact release tarball
         run: npm run package:smoke:prepared
-      - name: Publish with npm trusted publishing and provenance
-        run: npm publish --access public
+      - name: Publish from GitHub with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

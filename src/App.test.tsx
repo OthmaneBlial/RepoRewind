@@ -119,9 +119,9 @@ describe('RepoRewind application', () => {
 
     expect(within(caseFile).getByRole('heading', { name: 'You found the rebuild.' })).toBeVisible()
     await user.click(within(caseFile).getByRole('button', { name: /Run on my repository/ }))
-    const runDialog = screen.getByRole('dialog', { name: 'Use the current build from source.' })
-    expect(within(runDialog).getByText(/public npm package is not published yet/i)).toBeVisible()
-    expect(within(runDialog).getByText(/npm run reporewind -- \/path\/to\/your\/repository/)).toBeVisible()
+    const runDialog = screen.getByRole('dialog', { name: 'Open your repository with one command.' })
+    expect(within(runDialog).getByText(/first run downloads RepoRewind from npm/i)).toBeVisible()
+    expect(within(runDialog).getByText(/cd \/path\/to\/your\/repository\s+npx reporewind \./)).toBeVisible()
   })
 
   it('pins an era, travels through history, and opens the temporal diff', async () => {

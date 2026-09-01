@@ -61,10 +61,8 @@ if (!landing.includes('href="./play/?case=rebuild"')) {
   failures.push('index.html: missing canonical guided rebuild link')
 }
 if (!landing.includes('href="./gallery.html"')) failures.push('index.html: missing canonical gallery link')
-if (!landing.includes('npm run reporewind -- /path/to/your/repository')) {
-  failures.push('index.html: missing truthful source-run path')
-}
-if (landing.includes('npx reporewind')) failures.push('index.html: advertises the unpublished npm command')
+if (!landing.includes('npx reporewind .')) failures.push('index.html: missing public npm run path')
+if (landing.includes('public npm package pending')) failures.push('index.html: still presents npm as pending')
 for (const storyId of ['reporewind-productization', 'lightclaw-module-extraction', 'pdf-editor-offline-rename']) {
   if (!gallery.includes(`id="${storyId}"`)) failures.push(`gallery.html: missing reviewed story ${storyId}`)
 }

@@ -7,7 +7,7 @@
 [![No telemetry](https://img.shields.io/badge/telemetry-none-82aaff.svg)](./docs/privacy.md)
 [![Latest release](https://img.shields.io/github/v/release/OthmaneBlial/RepoRewind?sort=semver)](https://github.com/OthmaneBlial/RepoRewind/releases/latest)
 
-**[Explore a fictional rebuild →](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild)** · **[Run the current build](#run-it-on-your-repository)** · [Inspect the privacy boundary](./docs/privacy.md)
+**[Explore a fictional rebuild →](https://othmaneblial.github.io/RepoRewind/play/?case=rebuild)** · **[Run it on your repository](#run-it-on-your-repository)** · [Inspect the privacy boundary](./docs/privacy.md)
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="./docs/screenshots/city-timeline.png">
@@ -18,7 +18,7 @@ _A real RepoRewind export from the deterministic fictional archive. [Control the
 
 RepoRewind reconstructs how a repository became what it is. Files become buildings, folders become districts, releases become landmarks, contributors become travelers, refactors rebuild neighborhoods, and deleted paths remain visible as ruins. Search any trace, compare two real eras, inspect bounded archaeology findings, then export a privacy-reviewed story.
 
-> **Distribution status:** the interactive demo and source build work today. The public npm package is not published yet, so `npx reporewind .` is deliberately not presented as a working install command. It returns only after the public artifact passes the clean-install release gate.
+> **Public release:** `reporewind@0.2.0` is distributed through npm with a provenance statement linked to this repository. The first `npx` run downloads RepoRewind from npm; repository analysis and viewing then stay on your machine.
 
 ## See the difference in 60 seconds
 
@@ -36,10 +36,8 @@ No setup, account, upload, or analytics is involved. The hosted demo cannot read
 Requirements: [Git](https://git-scm.com/) and [Node.js](https://nodejs.org/) 24 (recommended) or Node.js 22.13+.
 
 ```bash
-git clone https://github.com/OthmaneBlial/RepoRewind.git
-cd RepoRewind
-npm ci
-npm run reporewind -- /path/to/your/repository
+cd /path/to/your/repository
+npx reporewind .
 ```
 
 Expected result:
@@ -55,7 +53,7 @@ The command analyzes the checked-out first-parent history, starts a read-only se
 Use `--no-open` to print the local URL without launching a browser:
 
 ```bash
-npm run reporewind -- /path/to/your/repository --no-open
+npx reporewind . --no-open
 ```
 
 ## Three reasons to come back
@@ -100,8 +98,8 @@ Every finding links back to commit or path evidence. RepoRewind never labels cod
 The checked-out branch is canonical by default. Side branches remain reachable refs and merge events instead of being flattened into invented repository states. Use an explicit ref or a bounded history when needed:
 
 ```bash
-npm run reporewind -- /path/to/repository --branch release/3.x
-npm run reporewind -- /path/to/repository --max-commits 5000
+npx reporewind /path/to/repository --branch release/3.x
+npx reporewind /path/to/repository --max-commits 5000
 ```
 
 ## Portable archives
@@ -109,7 +107,7 @@ npm run reporewind -- /path/to/repository --max-commits 5000
 The automatic loopback viewer is the fastest local path. Generate JSON only when you need a portable archive for the hosted viewer or another tool:
 
 ```bash
-npm run reporewind -- analyze /path/to/repository \
+npx reporewind analyze /path/to/repository \
   --output ./reporewind-history.json
 ```
 
@@ -119,10 +117,10 @@ Useful variants:
 
 ```bash
 # Pipe clean JSON
-npm run reporewind -- analyze /path/to/repository --stdout > reporewind-history.json
+npx reporewind analyze /path/to/repository --stdout > reporewind-history.json
 
 # Explicitly replace an existing archive
-npm run reporewind -- analyze /path/to/repository \
+npx reporewind analyze /path/to/repository \
   --output ./reporewind-history.json --force
 ```
 
@@ -163,15 +161,15 @@ npm run dev
 npm run verify
 ```
 
-`npm run verify` checks formatting, lint, documentation, community and gallery contracts, licenses, benchmark baselines, 82 application/CLI tests, TypeScript, browser and CLI builds, the Pages bundle, package contents, and high-severity dependency advisories. GitHub Actions is intentionally disabled at repository level for now; the same full gate remains available locally.
+`npm run verify` checks formatting, lint, documentation, community and gallery contracts, licenses, benchmark baselines, 82 application/CLI tests, TypeScript, browser and CLI builds, the Pages bundle, package contents, and high-severity dependency advisories. Repository Actions remain disabled for ordinary pushes; the same full gate stays available locally and is re-enabled only for an explicit release run.
 
 The browser build is emitted to `dist/`, the CLI to `dist-cli/`, and the combined Pages artifact to `.pages-site/`. Development and preview servers bind to localhost by default.
 
 ## Release status
 
-- [`v0.1.0`](https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.1.0) is the latest published source release.
-- `main` contains the `v0.2.0` release candidate: automatic local sessions, the guided case, Share Safety, story packs, Story Director, archaeology views, performance tiers, and the non-WebGL evidence workspace.
-- npm publication, a public clean-install check, provenance, and the matching `v0.2.0` tag/release are still pending. They are one release gate, not four separate marketing claims.
+- [`v0.2.0`](https://github.com/OthmaneBlial/RepoRewind/releases/tag/v0.2.0) is the current source release and [`reporewind@0.2.0`](https://www.npmjs.com/package/reporewind/v/0.2.0) is the matching public package.
+- The release includes automatic local sessions, the guided case, Share Safety, story packs, Story Director, archaeology views, performance tiers, and the non-WebGL evidence workspace.
+- The tag, package, provenance statement, public install path, live playground, and displayed version are verified as one release gate.
 
 See the [roadmap](./ROADMAP.md), [changelog](./CHANGELOG.md), and [release checklist](./docs/release-checklist.md).
 

@@ -24,7 +24,7 @@ Use this checklist for a public tag or hosted demo. It records evidence; it is n
 - [ ] Production HTML and immutable assets return successfully over HTTP.
 - [ ] `dist/LICENSE` and `dist/THIRD_PARTY_NOTICES.md` are present in the deployable artifact.
 - [ ] `npm view reporewind version` matches the release and provenance is visible on npm.
-- [ ] The tag-triggered release workflow used npm trusted publishing from a GitHub-hosted runner; no long-lived publish token was added.
+- [ ] The GitHub-hosted tag workflow published with provenance; any temporary npm token secret was deleted after the run.
 
 ## Product validation
 
